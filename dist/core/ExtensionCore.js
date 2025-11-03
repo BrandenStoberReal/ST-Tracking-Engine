@@ -26,6 +26,7 @@ import { DataManager } from '../managers/DataManager.js';
 import { OutfitDataService } from '../services/OutfitDataService.js';
 import { macroProcessor } from '../processors/MacroProcessor.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { migrateAllCharacters } from '../services/CharacterIdService.js';
 let AutoOutfitSystem;
 /**
  * Loads the AutoOutfitSystem module dynamically.
@@ -244,6 +245,16 @@ export function initializeExtension() {
         // Load the stored state into the outfit store after initialization
         outfitStore.loadState();
         debugLog('Data manager and outfit store initialized', null, 'info');
+        // Migrate existing characters to have character IDs
+        try {
+            const migratedCount = yield migrateAllCharacters();
+            if (migratedCount > 0) {
+                debugLog(`Migrated ${migratedCount} characters to use character IDs`, null, 'info');
+            }
+        }
+        catch (error) {
+            debugLog('Error during character migration:', error, 'error');
+        }
         const outfitDataService = new OutfitDataService(dataManager);
         const settings = dataManager.loadSettings();
         debugLog('Settings loaded', settings, 'info');

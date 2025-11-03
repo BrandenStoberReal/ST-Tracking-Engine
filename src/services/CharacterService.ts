@@ -1,6 +1,7 @@
 import {outfitStore} from '../common/Store';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
 import {debugLog} from '../logging/DebugLogger';
+import {getOrCreateCharacterId} from './CharacterIdService';
 
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
@@ -72,13 +73,18 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
 
         // Update the bot manager with the current character info
         const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
-        const charId = context.characterId;
+        const charIndex = context.characterId;
+        let characterUniqueId = null;
 
-        if (charId !== undefined && charId !== null) {
-            const characterName = getCharacterInfoById(charId, CharacterInfoType.Name);
+        if (charIndex !== undefined && charIndex !== null) {
+            const character = context.characters[charIndex];
+            if (character) {
+                characterUniqueId = await getOrCreateCharacterId(character);
+                const characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
 
-            if (characterName) {
-                botManager.setCharacter(characterName, charId.toString());
+                if (characterName) {
+                    botManager.setCharacter(characterName, characterUniqueId);
+                }
             }
         }
 
@@ -106,7 +112,7 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
 
         // Update the outfit store with current context and save settings
         if ((window as any).outfitStore) {
-            (window as any).outfitStore.setCurrentCharacter(context?.characterId?.toString() || null);
+            (window as any).outfitStore.setCurrentCharacter(characterUniqueId || null);
             (window as any).outfitStore.setCurrentChat(context?.chatId || null);
             outfitStore.saveState();
         }

@@ -237,6 +237,23 @@ function normalizeTextForInstanceId(text: string): string {
  * @param {Array<string>} [valuesToRemove] - Optional array of values to remove from the text before hashing.
  * @returns {Promise<string>} A promise that resolves to the instance ID.
  */
+/**
+ * Generates a UUID v4 (random GUID)
+ * @returns {string} A UUID v4 string
+ */
+export function generateGUID(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+
+    // Fallback implementation for environments without crypto.randomUUID
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 export async function generateInstanceIdFromText(text: string, valuesToRemove: string[] | null = null): Promise<string> {
     let processedText = text;
 

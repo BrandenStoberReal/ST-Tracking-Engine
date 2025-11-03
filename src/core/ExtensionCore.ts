@@ -17,6 +17,7 @@ import {DataManager} from '../managers/DataManager';
 import {OutfitDataService} from '../services/OutfitDataService';
 import {macroProcessor} from '../processors/MacroProcessor';
 import {debugLog} from '../logging/DebugLogger';
+import {migrateAllCharacters} from '../services/CharacterIdService';
 
 declare const window: any;
 
@@ -261,6 +262,16 @@ export async function initializeExtension(): Promise<void> {
     // Load the stored state into the outfit store after initialization
     outfitStore.loadState();
     debugLog('Data manager and outfit store initialized', null, 'info');
+
+    // Migrate existing characters to have character IDs
+    try {
+        const migratedCount = await migrateAllCharacters();
+        if (migratedCount > 0) {
+            debugLog(`Migrated ${migratedCount} characters to use character IDs`, null, 'info');
+        }
+    } catch (error) {
+        debugLog('Error during character migration:', error, 'error');
+    }
 
     const outfitDataService = new OutfitDataService(dataManager);
 

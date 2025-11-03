@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { getOrCreateCharacterId } from './CharacterIdService.js';
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
  */
@@ -57,7 +58,7 @@ function refreshMacroProcessing() {
  */
 export function updateForCurrentCharacter(botManager, userManager, botPanel, userPanel) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a;
         try {
             // Before changing anything, save the current outfit instances with their current instance IDs
             const oldBotInstanceId = botManager.getOutfitInstanceId();
@@ -73,11 +74,16 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             }
             // Update the bot manager with the current character info
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
-            const charId = context.characterId;
-            if (charId !== undefined && charId !== null) {
-                const characterName = getCharacterInfoById(charId, CharacterInfoType.Name);
-                if (characterName) {
-                    botManager.setCharacter(characterName, charId.toString());
+            const charIndex = context.characterId;
+            let characterUniqueId = null;
+            if (charIndex !== undefined && charIndex !== null) {
+                const character = context.characters[charIndex];
+                if (character) {
+                    characterUniqueId = yield getOrCreateCharacterId(character);
+                    const characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
+                    if (characterName) {
+                        botManager.setCharacter(characterName, characterUniqueId);
+                    }
                 }
             }
             // Reload the bot outfit for the new character/instance
@@ -98,7 +104,7 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             }
             // Update the outfit store with current context and save settings
             if (window.outfitStore) {
-                window.outfitStore.setCurrentCharacter(((_b = context === null || context === void 0 ? void 0 : context.characterId) === null || _b === void 0 ? void 0 : _b.toString()) || null);
+                window.outfitStore.setCurrentCharacter(characterUniqueId || null);
                 window.outfitStore.setCurrentChat((context === null || context === void 0 ? void 0 : context.chatId) || null);
                 outfitStore.saveState();
             }

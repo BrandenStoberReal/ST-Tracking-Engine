@@ -1,4 +1,14 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { debugLog } from '../logging/DebugLogger.js';
+import { getCharacterId, getOrCreateCharacterId } from '../services/CharacterIdService.js';
 export const CharacterInfoType = {
     Name: 'CharName',
     Description: 'CharDesc',
@@ -21,6 +31,7 @@ export const CharacterInfoType = {
     DateSinceLastChat: 'CharDateSinceLastChat',
     DataSize: 'CharDataSize',
     CharacterNotes: 'CharCharacterNotes',
+    CharacterId: 'CharCharacterId',
 };
 /**
  * Get character information by character ID
@@ -100,6 +111,9 @@ export function getCharacterInfoById(charId, infoType) {
                     case CharacterInfoType.CharacterNotes:
                         infoBuffer = character.data.extensions.depth_prompt.prompt;
                         break;
+                    case CharacterInfoType.CharacterId:
+                        infoBuffer = getCharacterId(character);
+                        break;
                     default:
                         infoBuffer = null;
                         break;
@@ -143,4 +157,73 @@ export function getCharacterIdByObject(char_object) {
     }
     debugLog('Resolving character id via object failed.', null, 'error');
     return null;
+}
+/**
+ * Gets the character ID for a character by their array index
+ * @param {string} charId - The character array index
+ * @returns {Promise<string|null>} The character's unique ID or null if not found
+ */
+export function getCharacterUniqueIdByIndex(charId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        try {
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            if (context && context.characters) {
+                const character = context.characters[charId];
+                if (character) {
+                    return yield getOrCreateCharacterId(character);
+                }
+            }
+            debugLog(`Resolving character unique ID from index failed. Faulty index: ${charId}`, null, 'error');
+            return null;
+        }
+        catch (error) {
+            debugLog('Error getting character unique ID by index:', error, 'error');
+            return null;
+        }
+    });
+}
+/**
+ * Gets the current character's unique ID
+ * @returns {Promise<string|null>} The current character's unique ID or null if no character is selected
+ */
+export function getCurrentCharacterUniqueId() {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        try {
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            if (context && context.characterId !== undefined && context.characterId !== null) {
+                return yield getCharacterUniqueIdByIndex(context.characterId.toString());
+            }
+            return null;
+        }
+        catch (error) {
+            debugLog('Error getting current character unique ID:', error, 'error');
+            return null;
+        }
+    });
+}
+/**
+ * Finds a character's array index by their unique ID
+ * @param {string} uniqueId - The character's unique ID
+ * @returns {number|null} The character's array index or null if not found
+ */
+export function getCharacterIndexByUniqueId(uniqueId) {
+    try {
+        const characters = getCharacters();
+        if (characters && uniqueId) {
+            for (let i = 0; i < characters.length; i++) {
+                const characterId = getCharacterId(characters[i]);
+                if (characterId === uniqueId) {
+                    return i;
+                }
+            }
+        }
+        debugLog(`Resolving character index by unique ID failed. Faulty unique ID: ${uniqueId}`, null, 'error');
+        return null;
+    }
+    catch (error) {
+        debugLog('Error getting character index by unique ID:', error, 'error');
+        return null;
+    }
 }
