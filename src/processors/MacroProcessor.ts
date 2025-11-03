@@ -1,7 +1,6 @@
 import {generateInstanceIdFromText} from '../utils/utilities';
 import {outfitStore} from '../common/Store';
 import {ALL_SLOTS} from '../config/constants';
-import {findCharacterById} from '../services/CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
 
 
@@ -34,40 +33,39 @@ class MacroProcessor {
             const firstBotMessage = ctx.chat.find((message: any) => !message.is_user && !message.is_system);
 
             if (firstBotMessage) {
-// Try to get characterId using the new character ID system first
-                let characterId = null;
-                let characterIndex = null;
+// Get the unique character ID for outfit lookups
+                let uniqueCharacterId = null;
 
                 // Try to get character ID from the current bot manager first
                 const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
                 if (botOutfitManager?.characterId) {
-                    const character = findCharacterById(botOutfitManager.characterId);
-                    if (character) {
-                        characterIndex = ctx.characters?.indexOf(character);
-                        characterId = characterIndex;
-                    }
+                    uniqueCharacterId = botOutfitManager.characterId;
                 }
 
-                // Fallback to old system if needed
-                if (characterId === null && ctx.characterId !== undefined && ctx.characterId !== null) {
-                    characterId = ctx.characterId;
-                }
-
-                // Additional fallback: try to find character by name
-                if (characterId === null && firstBotMessage.name) {
+                // Fallback: try to find character by name and get their unique ID
+                if (!uniqueCharacterId && firstBotMessage.name) {
                     if (ctx.characters && Array.isArray(ctx.characters)) {
-                        const characterIndex = ctx.characters.findIndex((char: any) => char?.name === firstBotMessage.name);
-                        if (characterIndex !== -1) {
-                            characterId = characterIndex;
+                        const character = ctx.characters.find((char: any) => char?.name === firstBotMessage.name);
+                        if (character) {
+                            // Get the unique ID from the character's extensions
+                            uniqueCharacterId = character.data?.extensions?.character_id;
                         }
                     }
                 }
 
+                // Additional fallback: try to get unique ID from current character index
+                if (!uniqueCharacterId && ctx.characterId !== undefined && ctx.characterId !== null) {
+                    const character = ctx.characters[ctx.characterId];
+                    if (character) {
+                        uniqueCharacterId = character.data?.extensions?.character_id;
+                    }
+                }
+
                 // Get all outfit values for the character to remove from the message during ID calculation
-                // Only proceed if we have a valid characterId
+                // Only proceed if we have a valid unique character ID
                 let outfitValues: string[] = [];
-                if (characterId !== undefined && characterId !== null) {
-                    outfitValues = this.getAllOutfitValuesForCharacter(characterId);
+                if (uniqueCharacterId) {
+                    outfitValues = this.getAllOutfitValuesForCharacter(uniqueCharacterId);
                 }
 
                 // Start with the original message text
@@ -94,11 +92,8 @@ class MacroProcessor {
                 debugLog('[OutfitTracker] Instance ID generation debug:');
                 debugLog('[OutfitTracker] Original message text:', firstBotMessage.mes);
                 debugLog('[OutfitTracker] Processed message text (macros and outfit values cleaned):', processedMessage);
-                // Show both the old character index and new unique character ID for debugging
-                const botManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
-                const uniqueCharacterId = botManager?.characterId || 'Not available';
-                debugLog('[OutfitTracker] Character index used:', characterId);
-                debugLog('[OutfitTracker] Unique character ID:', uniqueCharacterId);
+                // Show the unique character ID being used for debugging
+                debugLog('[OutfitTracker] Unique character ID used for instance calculation:', uniqueCharacterId);
                 debugLog('[OutfitTracker] Outfit values removed:', outfitValues);
                 
                 // Generate instance ID from the processed message with outfit values removed for consistent ID calculation
@@ -133,31 +128,22 @@ class MacroProcessor {
         }
     }
 
-    getAllOutfitValuesForCharacter(characterId: string | number): string[] {
-        if (!characterId) {
-            debugLog('[OutfitTracker] getAllOutfitValuesForCharacter called with no characterId');
+    getAllOutfitValuesForCharacter(uniqueCharacterId: string): string[] {
+        if (!uniqueCharacterId) {
+            debugLog('[OutfitTracker] getAllOutfitValuesForCharacter called with no uniqueCharacterId');
             return [];
         }
 
-        // Get the unique character ID from the bot manager if available
-        let uniqueCharacterId = null;
-        const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
-        if (botOutfitManager?.characterId) {
-            uniqueCharacterId = botOutfitManager.characterId;
-        }
-
-        // If we have a unique character ID, use that; otherwise use the old system
-        const actualCharacterId = uniqueCharacterId || characterId.toString();
         const state = outfitStore.getState();
         const outfitValues = new Set<string>();
 
-        debugLog('[OutfitTracker] Collecting outfit values for character:', actualCharacterId);
+        debugLog('[OutfitTracker] Collecting outfit values for character:', uniqueCharacterId);
         debugLog('[OutfitTracker] Current state instance ID:', state.currentOutfitInstanceId);
 
         // Get all outfit values from all bot instances for this character (including "None")
-        if (state.botInstances && state.botInstances[actualCharacterId]) {
-            debugLog('[OutfitTracker] Found bot instances for character:', Object.keys(state.botInstances[actualCharacterId]));
-            Object.values(state.botInstances[actualCharacterId]).forEach(instanceData => {
+        if (state.botInstances && state.botInstances[uniqueCharacterId]) {
+            debugLog('[OutfitTracker] Found bot instances for character:', Object.keys(state.botInstances[uniqueCharacterId]));
+            Object.values(state.botInstances[uniqueCharacterId]).forEach(instanceData => {
                 if (instanceData && instanceData.bot) {
                     Object.values(instanceData.bot).forEach(value => {
                         if (value !== undefined && value !== null && typeof value === 'string') {
@@ -172,7 +158,7 @@ class MacroProcessor {
         // Get all preset values for this character (including "None")
         if (state.presets && state.presets.bot) {
             Object.keys(state.presets.bot).forEach(key => {
-                if (key.startsWith(actualCharacterId + '_')) {
+                if (key.startsWith(uniqueCharacterId + '_')) {
                     const presets = state.presets.bot[key];
 
                     if (presets) {
@@ -193,8 +179,8 @@ class MacroProcessor {
 
         // Also include current outfit values for this character if available
         const currentInstanceId = state.currentOutfitInstanceId;
-        if (currentInstanceId && state.botInstances[actualCharacterId]?.[currentInstanceId]?.bot) {
-            const currentOutfit = state.botInstances[actualCharacterId][currentInstanceId].bot;
+        if (currentInstanceId && state.botInstances[uniqueCharacterId]?.[currentInstanceId]?.bot) {
+            const currentOutfit = state.botInstances[uniqueCharacterId][currentInstanceId].bot;
             Object.values(currentOutfit).forEach(value => {
                 if (value !== undefined && value !== null && typeof value === 'string') {
                     outfitValues.add(value);
