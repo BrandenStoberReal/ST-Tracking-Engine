@@ -1,6 +1,7 @@
 import {generateInstanceIdFromText} from '../utils/utilities';
 import {outfitStore} from '../common/Store';
 import {ALL_SLOTS} from '../config/constants';
+import {findCharacterById} from '../services/CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
 
 
@@ -33,11 +34,27 @@ class MacroProcessor {
             const firstBotMessage = ctx.chat.find((message: any) => !message.is_user && !message.is_system);
 
             if (firstBotMessage) {
-                // Try to get characterId from context first, then from the first bot message
-                let characterId = ctx.characterId;
+// Try to get characterId using the new character ID system first
+                let characterId = null;
+                let characterIndex = null;
 
-                if (!characterId && firstBotMessage.name) {
-                    // Look for the character in the context's characters array based on the message name
+                // Try to get character ID from the current bot manager first
+                const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+                if (botOutfitManager?.characterId) {
+                    const character = findCharacterById(botOutfitManager.characterId);
+                    if (character) {
+                        characterIndex = ctx.characters?.indexOf(character);
+                        characterId = characterIndex;
+                    }
+                }
+
+                // Fallback to old system if needed
+                if (characterId === null && ctx.characterId !== undefined && ctx.characterId !== null) {
+                    characterId = ctx.characterId;
+                }
+
+                // Additional fallback: try to find character by name
+                if (characterId === null && firstBotMessage.name) {
                     if (ctx.characters && Array.isArray(ctx.characters)) {
                         const characterIndex = ctx.characters.findIndex((char: any) => char?.name === firstBotMessage.name);
                         if (characterIndex !== -1) {
@@ -77,7 +94,11 @@ class MacroProcessor {
                 debugLog('[OutfitTracker] Instance ID generation debug:');
                 debugLog('[OutfitTracker] Original message text:', firstBotMessage.mes);
                 debugLog('[OutfitTracker] Processed message text (macros and outfit values cleaned):', processedMessage);
-                debugLog('[OutfitTracker] Character ID used:', characterId);
+                // Show both the old character index and new unique character ID for debugging
+                const botManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+                const uniqueCharacterId = botManager?.characterId || 'Not available';
+                debugLog('[OutfitTracker] Character index used:', characterId);
+                debugLog('[OutfitTracker] Unique character ID:', uniqueCharacterId);
                 debugLog('[OutfitTracker] Outfit values removed:', outfitValues);
                 
                 // Generate instance ID from the processed message with outfit values removed for consistent ID calculation
@@ -118,7 +139,15 @@ class MacroProcessor {
             return [];
         }
 
-        const actualCharacterId = characterId.toString();
+        // Get the unique character ID from the bot manager if available
+        let uniqueCharacterId = null;
+        const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+        if (botOutfitManager?.characterId) {
+            uniqueCharacterId = botOutfitManager.characterId;
+        }
+
+        // If we have a unique character ID, use that; otherwise use the old system
+        const actualCharacterId = uniqueCharacterId || characterId.toString();
         const state = outfitStore.getState();
         const outfitValues = new Set<string>();
 

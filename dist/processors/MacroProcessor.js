@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { generateInstanceIdFromText } from '../utils/utilities.js';
 import { outfitStore } from '../common/Store.js';
 import { ALL_SLOTS } from '../config/constants.js';
+import { findCharacterById } from '../services/CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
 class MacroProcessor {
     constructor() {
@@ -24,7 +25,7 @@ class MacroProcessor {
     }
     processMacrosInFirstMessage(context) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
+            var _a, _b, _c, _d, _e, _f, _g, _h;
             try {
                 const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null));
                 if (!ctx || !ctx.chat) {
@@ -32,10 +33,24 @@ class MacroProcessor {
                 }
                 const firstBotMessage = ctx.chat.find((message) => !message.is_user && !message.is_system);
                 if (firstBotMessage) {
-                    // Try to get characterId from context first, then from the first bot message
-                    let characterId = ctx.characterId;
-                    if (!characterId && firstBotMessage.name) {
-                        // Look for the character in the context's characters array based on the message name
+                    // Try to get characterId using the new character ID system first
+                    let characterId = null;
+                    let characterIndex = null;
+                    // Try to get character ID from the current bot manager first
+                    const botOutfitManager = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager;
+                    if (botOutfitManager === null || botOutfitManager === void 0 ? void 0 : botOutfitManager.characterId) {
+                        const character = findCharacterById(botOutfitManager.characterId);
+                        if (character) {
+                            characterIndex = (_d = ctx.characters) === null || _d === void 0 ? void 0 : _d.indexOf(character);
+                            characterId = characterIndex;
+                        }
+                    }
+                    // Fallback to old system if needed
+                    if (characterId === null && ctx.characterId !== undefined && ctx.characterId !== null) {
+                        characterId = ctx.characterId;
+                    }
+                    // Additional fallback: try to find character by name
+                    if (characterId === null && firstBotMessage.name) {
                         if (ctx.characters && Array.isArray(ctx.characters)) {
                             const characterIndex = ctx.characters.findIndex((char) => (char === null || char === void 0 ? void 0 : char.name) === firstBotMessage.name);
                             if (characterIndex !== -1) {
@@ -69,7 +84,11 @@ class MacroProcessor {
                     debugLog('[OutfitTracker] Instance ID generation debug:');
                     debugLog('[OutfitTracker] Original message text:', firstBotMessage.mes);
                     debugLog('[OutfitTracker] Processed message text (macros and outfit values cleaned):', processedMessage);
-                    debugLog('[OutfitTracker] Character ID used:', characterId);
+                    // Show both the old character index and new unique character ID for debugging
+                    const botManager = (_f = (_e = window.outfitTracker) === null || _e === void 0 ? void 0 : _e.botOutfitPanel) === null || _f === void 0 ? void 0 : _f.outfitManager;
+                    const uniqueCharacterId = (botManager === null || botManager === void 0 ? void 0 : botManager.characterId) || 'Not available';
+                    debugLog('[OutfitTracker] Character index used:', characterId);
+                    debugLog('[OutfitTracker] Unique character ID:', uniqueCharacterId);
                     debugLog('[OutfitTracker] Outfit values removed:', outfitValues);
                     // Generate instance ID from the processed message with outfit values removed for consistent ID calculation
                     const instanceId = yield generateInstanceIdFromText(processedMessage, []);
@@ -84,10 +103,10 @@ class MacroProcessor {
                             to: instanceId
                         }, 'log');
                         outfitStore.setCurrentInstanceId(instanceId);
-                        if ((_b = window.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager) {
+                        if ((_g = window.botOutfitPanel) === null || _g === void 0 ? void 0 : _g.outfitManager) {
                             window.botOutfitPanel.outfitManager.setOutfitInstanceId(instanceId);
                         }
-                        if ((_c = window.userOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager) {
+                        if ((_h = window.userOutfitPanel) === null || _h === void 0 ? void 0 : _h.outfitManager) {
                             window.userOutfitPanel.outfitManager.setOutfitInstanceId(instanceId);
                         }
                     }
@@ -102,12 +121,19 @@ class MacroProcessor {
         });
     }
     getAllOutfitValuesForCharacter(characterId) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         if (!characterId) {
             debugLog('[OutfitTracker] getAllOutfitValuesForCharacter called with no characterId');
             return [];
         }
-        const actualCharacterId = characterId.toString();
+        // Get the unique character ID from the bot manager if available
+        let uniqueCharacterId = null;
+        const botOutfitManager = (_b = (_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager;
+        if (botOutfitManager === null || botOutfitManager === void 0 ? void 0 : botOutfitManager.characterId) {
+            uniqueCharacterId = botOutfitManager.characterId;
+        }
+        // If we have a unique character ID, use that; otherwise use the old system
+        const actualCharacterId = uniqueCharacterId || characterId.toString();
         const state = outfitStore.getState();
         const outfitValues = new Set();
         debugLog('[OutfitTracker] Collecting outfit values for character:', actualCharacterId);
@@ -148,7 +174,7 @@ class MacroProcessor {
         }
         // Also include current outfit values for this character if available
         const currentInstanceId = state.currentOutfitInstanceId;
-        if (currentInstanceId && ((_b = (_a = state.botInstances[actualCharacterId]) === null || _a === void 0 ? void 0 : _a[currentInstanceId]) === null || _b === void 0 ? void 0 : _b.bot)) {
+        if (currentInstanceId && ((_d = (_c = state.botInstances[actualCharacterId]) === null || _c === void 0 ? void 0 : _c[currentInstanceId]) === null || _d === void 0 ? void 0 : _d.bot)) {
             const currentOutfit = state.botInstances[actualCharacterId][currentInstanceId].bot;
             Object.values(currentOutfit).forEach(value => {
                 if (value !== undefined && value !== null && typeof value === 'string') {
