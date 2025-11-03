@@ -60,6 +60,7 @@ class EventService {
             this.autoOutfitSystem.markAppInitialized();
         }
         this.updateForCurrentCharacter();
+        customMacroSystem.clearCache();
         customMacroSystem.deregisterCharacterSpecificMacros(this.context);
         customMacroSystem.registerCharacterSpecificMacros(this.context);
     }
@@ -76,6 +77,7 @@ class EventService {
                     debugLog('[OutfitTracker] CHAT_CHANGED event fired and first message has changed - updating for new conversation context');
                     this.currentFirstMessageHash = firstMessageHash;
                     this.updateForCurrentCharacter();
+                    customMacroSystem.clearCache();
                     customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                     customMacroSystem.registerCharacterSpecificMacros(this.context);
                 }
@@ -154,6 +156,7 @@ class EventService {
     }
     handleContextUpdate() {
         this.updateForCurrentCharacter();
+        customMacroSystem.clearCache();
         if (this.context) {
             customMacroSystem.deregisterCharacterSpecificMacros(this.context);
             customMacroSystem.registerCharacterSpecificMacros(this.context);
@@ -161,6 +164,8 @@ class EventService {
     }
     handleOutfitDataLoaded() {
         debugLog('[OutfitTracker] Outfit data loaded, refreshing macros and UI');
+        // Clear macro cache to ensure fresh data
+        customMacroSystem.clearCache();
         // Refresh the macro system to ensure it has the latest data
         if (this.context) {
             customMacroSystem.deregisterCharacterSpecificMacros(this.context);
