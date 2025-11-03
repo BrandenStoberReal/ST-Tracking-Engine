@@ -1,7 +1,7 @@
 import {outfitStore} from '../common/Store';
 import {ACCESSORY_SLOTS, CLOTHING_SLOTS} from '../config/constants';
 import {getCharacters} from '../utils/CharacterUtils';
-import {findCharacterById} from './CharacterIdService';
+import {getCharacterId} from './CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
 
 declare const window: any;
@@ -141,7 +141,12 @@ class CustomMacroService {
                 if (context && characters) {
                     const character = characters.find((c: any) => c.name === charNameParam);
                     if (character) {
-                        charId = characters.indexOf(character);
+                        // Use the new GUID system - get the character ID from extensions
+                        charId = getCharacterId(character);
+                        if (!charId) {
+                            // Fallback to array index if no GUID found
+                            charId = characters.indexOf(character);
+                        }
                     } else if (context.characterId && context.getName) {
                         const currentCharName = context.getName();
                         if (currentCharName === charNameParam) {
@@ -157,16 +162,20 @@ class CustomMacroService {
                 // Try to get character ID from the current bot manager first
                 const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
                 if (botOutfitManager?.characterId) {
-                    // Use the new character ID system
-                    const character = findCharacterById(botOutfitManager.characterId);
-                    if (character && characters) {
-                        charId = characters.indexOf(character);
-                    }
+                    // Use the new character ID system - characterId is already the GUID
+                    charId = botOutfitManager.characterId;
                 }
 
-                // Fallback to old system
-                if (charId === null) {
-                    charId = context?.characterId || null;
+                // Fallback to old system - convert array index to GUID
+                if (charId === null && context?.characterId !== null && context?.characterId !== undefined) {
+                    const character = context.characters[context.characterId];
+                    if (character) {
+                        charId = getCharacterId(character);
+                        if (!charId) {
+                            // If no GUID, fall back to array index as string for backward compatibility
+                            charId = context.characterId.toString();
+                        }
+                    }
                 }
             } else if (['user'].includes(macroType)) {
                 charId = null;

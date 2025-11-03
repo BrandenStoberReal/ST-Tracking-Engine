@@ -1,7 +1,7 @@
 import { outfitStore } from '../common/Store.js';
 import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants.js';
 import { getCharacters } from '../utils/CharacterUtils.js';
-import { findCharacterById } from './CharacterIdService.js';
+import { getCharacterId } from './CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
 class CustomMacroService {
     constructor() {
@@ -107,7 +107,12 @@ class CustomMacroService {
                 if (context && characters) {
                     const character = characters.find((c) => c.name === charNameParam);
                     if (character) {
-                        charId = characters.indexOf(character);
+                        // Use the new GUID system - get the character ID from extensions
+                        charId = getCharacterId(character);
+                        if (!charId) {
+                            // Fallback to array index if no GUID found
+                            charId = characters.indexOf(character);
+                        }
                     }
                     else if (context.characterId && context.getName) {
                         const currentCharName = context.getName();
@@ -125,15 +130,19 @@ class CustomMacroService {
                 // Try to get character ID from the current bot manager first
                 const botOutfitManager = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager;
                 if (botOutfitManager === null || botOutfitManager === void 0 ? void 0 : botOutfitManager.characterId) {
-                    // Use the new character ID system
-                    const character = findCharacterById(botOutfitManager.characterId);
-                    if (character && characters) {
-                        charId = characters.indexOf(character);
-                    }
+                    // Use the new character ID system - characterId is already the GUID
+                    charId = botOutfitManager.characterId;
                 }
-                // Fallback to old system
-                if (charId === null) {
-                    charId = (context === null || context === void 0 ? void 0 : context.characterId) || null;
+                // Fallback to old system - convert array index to GUID
+                if (charId === null && (context === null || context === void 0 ? void 0 : context.characterId) !== null && (context === null || context === void 0 ? void 0 : context.characterId) !== undefined) {
+                    const character = context.characters[context.characterId];
+                    if (character) {
+                        charId = getCharacterId(character);
+                        if (!charId) {
+                            // If no GUID, fall back to array index as string for backward compatibility
+                            charId = context.characterId.toString();
+                        }
+                    }
                 }
             }
             else if (['user'].includes(macroType)) {
