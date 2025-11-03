@@ -14,6 +14,7 @@ import { formatSlotName as utilsFormatSlotName } from '../utils/utilities.js';
 import { areSystemMessagesEnabled } from '../utils/SettingsUtil.js';
 import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
+import { findCharacterById } from '../services/CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
 /**
  * BotOutfitPanel - Manages the UI for the bot character's outfit tracking
@@ -93,7 +94,18 @@ export class BotOutfitPanel {
         var _a;
         try {
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
-            const characterName = getCharacterInfoById(context.characterId, CharacterInfoType.Name);
+            let characterName = null;
+            // Try to get character name using the new character ID system first
+            if (this.outfitManager.characterId) {
+                const character = findCharacterById(this.outfitManager.characterId);
+                if (character) {
+                    characterName = character.name;
+                }
+            }
+            // Fallback to old system if needed
+            if (!characterName && context.characterId !== undefined && context.characterId !== null) {
+                characterName = getCharacterInfoById(context.characterId, CharacterInfoType.Name);
+            }
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
                 const aiMessages = context.chat.filter((msg) => !msg.is_user && !msg.is_system &&
@@ -365,19 +377,28 @@ export class BotOutfitPanel {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
-            if (!context || context.characterId === undefined || context.characterId === null) {
+            // Try to get character using the new character ID system first
+            let character = null;
+            if (this.outfitManager.characterId) {
+                character = findCharacterById(this.outfitManager.characterId);
+            }
+            // Fallback to old system if needed
+            if (!character && context && context.characterId !== undefined && context.characterId !== null) {
+                character = context.characters[context.characterId];
+            }
+            if (!character) {
                 return {
                     error: 'No character selected or context not ready'
                 };
             }
             // Get character information
             const characterInfo = {
-                name: getCharacterInfoById(context.characterId, CharacterInfoType.Name) || 'Unknown',
-                description: getCharacterInfoById(context.characterId, CharacterInfoType.Description) || '',
-                personality: getCharacterInfoById(context.characterId, CharacterInfoType.Personality) || '',
-                scenario: getCharacterInfoById(context.characterId, CharacterInfoType.Scenario) || '',
-                firstMessage: getCharacterInfoById(context.characterId, CharacterInfoType.DefaultMessage) || '',
-                characterNotes: getCharacterInfoById(context.characterId, CharacterInfoType.CharacterNotes) || '',
+                name: character.name || 'Unknown',
+                description: character.description || '',
+                personality: character.personality || '',
+                scenario: character.scenario || '',
+                firstMessage: character.first_mes || '',
+                characterNotes: character.character_notes || '',
             };
             // Get the first message from the current chat if it's different from the character's first_message
             if (context.chat && context.chat.length > 0) {

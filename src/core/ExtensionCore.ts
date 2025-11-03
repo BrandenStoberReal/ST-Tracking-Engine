@@ -91,6 +91,8 @@ function setupApi(botManager: any, userManager: any, botPanel: any, userPanel: a
     extension_api.autoOutfitSystem = autoOutfitSystem;
     extension_api.wipeAllOutfits = () => outfitDataService.wipeAllOutfits();
     window.wipeAllOutfits = () => outfitDataService.wipeAllOutfits(); // Make it directly accessible globally
+    extension_api.migrateCharacterIds = () => migrateAllCharacters();
+    window.migrateCharacterIds = () => migrateAllCharacters(); // Make it directly accessible globally
     extension_api.getOutfitExtensionStatus = () => ({
         core: true,
         autoOutfit: autoOutfitSystem?.getStatus?.() ?? false,
@@ -265,12 +267,21 @@ export async function initializeExtension(): Promise<void> {
 
     // Migrate existing characters to have character IDs
     try {
+        debugLog('Starting character ID migration...', null, 'info');
+        console.log('[ST-Outfits] Starting character ID migration...');
         const migratedCount = await migrateAllCharacters();
+        debugLog(`Character ID migration completed. ${migratedCount} characters migrated.`, null, 'info');
+        console.log(`[ST-Outfits] Character ID migration completed. ${migratedCount} characters migrated.`);
         if (migratedCount > 0) {
             debugLog(`Migrated ${migratedCount} characters to use character IDs`, null, 'info');
+            console.log(`[ST-Outfits] Successfully migrated ${migratedCount} characters to use character IDs`);
+        } else {
+            debugLog('All characters already have character IDs', null, 'info');
+            console.log('[ST-Outfits] All characters already have character IDs');
         }
     } catch (error) {
         debugLog('Error during character migration:', error, 'error');
+        console.error('[ST-Outfits] Error during character migration:', error);
     }
 
     const outfitDataService = new OutfitDataService(dataManager);

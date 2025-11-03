@@ -1,6 +1,7 @@
 import { outfitStore } from '../common/Store.js';
 import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants.js';
 import { getCharacters } from '../utils/CharacterUtils.js';
+import { findCharacterById } from './CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
 class CustomMacroService {
     constructor() {
@@ -87,7 +88,7 @@ class CustomMacroService {
         }
     }
     getCurrentSlotValue(macroType, slotName, charNameParam = null) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f, _g;
         if (!this.allSlots.includes(slotName)) {
             return 'None';
         }
@@ -121,7 +122,19 @@ class CustomMacroService {
                 }
             }
             else if (macroType === 'char' || macroType === 'bot') {
-                charId = (context === null || context === void 0 ? void 0 : context.characterId) || null;
+                // Try to get character ID from the current bot manager first
+                const botOutfitManager = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager;
+                if (botOutfitManager === null || botOutfitManager === void 0 ? void 0 : botOutfitManager.characterId) {
+                    // Use the new character ID system
+                    const character = findCharacterById(botOutfitManager.characterId);
+                    if (character && characters) {
+                        charId = characters.indexOf(character);
+                    }
+                }
+                // Fallback to old system
+                if (charId === null) {
+                    charId = (context === null || context === void 0 ? void 0 : context.characterId) || null;
+                }
             }
             else if (['user'].includes(macroType)) {
                 charId = null;
@@ -136,7 +149,7 @@ class CustomMacroService {
             // Check if the outfit managers are available and initialized
             if (charId !== null && (macroType === 'char' || macroType === 'bot' || charNameParam || (this.isValidCharacterName(macroType) && !['user'].includes(macroType)))) {
                 // Check if outfit managers are available
-                const botOutfitManager = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager;
+                const botOutfitManager = (_e = (_d = window.outfitTracker) === null || _d === void 0 ? void 0 : _d.botOutfitPanel) === null || _e === void 0 ? void 0 : _e.outfitManager;
                 if (!botOutfitManager) {
                     // If managers aren't ready yet, return 'None' temporarily
                     // The UI should update when the managers become available
@@ -161,7 +174,7 @@ class CustomMacroService {
                 return result;
             }
             else if (macroType === 'user') {
-                const userOutfitManager = (_e = (_d = window.outfitTracker) === null || _d === void 0 ? void 0 : _d.userOutfitPanel) === null || _e === void 0 ? void 0 : _e.outfitManager;
+                const userOutfitManager = (_g = (_f = window.outfitTracker) === null || _f === void 0 ? void 0 : _f.userOutfitPanel) === null || _g === void 0 ? void 0 : _g.outfitManager;
                 if (!userOutfitManager) {
                     this._setCache(cacheKey, 'None');
                     return 'None';

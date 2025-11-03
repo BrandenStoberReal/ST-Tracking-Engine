@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { LLMUtility } from '../utils/LLMUtility.js';
 import { extractCommands } from '../processors/StringProcessor.js';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
+import { findCharacterById } from './CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
 /**
  * Process a single outfit command
@@ -74,19 +74,28 @@ export function generateOutfitFromLLM(options) {
  */
 export function importOutfitFromCharacterCard() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b, _c;
         try {
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
-            const charId = context.characterId;
-            if (charId === undefined || charId === null) {
+            // Try to get character using the new character ID system first
+            let character = null;
+            const botOutfitManager = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager;
+            if (botOutfitManager === null || botOutfitManager === void 0 ? void 0 : botOutfitManager.characterId) {
+                character = findCharacterById(botOutfitManager.characterId);
+            }
+            // Fallback to old system if needed
+            if (!character && context && context.characterId !== undefined && context.characterId !== null) {
+                character = context.characters[context.characterId];
+            }
+            if (!character) {
                 throw new Error('No character selected or context not ready');
             }
-            const characterName = getCharacterInfoById(charId, CharacterInfoType.Name) || 'Unknown';
-            const characterDescription = getCharacterInfoById(charId, CharacterInfoType.Description) || '';
-            const characterPersonality = getCharacterInfoById(charId, CharacterInfoType.Personality) || '';
-            const characterScenario = getCharacterInfoById(charId, CharacterInfoType.Scenario) || '';
-            const characterFirstMessage = getCharacterInfoById(charId, CharacterInfoType.DefaultMessage) || '';
-            const characterNotes = getCharacterInfoById(charId, CharacterInfoType.CharacterNotes) || '';
+            const characterName = character.name || 'Unknown';
+            const characterDescription = character.description || '';
+            const characterPersonality = character.personality || '';
+            const characterScenario = character.scenario || '';
+            const characterFirstMessage = character.first_mes || '';
+            const characterNotes = character.character_notes || '';
             // Construct a prompt to extract outfit information from character card
             const prompt = `Analyze the character card below and extract any clothing or accessory items mentioned. 
         Output only outfit-system commands in this format:

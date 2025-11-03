@@ -1,6 +1,7 @@
 import {outfitStore} from '../common/Store';
 import {ACCESSORY_SLOTS, CLOTHING_SLOTS} from '../config/constants';
 import {getCharacters} from '../utils/CharacterUtils';
+import {findCharacterById} from './CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
 
 declare const window: any;
@@ -153,7 +154,20 @@ class CustomMacroService {
                     }
                 }
             } else if (macroType === 'char' || macroType === 'bot') {
-                charId = context?.characterId || null;
+                // Try to get character ID from the current bot manager first
+                const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+                if (botOutfitManager?.characterId) {
+                    // Use the new character ID system
+                    const character = findCharacterById(botOutfitManager.characterId);
+                    if (character && characters) {
+                        charId = characters.indexOf(character);
+                    }
+                }
+
+                // Fallback to old system
+                if (charId === null) {
+                    charId = context?.characterId || null;
+                }
             } else if (['user'].includes(macroType)) {
                 charId = null;
             } else if (context && context.characterId && context.getName) {

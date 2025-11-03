@@ -160,18 +160,25 @@ export async function migrateAllCharacters(): Promise<number> {
             return 0;
         }
 
+        debugLog(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`, null, 'info');
+        console.log(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`);
         let migratedCount = 0;
 
         for (let i = 0; i < context.characters.length; i++) {
             const character = context.characters[i];
+            const characterName = character.name || 'Unnamed Character';
             const existingId = getCharacterId(character);
+
+            debugLog(`[CharacterIdService] Checking character "${characterName}" for existing ID...`, null, 'debug');
+            
             if (!existingId) {
                 const newCharacterId = generateGUID();
-                debugLog(`[CharacterIdService] Generated new character ID for migration: ${newCharacterId}`, null, 'info');
+                debugLog(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`, null, 'info');
+                console.log(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`);
 
                 if (context.writeExtensionField) {
                     await context.writeExtensionField(i, 'character_id', newCharacterId);
-                    debugLog(`[CharacterIdService] Migrated character "${character.name}" using writeExtensionField`, null, 'info');
+                    debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using writeExtensionField`, null, 'info');
                 } else {
                     debugLog('[CharacterIdService] writeExtensionField not available during migration, using fallback', null, 'warn');
                     // Fallback to direct assignment
@@ -182,14 +189,17 @@ export async function migrateAllCharacters(): Promise<number> {
                         character.data.extensions = {};
                     }
                     character.data.extensions.character_id = newCharacterId;
+                    debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using fallback method`, null, 'info');
                 }
 
                 migratedCount++;
-                debugLog(`[CharacterIdService] Migrated character "${character.name}" with new ID`, null, 'info');
+            } else {
+                debugLog(`[CharacterIdService] Character "${characterName}" already has ID: ${existingId}`, null, 'debug');
             }
         }
 
-        debugLog(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated.`, null, 'info');
+        debugLog(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`, null, 'info');
+        console.log(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`);
         return migratedCount;
     } catch (error) {
         debugLog('[CharacterIdService] Error during character migration:', error, 'error');

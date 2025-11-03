@@ -192,6 +192,13 @@ export async function getCharacterUniqueIdByIndex(charId: string): Promise<strin
  */
 export async function getCurrentCharacterUniqueId(): Promise<string | null> {
     try {
+        // Try to get character ID from the current bot manager first
+        const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+        if (botOutfitManager?.characterId) {
+            return botOutfitManager.characterId;
+        }
+
+        // Fallback to old system
         const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
 
         if (context && context.characterId !== undefined && context.characterId !== null) {

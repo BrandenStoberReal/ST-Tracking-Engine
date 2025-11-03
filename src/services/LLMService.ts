@@ -1,6 +1,6 @@
 import {LLMUtility} from '../utils/LLMUtility';
 import {extractCommands} from '../processors/StringProcessor';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
+import {findCharacterById} from './CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
 
 declare const window: any;
@@ -81,18 +81,29 @@ export async function importOutfitFromCharacterCard(): Promise<{
 }> {
     try {
         const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
-        const charId = context.characterId;
 
-        if (charId === undefined || charId === null) {
+        // Try to get character using the new character ID system first
+        let character = null;
+        const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+        if (botOutfitManager?.characterId) {
+            character = findCharacterById(botOutfitManager.characterId);
+        }
+
+        // Fallback to old system if needed
+        if (!character && context && context.characterId !== undefined && context.characterId !== null) {
+            character = context.characters[context.characterId];
+        }
+
+        if (!character) {
             throw new Error('No character selected or context not ready');
         }
 
-        const characterName = getCharacterInfoById(charId, CharacterInfoType.Name) || 'Unknown';
-        const characterDescription = getCharacterInfoById(charId, CharacterInfoType.Description) || '';
-        const characterPersonality = getCharacterInfoById(charId, CharacterInfoType.Personality) || '';
-        const characterScenario = getCharacterInfoById(charId, CharacterInfoType.Scenario) || '';
-        const characterFirstMessage = getCharacterInfoById(charId, CharacterInfoType.DefaultMessage) || '';
-        const characterNotes = getCharacterInfoById(charId, CharacterInfoType.CharacterNotes) || '';
+        const characterName = character.name || 'Unknown';
+        const characterDescription = character.description || '';
+        const characterPersonality = character.personality || '';
+        const characterScenario = character.scenario || '';
+        const characterFirstMessage = character.first_mes || '';
+        const characterNotes = character.character_notes || '';
 
         // Construct a prompt to extract outfit information from character card
         const prompt = `Analyze the character card below and extract any clothing or accessory items mentioned. 

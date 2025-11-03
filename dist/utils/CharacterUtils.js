@@ -189,9 +189,15 @@ export function getCharacterUniqueIdByIndex(charId) {
  */
 export function getCurrentCharacterUniqueId() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b, _c;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            // Try to get character ID from the current bot manager first
+            const botOutfitManager = (_b = (_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager;
+            if (botOutfitManager === null || botOutfitManager === void 0 ? void 0 : botOutfitManager.characterId) {
+                return botOutfitManager.characterId;
+            }
+            // Fallback to old system
+            const context = ((_c = window.SillyTavern) === null || _c === void 0 ? void 0 : _c.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
             if (context && context.characterId !== undefined && context.characterId !== null) {
                 return yield getCharacterUniqueIdByIndex(context.characterId.toString());
             }
