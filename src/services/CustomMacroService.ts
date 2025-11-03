@@ -24,6 +24,7 @@ class CustomMacroService {
     private accessorySlots: string[];
     private allSlots: string[];
     private cacheExpiryTime: number;
+    private registeredMacros: Set<string>;
 
     constructor() {
         this.clothingSlots = CLOTHING_SLOTS;
@@ -31,6 +32,7 @@ class CustomMacroService {
         this.allSlots = [...CLOTHING_SLOTS, ...ACCESSORY_SLOTS];
         this.macroValueCache = new Map<string, MacroCacheEntry>();
         this.cacheExpiryTime = 5 * 60 * 1000;
+        this.registeredMacros = new Set<string>();
     }
 
     registerMacros(context: any): void {
@@ -40,8 +42,18 @@ class CustomMacroService {
             // Don't register {{char}} and {{user}} macros globally as they should be handled manually in prompt injection only
             // Only register slot-specific macros
             this.allSlots.forEach(slot => {
-                ctx.registerMacro(`char_${slot}`, () => this.getCurrentSlotValue('char', slot));
-                ctx.registerMacro(`user_${slot}`, () => this.getCurrentSlotValue('user', slot));
+                const charMacro = `char_${slot}`;
+                const userMacro = `user_${slot}`;
+
+                if (!this.registeredMacros.has(charMacro)) {
+                    ctx.registerMacro(charMacro, () => this.getCurrentSlotValue('char', slot));
+                    this.registeredMacros.add(charMacro);
+                }
+
+                if (!this.registeredMacros.has(userMacro)) {
+                    ctx.registerMacro(userMacro, () => this.getCurrentSlotValue('user', slot));
+                    this.registeredMacros.add(userMacro);
+                }
             });
         }
     }
@@ -52,8 +64,18 @@ class CustomMacroService {
         if (ctx && ctx.unregisterMacro) {
             // Don't deregister {{char}} and {{user}} macros as they weren't registered globally
             this.allSlots.forEach(slot => {
-                ctx.unregisterMacro(`char_${slot}`);
-                ctx.unregisterMacro(`user_${slot}`);
+                const charMacro = `char_${slot}`;
+                const userMacro = `user_${slot}`;
+
+                if (this.registeredMacros.has(charMacro)) {
+                    ctx.unregisterMacro(charMacro);
+                    this.registeredMacros.delete(charMacro);
+                }
+
+                if (this.registeredMacros.has(userMacro)) {
+                    ctx.unregisterMacro(userMacro);
+                    this.registeredMacros.delete(userMacro);
+                }
             });
         }
     }
@@ -67,11 +89,17 @@ class CustomMacroService {
                 if (character && character.name) {
                     const characterName = character.name;
 
-                    ctx.registerMacro(characterName, () => characterName);
+                    if (!this.registeredMacros.has(characterName)) {
+                        ctx.registerMacro(characterName, () => characterName);
+                        this.registeredMacros.add(characterName);
+                    }
 
                     this.allSlots.forEach(slot => {
                         const macroName = `${characterName}_${slot}`;
-                        ctx.registerMacro(macroName, () => this.getCurrentSlotValue(characterName, slot, characterName));
+                        if (!this.registeredMacros.has(macroName)) {
+                            ctx.registerMacro(macroName, () => this.getCurrentSlotValue(characterName, slot, characterName));
+                            this.registeredMacros.add(macroName);
+                        }
                     });
                 }
             }
@@ -87,11 +115,17 @@ class CustomMacroService {
                 if (character && character.name) {
                     const characterName = character.name;
 
-                    ctx.unregisterMacro(characterName);
+                    if (this.registeredMacros.has(characterName)) {
+                        ctx.unregisterMacro(characterName);
+                        this.registeredMacros.delete(characterName);
+                    }
 
                     this.allSlots.forEach(slot => {
                         const macroName = `${characterName}_${slot}`;
-                        ctx.unregisterMacro(macroName);
+                        if (this.registeredMacros.has(macroName)) {
+                            ctx.unregisterMacro(macroName);
+                            this.registeredMacros.delete(macroName);
+                        }
                     });
                 }
             }
@@ -255,6 +289,8 @@ class CustomMacroService {
 
     clearCache(): void {
         this.macroValueCache.clear();
+        // Note: We don't clear registeredMacros here as they should persist across cache clears
+        // Only clear when explicitly deregistering
     }
 
     isValidCharacterName(name: string): boolean {
