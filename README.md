@@ -1,7 +1,9 @@
-# 🎽 Outfit Tracker Extension for SillyTavern
+# 🎽 SillyTavern Outfit Engine (v2.0.0-dev-unstable)
 
 *Keep track of what you and your AI character are wearing (or not wearing) with this comprehensive outfit management
 system.*
+
+**Author:** Lucanna (Forked by Branden)
 
 <div align="center">
   <img width="402" height="1131" alt="Extension UI Screenshot" src="https://github.com/user-attachments/assets/8a7865e8-309a-4ace-ab6b-ea8c76479522" />
@@ -319,20 +321,27 @@ following macros will be available:
 This extension follows a modular architecture with a well-organized directory structure for improved maintainability:
 
 ```
-ST-Outfits-Extended/
+ST-Outfits/
 ├── index.js                 # Main extension entry point
 ├── manifest.json           # Extension metadata and configuration
 ├── package.json           # NPM package configuration
 ├── style.css              # UI styling for outfit panels
-├── src/                   # Source code
-│   ├── common/            # Shared utilities and common functions
+├── AGENTS.md              # Development guidelines and coding standards
+├── src/                   # TypeScript source code
+│   ├── commands/          # Slash command implementations
+│   ├── common/            # Shared utilities and store
 │   ├── config/            # Configuration modules
-│   ├── core/              # Core business logic
+│   ├── core/              # Core business logic and events
+│   ├── logging/           # Debug logging utilities
 │   ├── managers/          # Outfit management classes
 │   ├── panels/            # UI panel implementations
-│   ├── services/          # Service classes
+│   ├── processors/        # String and macro processors
+│   ├── services/          # Service classes for LLM, storage, etc.
+│   ├── settings/          # Settings UI and configuration
 │   └── utils/             # Utility functions
-├── tests/                 # Test files
+├── dist/                  # Compiled JavaScript output
+├── docs/                  # Documentation and examples
+├── tests/                 # Jest test suite
 └── node_modules/          # NPM dependencies
 ```
 
@@ -341,18 +350,19 @@ ST-Outfits-Extended/
 1. Clone the repository to your SillyTavern extensions directory
 2. Install dependencies: `npm install`
 3. Make changes to the source files in the `/src` directory
-4. Use `npm run lint` to check code quality
+4. Build the project: `npm run build`
 5. Use `npm test` to run tests
+
+See [AGENTS.md](AGENTS.md) for detailed coding guidelines, build commands, and project conventions.
 
 ### 🧪 Testing
 
-The project includes a comprehensive testing suite using Jest. The tests handle the
+The project includes a comprehensive testing suite using Jest with jsdom environment. The tests handle the
 browser-dependent nature of the SillyTavern extension:
 
 - ✅ Tests for utility functions (validation, string processing)
 - ✅ Tests for the Outfit Store state management system
-- ✅ Mock-based tests for extension initialization
-- ✅ Jest configuration with jsdom environment
+- ✅ Tests for extension initialization and core functionality
 - ✅ Mock implementations of browser APIs and SillyTavern context
 
 | Command                 | Description                    |
@@ -362,28 +372,9 @@ browser-dependent nature of the SillyTavern extension:
 | `npm run test:watch`    | Run tests in watch mode        |
 
 The tests are located in the `tests/` directory and include setup files that mock the SillyTavern context and browser
-APIs.
+APIs. See `tests/README.md` for detailed testing information.
 
-### 🧹 Linting
 
-ESLint is used for code quality checks and style enforcement. The project follows recommended ESLint rules
-with additional custom configurations:
-
-- ✅ Indentation with 4 spaces
-- ✅ Single quotes for strings
-- ✅ Semicolons required
-- ✅ Line breaks in Windows style
-- ✅ Function and variable naming conventions
-- ✅ No unused variables allowed
-- ✅ Consistent code style enforcement
-
-| Command            | Description                        |
-|--------------------|------------------------------------|
-| `npm run lint`     | Run the linter to check for issues |
-| `npm run lint:fix` | Automatically fix linting issues   |
-
-The linting configuration is defined in `.eslintrc.json` and covers all JavaScript files in the `src/`
-directory and the main `index.js` file.
 
 ### Developer Documentation
 
@@ -404,6 +395,6 @@ This project is licensed under Creative Commons Zero (CC0) - see the [LICENSE](L
 
 **SillyTavern Outfit Engine** - Developed with ❤️ for the SillyTavern community
 
-[Back to Top](#-outfit-tracker-extension-for-sillytavern)
+[Back to Top](#-sillytavern-outfit-engine-v200-dev-unstable)
 
 </div>
