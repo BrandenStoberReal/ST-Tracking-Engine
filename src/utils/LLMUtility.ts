@@ -172,6 +172,49 @@ export class LLMUtility {
             context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
         }
 
+        // If no profile specified, use the default generation method
+        if (!profile) {
+            return await this.generateWithRetry(prompt, systemPrompt, context, maxRetries);
+        }
+
+        // Use the new SillyTavern ConnectionManagerRequestService.sendRequest API
+        if (context?.ConnectionManagerRequestService?.sendRequest) {
+            let attempt = 0;
+            const maxTokens = 2048; // Default max tokens, can be made configurable
+
+            while (attempt < maxRetries) {
+                try {
+                    const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
+                    const result = await context.ConnectionManagerRequestService.sendRequest(
+                        profile,
+                        fullPrompt,
+                        maxTokens,
+                        {}, // custom parameters (use defaults)
+                        {}  // override payload
+                    );
+
+                    if (!result || result.trim() === '') {
+                        debugLog(`[LLMUtility] Empty response from profile ${profile} (attempt ${attempt + 1}/${maxRetries})`, null, 'warn');
+                        attempt++;
+                        if (attempt >= maxRetries) {
+                            throw new Error('Empty response from LLM after retries');
+                        }
+                        continue;
+                    }
+
+                    return result;
+                } catch (error: any) {
+                    debugLog(`[LLMUtility] Profile generation attempt ${attempt + 1}/${maxRetries} with profile ${profile} failed:`, error, 'error');
+                    attempt++;
+                    if (attempt >= maxRetries) {
+                        throw new Error(`Profile generation failed after ${maxRetries} attempts: ${error.message}`);
+                    }
+                }
+            }
+        }
+
+        // Fallback to the old method if the new API is not available
+        debugLog('[LLMUtility] ConnectionManagerRequestService.sendRequest not available, falling back to legacy method', null, 'warn');
         const generationFunc = async (genContext: SillyTavernContext): Promise<string> => {
             if (genContext && genContext.generateRaw) {
                 return genContext.generateRaw(prompt, systemPrompt);

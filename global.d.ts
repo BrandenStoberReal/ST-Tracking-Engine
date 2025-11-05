@@ -115,6 +115,13 @@ interface SillyTavernContext {
     powerUserSettings: Record<string, any>;
     CONNECT_API_MAP: Record<string, any>;
     symbols: Record<string, any>;
+    ConnectionManagerRequestService?: {
+        getSupportedProfiles: () => Promise<Array<any>>;
+        sendRequest: (profileId: string, prompt: string | Array<{
+            role: string,
+            content: string
+        }>, maxTokens: number, custom?: any, overridePayload?: any) => Promise<string>;
+    };
 }
 
 declare global {

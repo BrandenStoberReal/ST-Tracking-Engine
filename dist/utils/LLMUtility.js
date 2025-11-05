@@ -167,10 +167,45 @@ export class LLMUtility {
     }
     static generateWithProfile(prompt_1) {
         return __awaiter(this, arguments, void 0, function* (prompt, systemPrompt = 'You are an AI assistant.', context = null, profile = null, maxRetries = 3) {
-            var _a;
+            var _a, _b;
             if (!context) {
                 context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
             }
+            // If no profile specified, use the default generation method
+            if (!profile) {
+                return yield this.generateWithRetry(prompt, systemPrompt, context, maxRetries);
+            }
+            // Use the new SillyTavern ConnectionManagerRequestService.sendRequest API
+            if ((_b = context === null || context === void 0 ? void 0 : context.ConnectionManagerRequestService) === null || _b === void 0 ? void 0 : _b.sendRequest) {
+                let attempt = 0;
+                const maxTokens = 2048; // Default max tokens, can be made configurable
+                while (attempt < maxRetries) {
+                    try {
+                        const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
+                        const result = yield context.ConnectionManagerRequestService.sendRequest(profile, fullPrompt, maxTokens, {}, // custom parameters (use defaults)
+                        {} // override payload
+                        );
+                        if (!result || result.trim() === '') {
+                            debugLog(`[LLMUtility] Empty response from profile ${profile} (attempt ${attempt + 1}/${maxRetries})`, null, 'warn');
+                            attempt++;
+                            if (attempt >= maxRetries) {
+                                throw new Error('Empty response from LLM after retries');
+                            }
+                            continue;
+                        }
+                        return result;
+                    }
+                    catch (error) {
+                        debugLog(`[LLMUtility] Profile generation attempt ${attempt + 1}/${maxRetries} with profile ${profile} failed:`, error, 'error');
+                        attempt++;
+                        if (attempt >= maxRetries) {
+                            throw new Error(`Profile generation failed after ${maxRetries} attempts: ${error.message}`);
+                        }
+                    }
+                }
+            }
+            // Fallback to the old method if the new API is not available
+            debugLog('[LLMUtility] ConnectionManagerRequestService.sendRequest not available, falling back to legacy method', null, 'warn');
             const generationFunc = (genContext) => __awaiter(this, void 0, void 0, function* () {
                 if (genContext && genContext.generateRaw) {
                     return genContext.generateRaw(prompt, systemPrompt);

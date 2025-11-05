@@ -35,6 +35,46 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     const autoOutfitConnectionProfile = currentSettings.autoOutfitConnectionProfile || '';
     const autoOutfitPrompt = currentSettings.autoOutfitPrompt || '';
 
+    // Function to fetch connection profiles from SillyTavern API
+    async function getConnectionProfiles(): Promise<Array<{ id: string, name: string }>> {
+        try {
+            const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            if (context?.ConnectionManagerRequestService?.getSupportedProfiles) {
+                const profiles = await context.ConnectionManagerRequestService.getSupportedProfiles();
+                return profiles.map((profile: any) => ({
+                    id: profile.id,
+                    name: profile.name || profile.id
+                }));
+            }
+        } catch (error) {
+            debugLog('[SettingsUI] Error fetching connection profiles:', error, 'error');
+        }
+        return [];
+    }
+
+    // Generate profile options HTML
+    function generateProfileOptions(profiles: Array<{ id: string, name: string }>): string {
+        let optionsHtml = '<option value="">Default Connection</option>';
+
+        profiles.forEach(profile => {
+            const selected = autoOutfitConnectionProfile === profile.id ? 'selected' : '';
+            optionsHtml += `<option value="${profile.id}" ${selected}>${profile.name}</option>`;
+        });
+
+        return optionsHtml;
+    }
+
+    // Function to populate the connection profile dropdown
+    async function populateConnectionProfiles(): Promise<void> {
+        try {
+            const profiles = await getConnectionProfiles();
+            const optionsHtml = generateProfileOptions(profiles);
+            $('#outfit-connection-profile').html(optionsHtml);
+        } catch (error) {
+            debugLog('[SettingsUI] Error populating connection profiles:', error, 'error');
+        }
+    }
+
     const autoSettingsHtml = hasAutoSystem ? `
         <div class="flex-container setting-row">
             <label for="outfit-auto-system">Enable auto outfit updates</label>
@@ -44,11 +84,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         <div class="flex-container setting-row">
             <label for="outfit-connection-profile">Connection Profile (Optional):</label>
             <select id="outfit-connection-profile" class="option">
-                <option value="">Default Connection</option>
-                <option value="openrouter" ${autoOutfitConnectionProfile === 'openrouter' ? 'selected' : ''}>OpenRouter</option>
-                <option value="ooba" ${autoOutfitConnectionProfile === 'ooba' ? 'selected' : ''}>Oobabooga</option>
-                <option value="openai" ${autoOutfitConnectionProfile === 'openai' ? 'selected' : ''}>OpenAI</option>
-                <option value="claude" ${autoOutfitConnectionProfile === 'claude' ? 'selected' : ''}>Claude</option>
+                <option value="">Loading profiles...</option>
             </select>
         </div>
         <div class="flex-container setting-row">
@@ -244,6 +280,11 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     `;
 
     $('#extensions_settings').append(settingsHtml);
+
+    // Populate connection profiles after UI is created
+    if (hasAutoSystem) {
+        populateConnectionProfiles();
+    }
 
     // Update status indicators after settings are loaded
     function updateStatusIndicators() {
