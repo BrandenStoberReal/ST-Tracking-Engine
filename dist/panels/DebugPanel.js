@@ -473,20 +473,7 @@ export class DebugPanel {
         const logItems = contentArea.querySelectorAll('.log-item');
         // Only update if there are new logs
         if (logs.length > logItems.length) {
-            // Check if settings drawer might be affected - use a more targeted update
-            const settingsDrawer = document.querySelector('.inline-drawer-content');
-            const isDrawerPotentiallyOpen = settingsDrawer && window.getComputedStyle(settingsDrawer).display !== 'none';
-            // If drawer might be open, delay the update to avoid interference
-            if (isDrawerPotentiallyOpen) {
-                setTimeout(() => {
-                    if (this.isVisible && this.currentTab === 'logs') {
-                        this.renderLogsTab(contentArea);
-                    }
-                }, 100);
-            }
-            else {
-                this.renderLogsTab(contentArea);
-            }
+            this.renderLogsTab(contentArea);
         }
     }
     /**
@@ -1333,16 +1320,14 @@ export class DebugPanel {
     startRealTimeUpdates() {
         // Clear existing intervals
         this.stopRealTimeUpdates();
-        // Update logs tab every 5000ms (reduced frequency to prevent drawer collapsing)
+        // Update logs tab every 5000ms (prevent refreshing if any drawers are open)
         this.logUpdateInterval = window.setInterval(() => {
             if (this.isVisible && this.currentTab === 'logs') {
-                // Check if user is actively interacting with settings to avoid collapsing drawer
-                const settingsPanel = document.getElementById('extensions_settings');
-                const isUserInteractingWithSettings = settingsPanel &&
-                    (settingsPanel.contains(document.activeElement) ||
-                        settingsPanel.matches(':hover'));
-                // Only update logs if user is not actively using settings
-                if (!isUserInteractingWithSettings) {
+                // Check if any drawers are open
+                const openDrawers = document.querySelectorAll('.inline-drawer-content:not([style*="display: none"])');
+                const areDrawersOpen = openDrawers.length > 0;
+                // Only update logs if no drawers are open
+                if (!areDrawersOpen) {
                     this.updateLogsTab();
                 }
             }
