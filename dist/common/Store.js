@@ -70,7 +70,7 @@ class OutfitStore {
     }
     getState() {
         const _a = this.state, { references } = _a, stateWithoutReferences = __rest(_a, ["references"]);
-        return deepClone(stateWithoutReferences);
+        return stateWithoutReferences;
     }
     getBotOutfit(characterId, instanceId) {
         const characterData = this.state.botInstances[characterId];

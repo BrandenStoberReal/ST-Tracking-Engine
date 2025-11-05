@@ -172,7 +172,7 @@ class OutfitStore {
 
     getState(): State {
         const {references, ...stateWithoutReferences} = this.state;
-        return deepClone(stateWithoutReferences as Omit<State, 'references'>) as State;
+        return stateWithoutReferences as State;
     }
 
     getBotOutfit(characterId: string, instanceId: string): OutfitData {
