@@ -74,7 +74,6 @@ class EventService {
     }
 
     setupExtensionEventListeners(): void {
-        extensionEventBus.on(EXTENSION_EVENTS.CONTEXT_UPDATED, () => this.handleContextUpdate());
         extensionEventBus.on(EXTENSION_EVENTS.OUTFIT_DATA_LOADED, () => this.handleOutfitDataLoaded());
     }
 

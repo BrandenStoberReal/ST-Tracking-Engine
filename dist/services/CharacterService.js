@@ -87,6 +87,7 @@ function syncEmbeddedOutfitData(characterId) {
         }
     });
 }
+let isUpdating = false;
 /**
  * Updates outfit managers and panels for the current character
  * @param {object} botManager - Bot outfit manager instance
@@ -98,6 +99,11 @@ function syncEmbeddedOutfitData(characterId) {
 export function updateForCurrentCharacter(botManager, userManager, botPanel, userPanel) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
+        if (isUpdating) {
+            debugLog('[OutfitTracker] Already updating for current character, skipping.', null, 'warn');
+            return;
+        }
+        isUpdating = true;
         try {
             // Before changing anything, save the current outfit instances with their current instance IDs
             const oldBotInstanceId = botManager.getOutfitInstanceId();
@@ -163,6 +169,9 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
         catch (error) {
             debugLog('[OutfitTracker] Error updating for current character:', error, 'error');
             throw error;
+        }
+        finally {
+            isUpdating = false;
         }
     });
 }

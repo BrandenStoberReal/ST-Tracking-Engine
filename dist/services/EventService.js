@@ -51,7 +51,6 @@ class EventService {
         eventSource.on(event_types.MESSAGE_SWIPED, (index) => this.handleMessageSwiped(index));
     }
     setupExtensionEventListeners() {
-        extensionEventBus.on(EXTENSION_EVENTS.CONTEXT_UPDATED, () => this.handleContextUpdate());
         extensionEventBus.on(EXTENSION_EVENTS.OUTFIT_DATA_LOADED, () => this.handleOutfitDataLoaded());
     }
     handleAppReady() {

@@ -85,6 +85,8 @@ async function syncEmbeddedOutfitData(characterId: string): Promise<void> {
     }
 }
 
+let isUpdating = false;
+
 /**
  * Updates outfit managers and panels for the current character
  * @param {object} botManager - Bot outfit manager instance
@@ -94,6 +96,12 @@ async function syncEmbeddedOutfitData(characterId: string): Promise<void> {
  * @returns {Promise<void>}
  */
 export async function updateForCurrentCharacter(botManager: any, userManager: any, botPanel: any, userPanel: any) {
+    if (isUpdating) {
+        debugLog('[OutfitTracker] Already updating for current character, skipping.', null, 'warn');
+        return;
+    }
+    isUpdating = true;
+
     try {
         // Before changing anything, save the current outfit instances with their current instance IDs
         const oldBotInstanceId = botManager.getOutfitInstanceId();
@@ -175,5 +183,7 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
     } catch (error) {
         debugLog('[OutfitTracker] Error updating for current character:', error, 'error');
         throw error;
+    } finally {
+        isUpdating = false;
     }
 }
