@@ -253,38 +253,42 @@ export function initializeExtension() {
         // Load the stored state into the outfit store after initialization
         outfitStore.loadState();
         debugLog('Data manager and outfit store initialized', null, 'info');
-        // Migrate existing characters to have character IDs
-        try {
-            debugLog('Starting character ID migration...', null, 'info');
-            console.log('[ST-Outfits] Starting character ID migration...');
-            const migratedCount = yield migrateAllCharacters();
-            debugLog(`Character ID migration completed. ${migratedCount} characters migrated.`, null, 'info');
-            console.log(`[ST-Outfits] Character ID migration completed. ${migratedCount} characters migrated.`);
-            if (migratedCount > 0) {
-                debugLog(`Migrated ${migratedCount} characters to use character IDs`, null, 'info');
-                console.log(`[ST-Outfits] Successfully migrated ${migratedCount} characters to use character IDs`);
+        // Migrate existing characters to have character IDs (run in background)
+        setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+            try {
+                debugLog('Starting character ID migration...', null, 'info');
+                console.log('[ST-Outfits] Starting character ID migration...');
+                const migratedCount = yield migrateAllCharacters();
+                debugLog(`Character ID migration completed. ${migratedCount} characters migrated.`, null, 'info');
+                console.log(`[ST-Outfits] Character ID migration completed. ${migratedCount} characters migrated.`);
+                if (migratedCount > 0) {
+                    debugLog(`Migrated ${migratedCount} characters to use character IDs`, null, 'info');
+                    console.log(`[ST-Outfits] Successfully migrated ${migratedCount} characters to use character IDs`);
+                }
+                else {
+                    debugLog('All characters already have character IDs', null, 'info');
+                    console.log('[ST-Outfits] All characters already have character IDs');
+                }
             }
-            else {
-                debugLog('All characters already have character IDs', null, 'info');
-                console.log('[ST-Outfits] All characters already have character IDs');
+            catch (error) {
+                debugLog('Error during character migration:', error, 'error');
+                console.error('[ST-Outfits] Error during character migration:', error);
             }
-        }
-        catch (error) {
-            debugLog('Error during character migration:', error, 'error');
-            console.error('[ST-Outfits] Error during character migration:', error);
-        }
-        // Migrate existing default outfits to character cards
-        try {
-            debugLog('Starting default outfit migration to character cards...', null, 'info');
-            console.log('[ST-Outfits] Starting default outfit migration to character cards...');
-            const defaultOutfitsMigrated = yield migrateDefaultOutfitsToCharacterCards();
-            debugLog(`Default outfit migration completed. ${defaultOutfitsMigrated} characters had default outfits migrated.`, null, 'info');
-            console.log(`[ST-Outfits] Default outfit migration completed. ${defaultOutfitsMigrated} characters had default outfits migrated.`);
-        }
-        catch (error) {
-            debugLog('Error during default outfit migration:', error, 'error');
-            console.error('[ST-Outfits] Error during default outfit migration:', error);
-        }
+        }), 100);
+        // Migrate existing default outfits to character cards (run in background)
+        setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+            try {
+                debugLog('Starting default outfit migration to character cards...', null, 'info');
+                console.log('[ST-Outfits] Starting default outfit migration to character cards...');
+                const defaultOutfitsMigrated = yield migrateDefaultOutfitsToCharacterCards();
+                debugLog(`Default outfit migration completed. ${defaultOutfitsMigrated} characters had default outfits migrated.`, null, 'info');
+                console.log(`[ST-Outfits] Default outfit migration completed. ${defaultOutfitsMigrated} characters had default outfits migrated.`);
+            }
+            catch (error) {
+                debugLog('Error during default outfit migration:', error, 'error');
+                console.error('[ST-Outfits] Error during default outfit migration:', error);
+            }
+        }), 200);
         const outfitDataService = new OutfitDataService(dataManager);
         const settings = dataManager.loadSettings();
         debugLog('Settings loaded', settings, 'info');
