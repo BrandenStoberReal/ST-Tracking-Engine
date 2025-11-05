@@ -26,6 +26,7 @@ export class DebugPanel {
         this.isEventRecordingPaused = false;
         this.realTimeUpdateInterval = null;
         this.logUpdateInterval = null;
+        this.logsSortDescending = true; // true = newest first (descending)
         // Subscribe to all extension events to record them
         Object.values(EXTENSION_EVENTS).forEach(event => {
             extensionEventBus.on(event, (data) => {
@@ -660,6 +661,9 @@ export class DebugPanel {
                     <option value="warn">Warn</option>
                     <option value="error">Error</option>
                 </select>
+                <button id="toggle-logs-sort" class="menu_button" title="Toggle sort direction">
+                    ${this.logsSortDescending ? '⬇️ Newest First' : '⬆️ Oldest First'}
+                </button>
                 <button id="clear-logs-btn" class="menu_button">Clear Logs</button>
             </div>
             <div class="debug-logs-list">
@@ -668,7 +672,13 @@ export class DebugPanel {
             logsHtml += '<p>No logs available.</p>';
         }
         else {
-            logsHtml += logs.map(log => {
+            // Sort logs based on timestamp
+            const sortedLogs = [...logs].sort((a, b) => {
+                const timeA = new Date(a.timestamp).getTime();
+                const timeB = new Date(b.timestamp).getTime();
+                return this.logsSortDescending ? timeB - timeA : timeA - timeB;
+            });
+            logsHtml += sortedLogs.map(log => {
                 const hasData = log.data !== null && log.data !== undefined;
                 const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
                 const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
@@ -703,6 +713,7 @@ export class DebugPanel {
         container.innerHTML = logsHtml;
         const searchInput = container.querySelector('#log-search');
         const levelFilter = container.querySelector('#log-level-filter');
+        const sortBtn = container.querySelector('#toggle-logs-sort');
         const clearBtn = container.querySelector('#clear-logs-btn');
         const filterLogs = () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -723,6 +734,10 @@ export class DebugPanel {
         };
         searchInput.addEventListener('input', filterLogs);
         levelFilter.addEventListener('change', filterLogs);
+        sortBtn.addEventListener('click', () => {
+            this.logsSortDescending = !this.logsSortDescending;
+            this.renderContent();
+        });
         clearBtn.addEventListener('click', () => {
             debugLogger.clearLogs();
             this.renderContent();
