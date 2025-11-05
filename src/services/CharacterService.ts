@@ -3,6 +3,7 @@ import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
 import {debugLog} from '../logging/DebugLogger';
 import {findCharacterById, getOrCreateCharacterId} from './CharacterIdService';
 import {getCharacterOutfitData} from './CharacterOutfitService';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
@@ -71,6 +72,14 @@ async function syncEmbeddedOutfitData(characterId: string): Promise<void> {
             // For now, presets are loaded on-demand from character cards
             // We could sync them to extension storage if needed for performance
         }
+
+        // Emit character outfit synced event
+        extensionEventBus.emit(EXTENSION_EVENTS.CHARACTER_OUTFIT_SYNCED, {
+            characterId: characterId,
+            hasDefaultOutfit: !!embeddedData.defaultOutfit,
+            presetCount: embeddedData.presets ? Object.keys(embeddedData.presets).length : 0,
+            lastModified: embeddedData.lastModified
+        });
     } catch (error) {
         debugLog('[CharacterService] Error syncing embedded outfit data:', error, 'error');
     }
@@ -106,12 +115,13 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
         const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
         const charIndex = context.characterId;
         let characterUniqueId = null;
+        let characterName = null;
 
         if (charIndex !== undefined && charIndex !== null) {
             const character = context.characters[charIndex];
             if (character) {
                 characterUniqueId = await getOrCreateCharacterId(character);
-                const characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
+                characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
 
                 if (characterName) {
                     botManager.setCharacter(characterName, characterUniqueId);
@@ -153,6 +163,13 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
 
         // Optionally trigger a refresh of macro processing after character change
         refreshMacroProcessing();
+
+        // Emit context updated event
+        extensionEventBus.emit(EXTENSION_EVENTS.CONTEXT_UPDATED, {
+            characterId: characterUniqueId,
+            characterName: characterName,
+            chatId: context?.chatId || null
+        });
 
         debugLog('[OutfitTracker] Updated outfit managers for current character');
     } catch (error) {

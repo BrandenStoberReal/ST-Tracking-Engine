@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { ALL_SLOTS } from '../config/constants.js';
 import { invalidateSpecificMacroCaches } from '../services/CustomMacroService.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 export class OutfitManager {
     constructor(slots = ALL_SLOTS) {
         this.slots = slots;
@@ -112,6 +113,16 @@ export class OutfitManager {
             if (this.characterId && this.outfitInstanceId) {
                 this.saveOutfit();
                 invalidateSpecificMacroCaches(this.constructor.name.includes('Bot') ? 'bot' : 'user', this.characterId, this.outfitInstanceId, slot);
+                // Emit outfit changed event
+                extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_CHANGED, {
+                    characterId: this.characterId,
+                    instanceId: this.outfitInstanceId,
+                    slot: slot,
+                    previousValue: previousValue,
+                    newValue: value,
+                    characterName: this.character,
+                    managerType: this.constructor.name.includes('Bot') ? 'bot' : 'user'
+                });
             }
             if (previousValue === 'None' && value !== 'None') {
                 return `${this.character} put on ${value}.`;

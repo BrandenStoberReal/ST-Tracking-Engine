@@ -2,6 +2,7 @@ import {ALL_SLOTS} from '../config/constants';
 import {debugLog} from '../logging/DebugLogger';
 import {findCharacterById, getCharacterId} from './CharacterIdService';
 import {outfitStore} from '../common/Store';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 /**
  * CharacterOutfitService - Handles embedding outfit presets in character card extensions
@@ -334,6 +335,14 @@ export async function migrateDefaultOutfitsToCharacterCards(): Promise<number> {
         }
 
         debugLog(`[CharacterOutfitService] Migration complete. ${migratedCount} characters had default outfits migrated.`, null, 'info');
+
+        // Emit migration completed event
+        extensionEventBus.emit(EXTENSION_EVENTS.MIGRATION_COMPLETED, {
+            migrationType: 'default-outfits-to-cards',
+            charactersMigrated: migratedCount,
+            totalCharacters: context.characters.length
+        });
+
         return migratedCount;
     } catch (error) {
         debugLog('[CharacterOutfitService] Error during default outfit migration:', error, 'error');

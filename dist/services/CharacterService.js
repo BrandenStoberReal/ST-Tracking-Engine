@@ -12,6 +12,7 @@ import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils
 import { debugLog } from '../logging/DebugLogger.js';
 import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService.js';
 import { getCharacterOutfitData } from './CharacterOutfitService.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
  */
@@ -73,6 +74,13 @@ function syncEmbeddedOutfitData(characterId) {
                 // For now, presets are loaded on-demand from character cards
                 // We could sync them to extension storage if needed for performance
             }
+            // Emit character outfit synced event
+            extensionEventBus.emit(EXTENSION_EVENTS.CHARACTER_OUTFIT_SYNCED, {
+                characterId: characterId,
+                hasDefaultOutfit: !!embeddedData.defaultOutfit,
+                presetCount: embeddedData.presets ? Object.keys(embeddedData.presets).length : 0,
+                lastModified: embeddedData.lastModified
+            });
         }
         catch (error) {
             debugLog('[CharacterService] Error syncing embedded outfit data:', error, 'error');
@@ -107,11 +115,12 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
             const charIndex = context.characterId;
             let characterUniqueId = null;
+            let characterName = null;
             if (charIndex !== undefined && charIndex !== null) {
                 const character = context.characters[charIndex];
                 if (character) {
                     characterUniqueId = yield getOrCreateCharacterId(character);
-                    const characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
+                    characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
                     if (characterName) {
                         botManager.setCharacter(characterName, characterUniqueId);
                         // Sync any embedded outfit data from the character card
@@ -143,6 +152,12 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             }
             // Optionally trigger a refresh of macro processing after character change
             refreshMacroProcessing();
+            // Emit context updated event
+            extensionEventBus.emit(EXTENSION_EVENTS.CONTEXT_UPDATED, {
+                characterId: characterUniqueId,
+                characterName: characterName,
+                chatId: (context === null || context === void 0 ? void 0 : context.chatId) || null
+            });
             debugLog('[OutfitTracker] Updated outfit managers for current character');
         }
         catch (error) {

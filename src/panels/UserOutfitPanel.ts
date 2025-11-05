@@ -3,6 +3,7 @@ import {formatSlotName as utilsFormatSlotName} from '../utils/utilities';
 import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
 import {outfitStore} from '../common/Store';
 import {debugLog} from '../logging/DebugLogger';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 declare const window: any;
 declare const toastr: any;
@@ -380,6 +381,14 @@ export class UserOutfitPanel {
         this.applyPanelColors(); // Apply colors after showing
         this.isVisible = true;
 
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'user',
+            visible: true,
+            characterId: 'user',
+            characterName: 'User'
+        });
+
         // Set up dynamic refresh when panel becomes visible
         this.setupDynamicRefresh();
 
@@ -432,6 +441,14 @@ export class UserOutfitPanel {
             this.domElement.style.display = 'none';
         }
         this.isVisible = false;
+
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'user',
+            visible: false,
+            characterId: 'user',
+            characterName: 'User'
+        });
 
         // Clean up dynamic refresh when panel is hidden
         this.cleanupDynamicRefresh();

@@ -11,6 +11,7 @@ import { ALL_SLOTS } from '../config/constants.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { findCharacterById, getCharacterId } from './CharacterIdService.js';
 import { outfitStore } from '../common/Store.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 /**
  * Gets the SillyTavern context
  */
@@ -302,6 +303,12 @@ export function migrateDefaultOutfitsToCharacterCards() {
                 }
             }
             debugLog(`[CharacterOutfitService] Migration complete. ${migratedCount} characters had default outfits migrated.`, null, 'info');
+            // Emit migration completed event
+            extensionEventBus.emit(EXTENSION_EVENTS.MIGRATION_COMPLETED, {
+                migrationType: 'default-outfits-to-cards',
+                charactersMigrated: migratedCount,
+                totalCharacters: context.characters.length
+            });
             return migratedCount;
         }
         catch (error) {

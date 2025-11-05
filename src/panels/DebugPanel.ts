@@ -45,6 +45,7 @@ export class DebugPanel {
     private realTimeUpdateInterval: number | null = null;
     private logUpdateInterval: number | null = null;
     private logsSortDescending: boolean = true; // true = newest first (descending)
+    private lastViewedEventCount: number = 0; // Track events seen when tab was last viewed
 
     constructor() {
         // Subscribe to all extension events to record them
@@ -78,9 +79,14 @@ export class DebugPanel {
             this.recordedEvents.shift();
         }
 
-        // If the events tab is active, re-render it
+        // If the events tab is active, re-render it and update last viewed count
         if (this.isVisible && this.currentTab === 'events') {
             this.renderContent();
+            this.lastViewedEventCount = this.recordedEvents.length;
+            this.updateEventNotification();
+        } else if (this.isVisible) {
+            // Show notification for new events when not viewing events tab
+            this.updateEventNotification();
         }
     }
 
@@ -118,7 +124,7 @@ export class DebugPanel {
                   <button class="outfit-debug-tab ${this.currentTab === 'pointers' ? 'active' : ''}" data-tab="pointers">Pointers <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'performance' ? 'active' : ''}" data-tab="performance">Performance <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'logs' ? 'active' : ''}" data-tab="logs">Logs <span class="realtime-indicator">🔄</span></button>
-                  <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events</button>
+                   <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events <span class="realtime-indicator">🔄</span><span class="event-notification" style="display: none;"></span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'embedded' ? 'active' : ''}" data-tab="embedded">Embedded <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'state' ? 'active' : ''}" data-tab="state">State <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'misc' ? 'active' : ''}" data-tab="misc">Misc <span class="realtime-indicator">🔄</span></button>
@@ -139,6 +145,12 @@ export class DebugPanel {
 
                 this.currentTab = tabName;
                 this.renderContent();
+
+                // Clear event notification when switching to events tab
+                if (tabName === 'events') {
+                    this.lastViewedEventCount = this.recordedEvents.length;
+                    this.updateEventNotification();
+                }
 
                 tabs.forEach(t => t.classList.remove('active'));
                 (event.target as HTMLElement).classList.add('active');
@@ -161,9 +173,20 @@ export class DebugPanel {
                         <option value="outfit-tracker-context-updated">Context Updated</option>
                         <option value="outfit-tracker-outfit-changed">Outfit Changed</option>
                         <option value="outfit-tracker-preset-loaded">Preset Loaded</option>
+                        <option value="outfit-tracker-preset-saved">Preset Saved</option>
+                        <option value="outfit-tracker-preset-deleted">Preset Deleted</option>
+                        <option value="outfit-tracker-preset-overwritten">Preset Overwritten</option>
+                        <option value="outfit-tracker-default-outfit-set">Default Outfit Set</option>
+                        <option value="outfit-tracker-default-outfit-cleared">Default Outfit Cleared</option>
+                        <option value="outfit-tracker-default-outfit-loaded">Default Outfit Loaded</option>
                         <option value="outfit-tracker-panel-visibility-changed">Panel Visibility</option>
                         <option value="outfit-tracker-chat-cleared">Chat Cleared</option>
                         <option value="outfit-tracker-data-loaded">Data Loaded</option>
+                        <option value="outfit-tracker-settings-changed">Settings Changed</option>
+                        <option value="outfit-tracker-migration-completed">Migration Completed</option>
+                        <option value="outfit-tracker-instance-created">Instance Created</option>
+                        <option value="outfit-tracker-instance-deleted">Instance Deleted</option>
+                        <option value="outfit-tracker-character-outfit-synced">Character Outfit Synced</option>
                     </select>
                     <button id="pause-events-btn" class="menu_button">Pause</button>
                     <button id="export-events-btn" class="menu_button">Export</button>
@@ -1328,6 +1351,41 @@ export class DebugPanel {
     }
 
     /**
+     * Updates events tab with current event count
+     */
+    private updateEventsTab(): void {
+        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'events') return;
+
+        // Update the total events count
+        const totalCount = contentArea.querySelector('.events-count') as HTMLElement;
+        if (totalCount) {
+            totalCount.textContent = `Total: ${this.recordedEvents.length}`;
+        }
+    }
+
+    /**
+     * Updates the event notification badge on the events tab button
+     */
+    private updateEventNotification(): void {
+        if (!this.domElement) return;
+
+        const eventTabButton = this.domElement.querySelector('button[data-tab="events"]') as HTMLElement;
+        const notificationBadge = eventTabButton?.querySelector('.event-notification') as HTMLElement;
+
+        if (!notificationBadge) return;
+
+        const newEventCount = this.recordedEvents.length - this.lastViewedEventCount;
+
+        if (newEventCount > 0 && this.currentTab !== 'events') {
+            notificationBadge.textContent = newEventCount.toString();
+            notificationBadge.style.display = 'inline';
+        } else {
+            notificationBadge.style.display = 'none';
+        }
+    }
+
+    /**
      * Updates misc tab with current information
      */
     private updateMiscTab(): void {
@@ -1361,9 +1419,20 @@ export class DebugPanel {
             'outfit-tracker-context-updated': 'event-context',
             'outfit-tracker-outfit-changed': 'event-outfit',
             'outfit-tracker-preset-loaded': 'event-preset',
+            'outfit-tracker-preset-saved': 'event-preset',
+            'outfit-tracker-preset-deleted': 'event-preset',
+            'outfit-tracker-preset-overwritten': 'event-preset',
+            'outfit-tracker-default-outfit-set': 'event-default',
+            'outfit-tracker-default-outfit-cleared': 'event-default',
+            'outfit-tracker-default-outfit-loaded': 'event-default',
             'outfit-tracker-panel-visibility-changed': 'event-panel',
             'outfit-tracker-chat-cleared': 'event-chat',
-            'outfit-tracker-data-loaded': 'event-data'
+            'outfit-tracker-data-loaded': 'event-data',
+            'outfit-tracker-settings-changed': 'event-settings',
+            'outfit-tracker-migration-completed': 'event-migration',
+            'outfit-tracker-instance-created': 'event-instance',
+            'outfit-tracker-instance-deleted': 'event-instance',
+            'outfit-tracker-character-outfit-synced': 'event-sync'
         };
         return classMap[eventType] || 'event-generic';
     }
@@ -1539,9 +1608,20 @@ export class DebugPanel {
             'outfit-tracker-context-updated': '🔄',
             'outfit-tracker-outfit-changed': '👔',
             'outfit-tracker-preset-loaded': '📁',
+            'outfit-tracker-preset-saved': '💾',
+            'outfit-tracker-preset-deleted': '🗑️',
+            'outfit-tracker-preset-overwritten': '🔄',
+            'outfit-tracker-default-outfit-set': '⭐',
+            'outfit-tracker-default-outfit-cleared': '❌',
+            'outfit-tracker-default-outfit-loaded': '📥',
             'outfit-tracker-panel-visibility-changed': '👁️',
             'outfit-tracker-chat-cleared': '🗑️',
-            'outfit-tracker-data-loaded': '💾'
+            'outfit-tracker-data-loaded': '💾',
+            'outfit-tracker-settings-changed': '⚙️',
+            'outfit-tracker-migration-completed': '🚀',
+            'outfit-tracker-instance-created': '➕',
+            'outfit-tracker-instance-deleted': '➖',
+            'outfit-tracker-character-outfit-synced': '🔄'
         };
         return iconMap[eventType] || '📡';
     }
@@ -1703,6 +1783,9 @@ export class DebugPanel {
                     break;
                 case 'embedded':
                     this.updateEmbeddedDataTab();
+                    break;
+                case 'events':
+                    this.updateEventsTab();
                     break;
                 case 'state':
                     this.updateStateTab();

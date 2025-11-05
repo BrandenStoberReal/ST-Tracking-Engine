@@ -16,6 +16,7 @@ import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { findCharacterById } from '../services/CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 /**
  * BotOutfitPanel - Manages the UI for the bot character's outfit tracking
  * This class creates and manages a draggable panel for viewing and modifying
@@ -561,6 +562,13 @@ export class BotOutfitPanel {
         this.domElement.style.display = 'flex';
         this.applyPanelColors(); // Apply colors after showing
         this.isVisible = true;
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'bot',
+            visible: true,
+            characterId: this.outfitManager.characterId,
+            characterName: this.outfitManager.character
+        });
         // Set up dynamic refresh when panel becomes visible
         this.setupDynamicRefresh();
         if (this.domElement) {
@@ -614,6 +622,13 @@ export class BotOutfitPanel {
             this.domElement.style.display = 'none';
         }
         this.isVisible = false;
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'bot',
+            visible: false,
+            characterId: this.outfitManager.characterId,
+            characterName: this.outfitManager.character
+        });
         // Clean up dynamic refresh when panel is hidden
         this.cleanupDynamicRefresh();
     }

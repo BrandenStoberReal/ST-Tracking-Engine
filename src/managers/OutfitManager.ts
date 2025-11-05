@@ -1,6 +1,7 @@
 import {ALL_SLOTS} from '../config/constants';
 import {invalidateSpecificMacroCaches} from '../services/CustomMacroService';
 import {debugLog} from '../logging/DebugLogger';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 export abstract class OutfitManager {
     slots: string[];
@@ -151,6 +152,17 @@ export abstract class OutfitManager {
                 this.outfitInstanceId,
                 slot
             );
+
+            // Emit outfit changed event
+            extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_CHANGED, {
+                characterId: this.characterId,
+                instanceId: this.outfitInstanceId,
+                slot: slot,
+                previousValue: previousValue,
+                newValue: value,
+                characterName: this.character,
+                managerType: this.constructor.name.includes('Bot') ? 'bot' : 'user'
+            });
         }
 
         if (previousValue === 'None' && value !== 'None') {

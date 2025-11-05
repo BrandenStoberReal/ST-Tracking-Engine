@@ -4,9 +4,20 @@ export const EXTENSION_EVENTS = {
     CONTEXT_UPDATED: 'outfit-tracker-context-updated',
     OUTFIT_CHANGED: 'outfit-tracker-outfit-changed',
     PRESET_LOADED: 'outfit-tracker-preset-loaded',
+    PRESET_SAVED: 'outfit-tracker-preset-saved',
+    PRESET_DELETED: 'outfit-tracker-preset-deleted',
+    PRESET_OVERWRITTEN: 'outfit-tracker-preset-overwritten',
+    DEFAULT_OUTFIT_SET: 'outfit-tracker-default-outfit-set',
+    DEFAULT_OUTFIT_CLEARED: 'outfit-tracker-default-outfit-cleared',
+    DEFAULT_OUTFIT_LOADED: 'outfit-tracker-default-outfit-loaded',
     PANEL_VISIBILITY_CHANGED: 'outfit-tracker-panel-visibility-changed',
     CHAT_CLEARED: 'outfit-tracker-chat-cleared',
-    OUTFIT_DATA_LOADED: 'outfit-tracker-data-loaded'
+    OUTFIT_DATA_LOADED: 'outfit-tracker-data-loaded',
+    SETTINGS_CHANGED: 'outfit-tracker-settings-changed',
+    MIGRATION_COMPLETED: 'outfit-tracker-migration-completed',
+    INSTANCE_CREATED: 'outfit-tracker-instance-created',
+    INSTANCE_DELETED: 'outfit-tracker-instance-deleted',
+    CHARACTER_OUTFIT_SYNCED: 'outfit-tracker-character-outfit-synced'
 };
 // Simple event bus implementation
 class ExtensionEventBus {

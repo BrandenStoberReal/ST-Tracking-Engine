@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { OutfitManager } from './OutfitManager.js';
 import { outfitStore } from '../common/Store.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 export class NewUserOutfitManager extends OutfitManager {
     constructor(slots) {
         super(slots);
@@ -70,6 +71,15 @@ export class NewUserOutfitManager extends OutfitManager {
             presetData[slot] = this.currentValues[slot];
         });
         outfitStore.savePreset('user', actualInstanceId, presetName, presetData, 'user');
+        // Emit preset saved event
+        extensionEventBus.emit(EXTENSION_EVENTS.PRESET_SAVED, {
+            characterId: 'user',
+            instanceId: actualInstanceId,
+            presetName: presetName,
+            characterName: 'User',
+            managerType: 'user',
+            presetData: presetData
+        });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Saved "${presetName}" outfit for user character (instance: ${actualInstanceId}).`;
         }
@@ -98,6 +108,14 @@ export class NewUserOutfitManager extends OutfitManager {
                 }
             }
             if (changed) {
+                // Emit preset loaded event
+                extensionEventBus.emit(EXTENSION_EVENTS.PRESET_LOADED, {
+                    characterId: 'user',
+                    instanceId: actualInstanceId,
+                    presetName: presetName,
+                    characterName: 'User',
+                    changed: true
+                });
                 return `You changed into the "${presetName}" outfit (instance: ${actualInstanceId}).`;
             }
             return `You are already wearing the "${presetName}" outfit (instance: ${actualInstanceId}).`;
@@ -117,6 +135,14 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] Preset "${presetName}" not found for user instance ${actualInstanceId}.`;
         }
         outfitStore.deletePreset('user', actualInstanceId, presetName, 'user');
+        // Emit preset deleted event
+        extensionEventBus.emit(EXTENSION_EVENTS.PRESET_DELETED, {
+            characterId: 'user',
+            instanceId: actualInstanceId,
+            presetName: presetName,
+            characterName: 'User',
+            managerType: 'user'
+        });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Deleted your "${presetName}" outfit for instance ${actualInstanceId}.`;
         }
@@ -167,6 +193,15 @@ export class NewUserOutfitManager extends OutfitManager {
                 }
             }
             if (changed) {
+                // Emit default outfit loaded event
+                extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_LOADED, {
+                    characterId: 'user',
+                    instanceId: actualInstanceId,
+                    characterName: 'User',
+                    managerType: 'user',
+                    source: 'legacy',
+                    changed: true
+                });
                 return `You changed into your default outfit (instance: ${actualInstanceId}).`;
             }
             return `You were already wearing your default outfit (instance: ${actualInstanceId}).`;
@@ -191,6 +226,15 @@ export class NewUserOutfitManager extends OutfitManager {
             presetData[slot] = this.currentValues[slot];
         });
         outfitStore.savePreset('user', actualInstanceId, presetName, presetData, 'user');
+        // Emit preset overwritten event
+        extensionEventBus.emit(EXTENSION_EVENTS.PRESET_OVERWRITTEN, {
+            characterId: 'user',
+            instanceId: actualInstanceId,
+            presetName: presetName,
+            characterName: 'User',
+            managerType: 'user',
+            presetData: presetData
+        });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Overwrote your "${presetName}" outfit (instance: ${actualInstanceId}).`;
         }
@@ -262,6 +306,15 @@ export class NewUserOutfitManager extends OutfitManager {
             const defaultUserPresets = Object.assign({}, (state.settings.defaultUserPresets || {}));
             defaultUserPresets[actualInstanceId] = presetName;
             outfitStore.setSetting('defaultUserPresets', defaultUserPresets);
+            // Emit default outfit set event
+            extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_SET, {
+                characterId: 'user',
+                instanceId: actualInstanceId,
+                presetName: presetName,
+                characterName: 'User',
+                managerType: 'user',
+                embedded: false
+            });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Set "${presetName}" as your default outfit (instance: ${actualInstanceId}).`;
             }
@@ -285,6 +338,13 @@ export class NewUserOutfitManager extends OutfitManager {
             const updatedDefaultUserPresets = Object.assign({}, (state.settings.defaultUserPresets || {}));
             delete updatedDefaultUserPresets[actualInstanceId];
             outfitStore.setSetting('defaultUserPresets', updatedDefaultUserPresets);
+            // Emit default outfit cleared event
+            extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_CLEARED, {
+                characterId: 'user',
+                instanceId: actualInstanceId,
+                characterName: 'User',
+                managerType: 'user'
+            });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Default outfit cleared for user (instance: ${actualInstanceId}).`;
             }

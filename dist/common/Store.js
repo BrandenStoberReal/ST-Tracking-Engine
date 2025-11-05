@@ -1,6 +1,7 @@
 import { DEFAULT_SETTINGS } from '../config/constants.js';
 import { deepClone } from '../utils/utilities.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 class OutfitStore {
     constructor() {
         this.state = {
@@ -74,8 +75,15 @@ class OutfitStore {
         if (!this.state.botInstances[characterId]) {
             this.state.botInstances[characterId] = {};
         }
-        if (!this.state.botInstances[characterId][instanceId]) {
+        const instanceCreated = !this.state.botInstances[characterId][instanceId];
+        if (instanceCreated) {
             this.state.botInstances[characterId][instanceId] = { bot: {}, user: {} };
+            // Emit instance created event
+            extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
+                instanceId: instanceId,
+                instanceType: 'bot',
+                characterId: characterId
+            });
         }
         // Preserve any existing promptInjectionEnabled value
         const existingInstanceData = this.state.botInstances[characterId][instanceId];
@@ -92,6 +100,8 @@ class OutfitStore {
         return deepClone(instanceData || {});
     }
     setUserOutfit(instanceId, outfitData) {
+        // Check if instance is being created
+        const instanceCreated = !this.state.userInstances[instanceId];
         // Preserve any existing promptInjectionEnabled value
         const existingInstanceData = this.state.userInstances[instanceId];
         let promptInjectionEnabled;
@@ -104,6 +114,14 @@ class OutfitStore {
             updatedInstanceData.promptInjectionEnabled = promptInjectionEnabled;
         }
         this.state.userInstances[instanceId] = updatedInstanceData;
+        if (instanceCreated) {
+            // Emit instance created event
+            extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
+                instanceId: instanceId,
+                instanceType: 'user',
+                characterId: 'user'
+            });
+        }
         this.notifyListeners();
     }
     getPresets(characterId, instanceId) {
@@ -238,8 +256,15 @@ class OutfitStore {
         return this.state.settings[key];
     }
     setSetting(key, value) {
+        const oldValue = this.state.settings[key];
         this.state.settings[key] = value;
         this.notifyListeners();
+        // Emit settings changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.SETTINGS_CHANGED, {
+            key: key,
+            oldValue: oldValue,
+            newValue: value
+        });
     }
     getCurrentInstanceId() {
         return this.state.currentOutfitInstanceId;
@@ -359,11 +384,23 @@ class OutfitStore {
                 if (Object.keys(this.state.botInstances[characterId]).length === 0) {
                     delete this.state.botInstances[characterId];
                 }
+                // Emit instance deleted event
+                extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_DELETED, {
+                    instanceId: instanceId,
+                    instanceType: instanceType,
+                    characterId: characterId
+                });
             }
         }
         else if (instanceType === 'user') {
             if (this.state.userInstances[instanceId]) {
                 delete this.state.userInstances[instanceId];
+                // Emit instance deleted event
+                extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_DELETED, {
+                    instanceId: instanceId,
+                    instanceType: instanceType,
+                    characterId: 'user'
+                });
             }
         }
         this.notifyListeners();

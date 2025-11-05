@@ -7,6 +7,7 @@ import {outfitStore} from '../common/Store';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
 import {findCharacterById} from '../services/CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 declare const window: any;
 declare const toastr: any;
@@ -660,6 +661,14 @@ export class BotOutfitPanel {
         this.applyPanelColors(); // Apply colors after showing
         this.isVisible = true;
 
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'bot',
+            visible: true,
+            characterId: this.outfitManager.characterId,
+            characterName: this.outfitManager.character
+        });
+
         // Set up dynamic refresh when panel becomes visible
         this.setupDynamicRefresh();
 
@@ -723,6 +732,14 @@ export class BotOutfitPanel {
             this.domElement.style.display = 'none';
         }
         this.isVisible = false;
+
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'bot',
+            visible: false,
+            characterId: this.outfitManager.characterId,
+            characterName: this.outfitManager.character
+        });
 
         // Clean up dynamic refresh when panel is hidden
         this.cleanupDynamicRefresh();

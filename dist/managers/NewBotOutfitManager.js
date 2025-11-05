@@ -11,6 +11,7 @@ import { OutfitManager } from './OutfitManager.js';
 import { outfitStore } from '../common/Store.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { getCharacterDefaultOutfitById, setCharacterDefaultOutfitById } from '../services/CharacterOutfitService.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 export class NewBotOutfitManager extends OutfitManager {
     constructor(slots) {
         super(slots);
@@ -94,6 +95,15 @@ export class NewBotOutfitManager extends OutfitManager {
         }
         // Save to extension storage
         outfitStore.savePreset(this.characterId, actualInstanceId, presetName, presetData, 'bot');
+        // Emit preset saved event
+        extensionEventBus.emit(EXTENSION_EVENTS.PRESET_SAVED, {
+            characterId: this.characterId,
+            instanceId: actualInstanceId,
+            presetName: presetName,
+            characterName: this.character,
+            managerType: 'bot',
+            presetData: presetData
+        });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Saved "${presetName}" outfit for ${this.character} (instance: ${actualInstanceId}).`;
         }
@@ -123,6 +133,14 @@ export class NewBotOutfitManager extends OutfitManager {
                 }
             }
             if (changed) {
+                // Emit preset loaded event
+                extensionEventBus.emit(EXTENSION_EVENTS.PRESET_LOADED, {
+                    characterId: this.characterId,
+                    instanceId: actualInstanceId,
+                    presetName: presetName,
+                    characterName: this.character,
+                    changed: true
+                });
                 return `${this.character} changed into the "${presetName}" outfit (instance: ${actualInstanceId}).`;
             }
             return `${this.character} was already wearing the "${presetName}" outfit (instance: ${actualInstanceId}).`;
@@ -144,6 +162,14 @@ export class NewBotOutfitManager extends OutfitManager {
         }
         // Delete from extension storage only
         outfitStore.deletePreset(this.characterId, actualInstanceId, presetName, 'bot');
+        // Emit preset deleted event
+        extensionEventBus.emit(EXTENSION_EVENTS.PRESET_DELETED, {
+            characterId: this.characterId,
+            instanceId: actualInstanceId,
+            presetName: presetName,
+            characterName: this.character,
+            managerType: 'bot'
+        });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Deleted "${presetName}" outfit for instance ${actualInstanceId}.`;
         }
@@ -189,6 +215,15 @@ export class NewBotOutfitManager extends OutfitManager {
                     }
                 }
                 if (changed) {
+                    // Emit default outfit loaded event
+                    extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_LOADED, {
+                        characterId: this.characterId,
+                        instanceId: actualInstanceId,
+                        characterName: this.character,
+                        managerType: 'bot',
+                        source: 'embedded',
+                        changed: true
+                    });
                     return `${this.character} changed into the default outfit (instance: ${actualInstanceId}).`;
                 }
                 return `${this.character} was already wearing the default outfit (instance: ${actualInstanceId}).`;
@@ -219,6 +254,15 @@ export class NewBotOutfitManager extends OutfitManager {
                 }
             }
             if (changed) {
+                // Emit default outfit loaded event
+                extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_LOADED, {
+                    characterId: this.characterId,
+                    instanceId: actualInstanceId,
+                    characterName: this.character,
+                    managerType: 'bot',
+                    source: 'legacy',
+                    changed: true
+                });
                 return `${this.character} changed into the default outfit (instance: ${actualInstanceId}).`;
             }
             return `${this.character} was already wearing the default outfit (instance: ${actualInstanceId}).`;
@@ -243,6 +287,15 @@ export class NewBotOutfitManager extends OutfitManager {
             presetData[slot] = this.currentValues[slot];
         });
         outfitStore.savePreset(this.characterId, actualInstanceId, presetName, presetData, 'bot');
+        // Emit preset overwritten event
+        extensionEventBus.emit(EXTENSION_EVENTS.PRESET_OVERWRITTEN, {
+            characterId: this.characterId,
+            instanceId: actualInstanceId,
+            presetName: presetName,
+            characterName: this.character,
+            managerType: 'bot',
+            presetData: presetData
+        });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Overwrote "${presetName}" outfit for ${this.character} (instance: ${actualInstanceId}).`;
         }
@@ -320,6 +373,15 @@ export class NewBotOutfitManager extends OutfitManager {
             else {
                 debugLog(`[NewBotOutfitManager] Successfully embedded default outfit in character card for ${this.character}`, null, 'info');
             }
+            // Emit default outfit set event
+            extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_SET, {
+                characterId: this.characterId,
+                instanceId: actualInstanceId,
+                presetName: presetName,
+                characterName: this.character,
+                managerType: 'bot',
+                embedded: success
+            });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Set "${presetName}" as the default outfit for ${this.character} (instance: ${actualInstanceId}).`;
             }
@@ -352,6 +414,13 @@ export class NewBotOutfitManager extends OutfitManager {
                 delete updatedDefaultBotPresets[this.characterId][actualInstanceId];
                 outfitStore.setSetting('defaultBotPresets', updatedDefaultBotPresets);
             }
+            // Emit default outfit cleared event
+            extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_CLEARED, {
+                characterId: this.characterId,
+                instanceId: actualInstanceId,
+                characterName: this.character,
+                managerType: 'bot'
+            });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Default outfit cleared for ${this.character} (instance: ${actualInstanceId}).`;
             }

@@ -12,6 +12,7 @@ import { formatSlotName as utilsFormatSlotName } from '../utils/utilities.js';
 import { areSystemMessagesEnabled } from '../utils/SettingsUtil.js';
 import { outfitStore } from '../common/Store.js';
 import { debugLog } from '../logging/DebugLogger.js';
+import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
 /**
  * UserOutfitPanel - Manages the UI for the user character's outfit tracking
  * This class creates and manages a draggable panel for viewing and modifying
@@ -312,6 +313,13 @@ export class UserOutfitPanel {
         this.domElement.style.display = 'flex';
         this.applyPanelColors(); // Apply colors after showing
         this.isVisible = true;
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'user',
+            visible: true,
+            characterId: 'user',
+            characterName: 'User'
+        });
         // Set up dynamic refresh when panel becomes visible
         this.setupDynamicRefresh();
         if (this.domElement) {
@@ -358,6 +366,13 @@ export class UserOutfitPanel {
             this.domElement.style.display = 'none';
         }
         this.isVisible = false;
+        // Emit panel visibility changed event
+        extensionEventBus.emit(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, {
+            panelType: 'user',
+            visible: false,
+            characterId: 'user',
+            characterName: 'User'
+        });
         // Clean up dynamic refresh when panel is hidden
         this.cleanupDynamicRefresh();
     }
