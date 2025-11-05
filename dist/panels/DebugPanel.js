@@ -291,10 +291,14 @@ export class DebugPanel {
                 const timeB = new Date(b.timestamp).getTime();
                 return this.logsSortDescending ? timeB - timeA : timeA - timeB;
             });
-            logsHtml += sortedLogs.map(log => {
+            // Group logs with the same message and data
+            const groupedLogs = this.groupSimilarLogs(sortedLogs);
+            logsHtml += groupedLogs.map(group => {
+                const log = group.logs[0]; // Use the first log for display
                 const hasData = log.data !== null && log.data !== undefined;
                 const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
                 const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
+                const countDisplay = group.count > 1 ? ` <span class="log-count">(${group.count}x)</span>` : '';
                 if (hasData) {
                     return `
                         <div class="${logItemClasses}" ${logItemAttributes}>
@@ -302,7 +306,7 @@ export class DebugPanel {
                                 <summary>
                                     <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                                     <span class="log-level">[${log.level}]</span>
-                                    <span class="log-message">${log.message}</span>
+                                    <span class="log-message">${log.message}${countDisplay}</span>
                                 </summary>
                                 <div class="log-data">
                                     <pre>${JSON.stringify(log.data, null, 2)}</pre>
@@ -316,7 +320,7 @@ export class DebugPanel {
                         <div class="${logItemClasses}" ${logItemAttributes}>
                             <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                             <span class="log-level">[${log.level}]</span>
-                            <span class="log-message">${log.message}</span>
+                            <span class="log-message">${log.message}${countDisplay}</span>
                         </div>
                     `;
                 }
@@ -360,6 +364,26 @@ export class DebugPanel {
             this.renderContent();
             toastr.success('Logs cleared!', 'Debug Panel');
         });
+    }
+    /**
+     * Groups logs with the same message and data together
+     */
+    groupSimilarLogs(logs) {
+        const groups = new Map();
+        for (const log of logs) {
+            // Create a key based on message and data
+            const dataStr = log.data !== null && log.data !== undefined ? JSON.stringify(log.data) : '';
+            const key = `${log.level}:${log.message}:${dataStr}`;
+            if (!groups.has(key)) {
+                groups.set(key, []);
+            }
+            groups.get(key).push(log);
+        }
+        // Convert to array of groups, keeping only the most recent log for each group
+        return Array.from(groups.values()).map(logsInGroup => ({
+            logs: [logsInGroup[0]], // Keep only the first (most recent) log
+            count: logsInGroup.length
+        }));
     }
     /**
      * Exports current logs to a downloadable .log file
@@ -849,8 +873,8 @@ export class DebugPanel {
             return;
         const state = outfitStore.getState();
         const references = state.references;
-        // Update global references
-        let refsHtml = '<h4>Global References</h4>';
+        // Update global references (without the header that's already there)
+        let refsHtml = '';
         for (const [key, value] of Object.entries(references)) {
             refsHtml += `<div><strong>${key}:</strong> ${value ? 'Available' : 'Not Set'}</div>`;
         }
