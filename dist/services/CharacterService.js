@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { getOrCreateCharacterId, findCharacterById } from './CharacterIdService.js';
+import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService.js';
 import { getCharacterOutfitData } from './CharacterOutfitService.js';
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension

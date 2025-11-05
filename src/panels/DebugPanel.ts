@@ -557,6 +557,26 @@ export class DebugPanel {
         let embeddedHtml = '<div class="debug-embedded-content">';
 
         embeddedHtml += '<h4>Character Card Embedded Outfit Data</h4>';
+
+        // Count total default outfits
+        let totalDefaultOutfits = 0;
+        if (context && context.characters) {
+            for (let i = 0; i < context.characters.length; i++) {
+                const character = context.characters[i];
+                const embeddedData = getCharacterOutfitData(character);
+                if (embeddedData && embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0) {
+                    totalDefaultOutfits++;
+                }
+            }
+        }
+
+        embeddedHtml += `<div class="embedded-summary-stats">
+            <div class="embedded-stat-card">
+                <div class="stat-number">${totalDefaultOutfits}</div>
+                <div class="stat-label">Default Outfits Embedded</div>
+            </div>
+        </div>`;
+
         embeddedHtml += '<div class="embedded-info">';
 
         if (!context || !context.characters) {
@@ -1688,7 +1708,26 @@ export class DebugPanel {
         const embeddedInfo = contentArea.querySelector('.embedded-info');
         if (!embeddedInfo) return;
 
-        // For now, just update the timestamp display. Full re-render could be expensive
+        // Update the counter if it exists
+        const statNumberElement = contentArea.querySelector('.stat-number') as HTMLElement;
+        if (statNumberElement) {
+            const context = (window as any).SillyTavern?.getContext?.() || (window as any).getContext?.();
+            let totalDefaultOutfits = 0;
+
+            if (context && context.characters) {
+                for (let i = 0; i < context.characters.length; i++) {
+                    const character = context.characters[i];
+                    const embeddedData = getCharacterOutfitData(character);
+                    if (embeddedData && embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0) {
+                        totalDefaultOutfits++;
+                    }
+                }
+            }
+
+            statNumberElement.textContent = totalDefaultOutfits.toString();
+        }
+
+        // Update timestamp displays
         const lastModifiedElements = contentArea.querySelectorAll('.embedded-last-modified');
         lastModifiedElements.forEach(element => {
             // Update "Modified: X" text with current time indicator

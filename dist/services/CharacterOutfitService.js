@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { ALL_SLOTS } from '../config/constants.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { getCharacterId, findCharacterById } from './CharacterIdService.js';
+import { findCharacterById, getCharacterId } from './CharacterIdService.js';
 import { outfitStore } from '../common/Store.js';
 /**
  * Gets the SillyTavern context

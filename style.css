@@ -1666,6 +1666,55 @@ input:checked + .slider:before {
     border-color: #e74c3c !important;
 }
 
+/* Debug Panel Menu Button Styles */
+.outfit-debug-panel .menu_button {
+    background: linear-gradient(135deg, rgba(52, 73, 94, 0.8) 0%, rgba(44, 62, 80, 0.8) 100%);
+    border: 1px solid rgba(149, 165, 166, 0.3);
+    border-radius: 6px;
+    color: #ecf0f1;
+    cursor: pointer;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.outfit-debug-panel .menu_button:hover {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.8) 0%, rgba(41, 128, 185, 0.8) 100%);
+    border-color: rgba(52, 152, 219, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.outfit-debug-panel .menu_button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.outfit-debug-panel .menu_button:focus {
+    outline: none;
+    border-color: rgba(52, 152, 219, 0.8);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.outfit-debug-panel .menu_button.danger-button {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.8) 0%, rgba(192, 57, 43, 0.8) 100%);
+    border-color: rgba(231, 76, 60, 0.4);
+}
+
+.outfit-debug-panel .menu_button.danger-button:hover {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.9) 0%, rgba(192, 57, 43, 0.9) 100%);
+    border-color: rgba(231, 76, 60, 0.6);
+}
+
 /* Embedded Data Tab Styles */
 .debug-embedded-content {
     padding: 8px;
@@ -1677,6 +1726,37 @@ input:checked + .slider:before {
     color: #ecf0f1;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     padding-bottom: 4px;
+}
+
+.embedded-summary-stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.embedded-stat-card {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.2) 0%, rgba(41, 128, 185, 0.2) 100%);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    min-width: 120px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+    font-size: 0.85em;
+    color: #bdc3c7;
+    font-weight: 500;
 }
 
 .debug-embedded-content h5 {
@@ -1742,20 +1822,46 @@ input:checked + .slider:before {
     gap: 4px;
 }
 
+.embedded-character-actions {
+    display: flex;
+    gap: 6px;
+}
+
 .embedded-character-actions button {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
+    background: linear-gradient(135deg, rgba(52, 73, 94, 0.8) 0%, rgba(44, 62, 80, 0.8) 100%);
+    border: 1px solid rgba(149, 165, 166, 0.3);
+    border-radius: 4px;
     color: #ecf0f1;
     cursor: pointer;
-    padding: 2px 6px;
+    padding: 4px 8px;
     font-size: 0.8em;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .embedded-character-actions button:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.8) 0%, rgba(41, 128, 185, 0.8) 100%);
+    border-color: rgba(52, 152, 219, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.embedded-character-actions button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.embedded-character-actions button:focus {
+    outline: none;
+    border-color: rgba(52, 152, 219, 0.8);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
 }
 
 .embedded-character-summary {
@@ -1864,19 +1970,34 @@ input:checked + .slider:before {
 .embedded-migration-tools .menu_button {
     margin-right: 8px;
     margin-bottom: 8px;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.8) 0%, rgba(39, 174, 96, 0.8) 100%);
+    border-color: rgba(46, 204, 113, 0.4);
+}
+
+.embedded-migration-tools .menu_button:hover {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.8) 0%, rgba(41, 128, 185, 0.8) 100%);
+    border-color: rgba(52, 152, 219, 0.5);
 }
 
 #migration-results {
-    margin-top: 8px;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+    margin-top: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.6) 0%, rgba(52, 73, 94, 0.6) 100%);
+    border: 1px solid rgba(149, 165, 166, 0.3);
+    border-radius: 8px;
     font-size: 0.9em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 #migration-results p {
     margin: 0;
     color: #ecf0f1;
+    font-weight: 500;
+}
+
+#migration-results p:first-child {
+    font-size: 1.1em;
+    margin-bottom: 4px;
 }
 
 /* Responsive design for debug panel */
