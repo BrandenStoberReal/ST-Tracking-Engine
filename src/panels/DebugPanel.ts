@@ -81,13 +81,8 @@ export class DebugPanel {
             this.recordedEvents.shift();
         }
 
-        // If the events tab is active, re-render it and update last viewed count
-        if (this.isVisible && this.currentTab === 'events') {
-            this.renderContent();
-            this.lastViewedEventCount = this.recordedEvents.length;
-            this.updateEventNotification();
-        } else if (this.isVisible) {
-            // Show notification for new events when not viewing events tab
+        // Update notification badge if panel is visible
+        if (this.isVisible) {
             this.updateEventNotification();
         }
     }
@@ -126,7 +121,7 @@ export class DebugPanel {
                   <button class="outfit-debug-tab ${this.currentTab === 'pointers' ? 'active' : ''}" data-tab="pointers">Pointers <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'performance' ? 'active' : ''}" data-tab="performance">Performance <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'logs' ? 'active' : ''}" data-tab="logs">Logs <span class="realtime-indicator">🔄</span></button>
-                   <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events <span class="realtime-indicator">🔄</span><span class="event-notification" style="display: none;"></span></button>
+                   <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events<span class="event-notification" style="display: none;"></span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'embedded' ? 'active' : ''}" data-tab="embedded">Embedded <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'state' ? 'active' : ''}" data-tab="state">State <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'misc' ? 'active' : ''}" data-tab="misc">Misc <span class="realtime-indicator">🔄</span></button>
