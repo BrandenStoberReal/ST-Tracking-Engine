@@ -92,7 +92,7 @@ export function deepClone(obj) {
         if (obj === null || typeof obj !== 'object') {
             return obj;
         }
-        if (obj instanceof Date) {
+        if (Object.prototype.toString.call(obj) === '[object Date]') {
             return new Date(obj.getTime());
         }
         if (visited.has(obj)) {
@@ -106,7 +106,7 @@ export function deepClone(obj) {
             }
             return clonedArr;
         }
-        if (typeof obj === 'object') {
+        if (typeof obj === 'object' && obj.constructor === Object) {
             const clonedObj = {};
             visited.set(obj, clonedObj);
             for (const key in obj) {
@@ -116,7 +116,7 @@ export function deepClone(obj) {
             }
             return clonedObj;
         }
-        // Default return to satisfy TypeScript
+        // For other objects (functions, custom classes, etc.), return as-is to avoid issues
         return obj;
     }
     return clone(obj);
