@@ -250,58 +250,96 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         if (typeof window.getOutfitExtensionStatus === 'function') {
             const status = window.getOutfitExtensionStatus();
 
+            // Cache DOM elements to avoid repeated jQuery lookups
+            const $statusCore = $('#status-core');
+            const $statusAutoOutfit = $('#status-auto-outfit');
+            const $statusBotPanel = $('#status-bot-panel');
+            const $statusUserPanel = $('#status-user-panel');
+            const $statusEvents = $('#status-events');
+            const $statusManagers = $('#status-managers');
+
             // Update core extension status
             if (status.core) {
-                $('#status-core').removeClass('status-loading').addClass('status-active').text('Active');
+                if (!$statusCore.hasClass('status-active')) {
+                    $statusCore.removeClass('status-loading').addClass('status-active').text('Active');
+                }
             } else {
-                $('#status-core').removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                if (!$statusCore.hasClass('status-inactive')) {
+                    $statusCore.removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                }
             }
 
             // Update auto outfit system status
             if (status.autoOutfit) {
                 if (status.autoOutfit.enabled) {
-                    $('#status-auto-outfit').removeClass('status-loading').addClass('status-active').text('Active');
+                    if (!$statusAutoOutfit.hasClass('status-active')) {
+                        $statusAutoOutfit.removeClass('status-loading').addClass('status-active').text('Active');
+                    }
                 } else {
-                    $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                    if (!$statusAutoOutfit.hasClass('status-inactive')) {
+                        $statusAutoOutfit.removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                    }
                 }
             } else {
-                $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                if (!$statusAutoOutfit.hasClass('status-inactive') || $statusAutoOutfit.text() !== 'Not Available') {
+                    $statusAutoOutfit.removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                }
             }
 
             // Update bot panel status
             if (status.botPanel) {
                 if (status.botPanel.isVisible) {
-                    $('#status-bot-panel').removeClass('status-loading').addClass('status-active').text('Visible');
+                    if (!$statusBotPanel.hasClass('status-active')) {
+                        $statusBotPanel.removeClass('status-loading').addClass('status-active').text('Visible');
+                    }
                 } else {
-                    $('#status-bot-panel').removeClass('status-loading').addClass('status-inactive').text('Hidden');
+                    if (!$statusBotPanel.hasClass('status-inactive')) {
+                        $statusBotPanel.removeClass('status-loading').addClass('status-inactive').text('Hidden');
+                    }
                 }
             } else {
-                $('#status-bot-panel').removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
+                if (!$statusBotPanel.hasClass('status-inactive') || $statusBotPanel.text() !== 'Not Loaded') {
+                    $statusBotPanel.removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
+                }
             }
 
             // Update user panel status
             if (status.userPanel) {
                 if (status.userPanel.isVisible) {
-                    $('#status-user-panel').removeClass('status-loading').addClass('status-active').text('Visible');
+                    if (!$statusUserPanel.hasClass('status-active')) {
+                        $statusUserPanel.removeClass('status-loading').addClass('status-active').text('Visible');
+                    }
                 } else {
-                    $('#status-user-panel').removeClass('status-loading').addClass('status-inactive').text('Hidden');
+                    if (!$statusUserPanel.hasClass('status-inactive')) {
+                        $statusUserPanel.removeClass('status-loading').addClass('status-inactive').text('Hidden');
+                    }
                 }
             } else {
-                $('#status-user-panel').removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
+                if (!$statusUserPanel.hasClass('status-inactive') || $statusUserPanel.text() !== 'Not Loaded') {
+                    $statusUserPanel.removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
+                }
             }
 
             // Update event system status
             if (status.events) {
-                $('#status-events').removeClass('status-loading').addClass('status-active').text('Active');
+                if (!$statusEvents.hasClass('status-active')) {
+                    $statusEvents.removeClass('status-loading').addClass('status-active').text('Active');
+                }
             } else {
-                $('#status-events').removeClass('status-loading').addClass('status-warning').text('Limited');
+                if (!$statusEvents.hasClass('status-warning')) {
+                    $statusEvents.removeClass('status-loading').addClass('status-warning').text('Limited');
+                }
             }
 
             // Update outfit managers status
             if (status.managers) {
-                $('#status-managers').removeClass('status-loading').addClass('status-active').text('Active');
+                if (!$statusManagers.hasClass('status-active')) {
+                    $statusManagers.removeClass('status-loading').addClass('status-active').text('Active');
+                }
             } else {
-                $('#status-managers').removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                if (!$statusManagers.hasClass('status-inactive')) {
+                    $statusManagers.removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                }
             }
         } else {
             // Fallback to direct checking
@@ -388,14 +426,14 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         setTimeout(updateStatusIndicators, 100); // Small delay to ensure UI is fully loaded
     });
 
-    // Function to update status indicators periodically
+    // Function to update status indicators periodically (reduced frequency to prevent stuttering)
     function periodicallyUpdateStatusIndicators() {
         updateStatusIndicators();
-        setTimeout(periodicallyUpdateStatusIndicators, 10000); // Update every 10 seconds
+        setTimeout(periodicallyUpdateStatusIndicators, 30000); // Update every 30 seconds instead of 10
     }
 
-    // Start periodic updates after a short delay
-    setTimeout(periodicallyUpdateStatusIndicators, 2000);
+    // Start periodic updates after a longer delay
+    setTimeout(periodicallyUpdateStatusIndicators, 5000);
 
     // Helper function to convert hex color to rgba
     function hexToRgba(hex: string, opacity: number): string {

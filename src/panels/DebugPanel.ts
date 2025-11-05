@@ -48,6 +48,7 @@ export class DebugPanel {
     private lastViewedEventCount: number = 0; // Track events seen when tab was last viewed
     private lastMacroCacheSize: number = 0; // Track macro cache size to avoid unnecessary updates
     private lastStorageSize: number = 0; // Cache storage size calculation
+    private lastStateStringifyTime: number = 0; // Track when we last did expensive stringify operations
 
     constructor() {
         // Subscribe to all extension events to record them
@@ -67,19 +68,19 @@ export class DebugPanel {
             return;
         }
 
+        // Skip recording if limit reached to avoid unnecessary serialization work
+        if (this.recordedEvents.length >= 200) {
+            return;
+        }
+
         // Sanitize and limit data size to prevent memory issues
         const sanitizedData = this.sanitizeEventData(data);
-        
+
         this.recordedEvents.push({
             timestamp: new Date().toISOString(),
             event,
             data: sanitizedData
         });
-
-        // Keep the list of events from growing too large
-        if (this.recordedEvents.length > 200) {
-            this.recordedEvents.shift();
-        }
 
         // Update notification badge if panel is visible
         if (this.isVisible) {
@@ -926,43 +927,85 @@ export class DebugPanel {
     }
 
     /**
-     * Updates macros tab with current macro values
+     * Renders the 'Performance' tab with performance metrics
      */
-    private updateMacrosTab(): void {
-        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
-        if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros') return;
+    renderPerformanceTab(container: HTMLElement): void {
+        const state = outfitStore.getState();
 
-        // Check if content has been rendered
-        const cacheInfo = contentArea.querySelector('.macro-cache-info');
-        const cacheTable = contentArea.querySelector('.macro-cache-table');
-        if (!cacheInfo || !cacheTable) return;
+        // Calculate performance metrics
+        const botInstanceCount = Object.keys(state.botInstances).reduce((total, charId) => {
+            return total + Object.keys(state.botInstances[charId]).length;
+        }, 0);
 
-        const currentCacheSize = customMacroSystem.macroValueCache.size;
+        const userInstanceCount = Object.keys(state.userInstances).length;
 
-        // Only update if cache size changed
-        if (currentCacheSize === this.lastMacroCacheSize) {
-            // Just update the timestamp
-            const updateTime = new Date().toLocaleTimeString();
-            const sizeText = cacheInfo.innerHTML.match(/Cached entries: \d+/)?.[0] || `Cached entries: ${currentCacheSize}`;
-            cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
-            return;
+        // Estimate storage size
+        const stateStr = JSON.stringify(state);
+        const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
+
+        let performanceHtml = '<div class="debug-performance-content">';
+
+        performanceHtml += '<h4>Performance Metrics</h4>';
+        performanceHtml += '<div class="performance-info">';
+
+        // General metrics
+        performanceHtml += `<div><strong>Total Bot Instances:</strong> ${botInstanceCount}</div>`;
+        performanceHtml += `<div><strong>Total User Instances:</strong> ${userInstanceCount}</div>`;
+        performanceHtml += `<div><strong>Total Outfit Slots:</strong> ${(botInstanceCount + userInstanceCount) * 19}</div>`;
+        performanceHtml += `<div><strong>Estimated Storage Size:</strong> ${estimatedStorageSize}</div>`;
+
+        // Macro performance
+        performanceHtml += '<h5>Macro System Performance:</h5>';
+        performanceHtml += `<div><strong>Current Cache Size:</strong> ${customMacroSystem.macroValueCache.size} items</div>`;
+
+        // Performance indicators
+        performanceHtml += '<h5>Performance Indicators:</h5>';
+        performanceHtml += '<div class="performance-indicators">';
+
+        // Check for potentially large data
+        if (botInstanceCount > 50) {
+            performanceHtml += '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
+        } else if (botInstanceCount > 20) {
+            performanceHtml += '<div class="info">ℹ️ Moderate number of bot instances</div>';
+        } else {
+            performanceHtml += '<div class="good">✅ Low number of bot instances</div>';
         }
 
-        this.lastMacroCacheSize = currentCacheSize;
+        if (userInstanceCount > 10) {
+            performanceHtml += '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
+        } else {
+            performanceHtml += '<div class="good">✅ Reasonable number of user instances</div>';
+        }
 
-        // Update macro cache info
-        const updateTime = new Date().toLocaleTimeString();
-        cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
+        const storageKB = new Blob([stateStr]).size / 1024;
 
-        // Update macro cache table
-        const tbody = (cacheTable as HTMLTableElement).querySelector('tbody');
-        if (tbody) {
-            let tbodyHtml = '';
-            for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
-                const timestamp = new Date(entry.timestamp).toISOString();
-                tbodyHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
-            }
-            tbody.innerHTML = tbodyHtml;
+        if (storageKB > 1000) { // More than 1MB
+            performanceHtml += '<div class="warning">⚠️ Large storage size detected - consider cleanup</div>';
+        } else if (storageKB > 500) { // More than 500KB
+            performanceHtml += '<div class="info">ℹ️ Moderate storage size</div>';
+        } else {
+            performanceHtml += '<div class="good">✅ Reasonable storage size</div>';
+        }
+
+        performanceHtml += '</div>';
+
+        // Add performance testing section
+        performanceHtml += '<h5>Performance Testing:</h5>';
+        performanceHtml += '<div class="performance-testing">';
+        performanceHtml += '<button id="debug-run-performance-test" class="menu_button">Run Performance Test</button>';
+        performanceHtml += '<div id="performance-test-results"></div>';
+        performanceHtml += '</div>';
+
+        performanceHtml += '</div></div>';
+
+        container.innerHTML = performanceHtml;
+
+        // Add event listener for performance testing
+        const performanceTestBtn = container.querySelector('#debug-run-performance-test') as HTMLButtonElement;
+        if (performanceTestBtn) {
+            performanceTestBtn.addEventListener('click', () => {
+                this.runPerformanceTest();
+            });
         }
     }
 
@@ -1219,85 +1262,44 @@ export class DebugPanel {
     }
 
     /**
-     * Renders the 'Performance' tab with performance metrics
+     * Updates macros tab with current macro values
      */
-    renderPerformanceTab(container: HTMLElement): void {
-        const state = outfitStore.getState();
+    private updateMacrosTab(): void {
+        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros') return;
 
-        // Calculate performance metrics
-        const botInstanceCount = Object.keys(state.botInstances).reduce((total, charId) => {
-            return total + Object.keys(state.botInstances[charId]).length;
-        }, 0);
+        // Check if content has been rendered
+        const cacheInfo = contentArea.querySelector('.macro-cache-info');
+        const cacheTable = contentArea.querySelector('.macro-cache-table');
+        if (!cacheInfo || !cacheTable) return;
 
-        const userInstanceCount = Object.keys(state.userInstances).length;
+        const currentCacheSize = customMacroSystem.macroValueCache.size;
 
-        // Estimate storage size
-        const stateStr = JSON.stringify(state);
-        const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
-
-        let performanceHtml = '<div class="debug-performance-content">';
-
-        performanceHtml += '<h4>Performance Metrics</h4>';
-        performanceHtml += '<div class="performance-info">';
-
-        // General metrics
-        performanceHtml += `<div><strong>Total Bot Instances:</strong> ${botInstanceCount}</div>`;
-        performanceHtml += `<div><strong>Total User Instances:</strong> ${userInstanceCount}</div>`;
-        performanceHtml += `<div><strong>Total Outfit Slots:</strong> ${(botInstanceCount + userInstanceCount) * 19}</div>`;
-        performanceHtml += `<div><strong>Estimated Storage Size:</strong> ${estimatedStorageSize}</div>`;
-
-        // Macro performance
-        performanceHtml += '<h5>Macro System Performance:</h5>';
-        performanceHtml += `<div><strong>Current Cache Size:</strong> ${customMacroSystem.macroValueCache.size} items</div>`;
-
-        // Performance indicators
-        performanceHtml += '<h5>Performance Indicators:</h5>';
-        performanceHtml += '<div class="performance-indicators">';
-
-        // Check for potentially large data
-        if (botInstanceCount > 50) {
-            performanceHtml += '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
-        } else if (botInstanceCount > 20) {
-            performanceHtml += '<div class="info">ℹ️ Moderate number of bot instances</div>';
-        } else {
-            performanceHtml += '<div class="good">✅ Low number of bot instances</div>';
+        // Only update if cache size changed
+        if (currentCacheSize === this.lastMacroCacheSize) {
+            // Just update the timestamp
+            const updateTime = new Date().toLocaleTimeString();
+            const sizeText = cacheInfo.innerHTML.match(/Cached entries: \d+/)?.[0] || `Cached entries: ${currentCacheSize}`;
+            cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
+            return;
         }
 
-        if (userInstanceCount > 10) {
-            performanceHtml += '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
-        } else {
-            performanceHtml += '<div class="good">✅ Reasonable number of user instances</div>';
+        this.lastMacroCacheSize = currentCacheSize;
+
+        // Update macro cache info
+        const updateTime = new Date().toLocaleTimeString();
+        cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
+
+        // Update macro cache table (only if cache size changed)
+        const tbody = (cacheTable as HTMLTableElement).querySelector('tbody');
+        if (tbody && currentCacheSize !== this.lastMacroCacheSize) {
+            let tbodyHtml = '';
+            for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
+                const timestamp = new Date(entry.timestamp).toISOString();
+                tbodyHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
+            }
+            tbody.innerHTML = tbodyHtml;
         }
-
-        const storageKB = new Blob([stateStr]).size / 1024;
-
-        if (storageKB > 1000) { // More than 1MB
-            performanceHtml += '<div class="warning">⚠️ Large storage size detected - consider cleanup</div>';
-        } else if (storageKB > 500) { // More than 500KB
-            performanceHtml += '<div class="info">ℹ️ Moderate storage size</div>';
-        } else {
-            performanceHtml += '<div class="good">✅ Reasonable storage size</div>';
-        }
-
-        performanceHtml += '</div>';
-
-        // Add performance testing section
-        performanceHtml += '<h5>Performance Testing:</h5>';
-        performanceHtml += '<div class="performance-testing">';
-        performanceHtml += '<button id="debug-run-performance-test" class="menu_button">Run Performance Test</button>';
-        performanceHtml += '<div id="performance-test-results"></div>';
-        performanceHtml += '</div>';
-
-        performanceHtml += '</div></div>';
-
-        container.innerHTML = performanceHtml;
-
-        // Add event listener for performance testing
-        setTimeout(() => {
-            document.getElementById('debug-run-performance-test')?.addEventListener('click', () => {
-                this.runPerformanceTest();
-            });
-        }, 100);
     }
 
     /**
@@ -1365,11 +1367,13 @@ export class DebugPanel {
         }, 0);
         const userInstanceCount = Object.keys(state.userInstances).length;
 
-        // Only recalculate storage size every 10 updates to reduce performance impact
+        // Only recalculate storage size every 30 seconds to reduce performance impact
         let estimatedStorageSize: string;
-        if (Math.random() < 0.1) { // 10% chance to recalculate
+        const now = Date.now();
+        if (now - this.lastStateStringifyTime > 30000) { // 30 seconds
             const stateStr = JSON.stringify(state);
             this.lastStorageSize = new Blob([stateStr]).size / 1024;
+            this.lastStateStringifyTime = now;
         }
         estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
 
@@ -1411,6 +1415,44 @@ export class DebugPanel {
 
         infoHtml += '</div>';
         perfInfo.innerHTML = infoHtml;
+
+        // Ensure performance testing button is present and has event listener
+        this.ensurePerformanceTestButton();
+    }
+
+    /**
+     * Ensures the performance test button is present and has event listener
+     */
+    private ensurePerformanceTestButton(): void {
+        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'performance') return;
+
+        // Check if performance testing section exists
+        let testingSection = contentArea.querySelector('.performance-testing');
+        if (!testingSection) {
+            // Add the performance testing section after the performance-info div
+            const perfInfo = contentArea.querySelector('.performance-info');
+            if (perfInfo && perfInfo.parentNode) {
+                const testingHtml = `
+                    <h5>Performance Testing:</h5>
+                    <div class="performance-testing">
+                        <button id="debug-run-performance-test" class="menu_button">Run Performance Test</button>
+                        <div id="performance-test-results"></div>
+                    </div>
+                `;
+                perfInfo.insertAdjacentHTML('afterend', testingHtml);
+                testingSection = contentArea.querySelector('.performance-testing');
+            }
+        }
+
+        // Ensure button has event listener
+        const performanceTestBtn = contentArea.querySelector('#debug-run-performance-test') as HTMLButtonElement;
+        if (performanceTestBtn && !performanceTestBtn.hasAttribute('data-has-listener')) {
+            performanceTestBtn.addEventListener('click', () => {
+                this.runPerformanceTest();
+            });
+            performanceTestBtn.setAttribute('data-has-listener', 'true');
+        }
     }
 
     /**
@@ -1830,14 +1872,14 @@ export class DebugPanel {
         // Clear existing intervals
         this.stopRealTimeUpdates();
 
-        // Update logs tab every 1000ms (reduced frequency to prevent stuttering)
+        // Update logs tab every 2000ms (further reduced to prevent stuttering)
         this.logUpdateInterval = window.setInterval(() => {
             if (this.isVisible && this.currentTab === 'logs') {
                 this.updateLogsTab();
             }
-        }, 1000);
+        }, 2000);
 
-        // Update other tabs every 5 seconds (reduced frequency to prevent stuttering)
+        // Update other tabs every 10 seconds (further reduced to prevent stuttering)
         this.realTimeUpdateInterval = window.setInterval(() => {
             if (!this.isVisible) return;
 
@@ -1862,7 +1904,7 @@ export class DebugPanel {
                     break;
                 // Removed 'events' from real-time updates - it only updates when events are recorded
             }
-        }, 5000);
+        }, 10000);
     }
 
     /**

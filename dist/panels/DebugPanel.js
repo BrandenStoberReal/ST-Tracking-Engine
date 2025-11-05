@@ -30,6 +30,7 @@ export class DebugPanel {
         this.lastViewedEventCount = 0; // Track events seen when tab was last viewed
         this.lastMacroCacheSize = 0; // Track macro cache size to avoid unnecessary updates
         this.lastStorageSize = 0; // Cache storage size calculation
+        this.lastStateStringifyTime = 0; // Track when we last did expensive stringify operations
         // Subscribe to all extension events to record them
         Object.values(EXTENSION_EVENTS).forEach(event => {
             extensionEventBus.on(event, (data) => {
@@ -45,6 +46,10 @@ export class DebugPanel {
         if (this.isEventRecordingPaused) {
             return;
         }
+        // Skip recording if limit reached to avoid unnecessary serialization work
+        if (this.recordedEvents.length >= 200) {
+            return;
+        }
         // Sanitize and limit data size to prevent memory issues
         const sanitizedData = this.sanitizeEventData(data);
         this.recordedEvents.push({
@@ -52,10 +57,6 @@ export class DebugPanel {
             event,
             data: sanitizedData
         });
-        // Keep the list of events from growing too large
-        if (this.recordedEvents.length > 200) {
-            this.recordedEvents.shift();
-        }
         // Update notification badge if panel is visible
         if (this.isVisible) {
             this.updateEventNotification();
@@ -814,9 +815,9 @@ export class DebugPanel {
         // Update macro cache info
         const updateTime = new Date().toLocaleTimeString();
         cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
-        // Update macro cache table
+        // Update macro cache table (only if cache size changed)
         const tbody = cacheTable.querySelector('tbody');
-        if (tbody) {
+        if (tbody && currentCacheSize !== this.lastMacroCacheSize) {
             let tbodyHtml = '';
             for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
                 const timestamp = new Date(entry.timestamp).toISOString();
@@ -1107,12 +1108,12 @@ export class DebugPanel {
         performanceHtml += '</div></div>';
         container.innerHTML = performanceHtml;
         // Add event listener for performance testing
-        setTimeout(() => {
-            var _a;
-            (_a = document.getElementById('debug-run-performance-test')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+        const performanceTestBtn = container.querySelector('#debug-run-performance-test');
+        if (performanceTestBtn) {
+            performanceTestBtn.addEventListener('click', () => {
                 this.runPerformanceTest();
             });
-        }, 100);
+        }
     }
     /**
      * Runs performance tests and displays results
@@ -1169,11 +1170,13 @@ export class DebugPanel {
             return total + Object.keys(state.botInstances[charId]).length;
         }, 0);
         const userInstanceCount = Object.keys(state.userInstances).length;
-        // Only recalculate storage size every 10 updates to reduce performance impact
+        // Only recalculate storage size every 30 seconds to reduce performance impact
         let estimatedStorageSize;
-        if (Math.random() < 0.1) { // 10% chance to recalculate
+        const now = Date.now();
+        if (now - this.lastStateStringifyTime > 30000) { // 30 seconds
             const stateStr = JSON.stringify(state);
             this.lastStorageSize = new Blob([stateStr]).size / 1024;
+            this.lastStateStringifyTime = now;
         }
         estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
         const updateTime = new Date().toLocaleTimeString();
@@ -1213,6 +1216,42 @@ export class DebugPanel {
         }
         infoHtml += '</div>';
         perfInfo.innerHTML = infoHtml;
+        // Ensure performance testing button is present and has event listener
+        this.ensurePerformanceTestButton();
+    }
+    /**
+     * Ensures the performance test button is present and has event listener
+     */
+    ensurePerformanceTestButton() {
+        var _a;
+        const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'performance')
+            return;
+        // Check if performance testing section exists
+        let testingSection = contentArea.querySelector('.performance-testing');
+        if (!testingSection) {
+            // Add the performance testing section after the performance-info div
+            const perfInfo = contentArea.querySelector('.performance-info');
+            if (perfInfo && perfInfo.parentNode) {
+                const testingHtml = `
+                    <h5>Performance Testing:</h5>
+                    <div class="performance-testing">
+                        <button id="debug-run-performance-test" class="menu_button">Run Performance Test</button>
+                        <div id="performance-test-results"></div>
+                    </div>
+                `;
+                perfInfo.insertAdjacentHTML('afterend', testingHtml);
+                testingSection = contentArea.querySelector('.performance-testing');
+            }
+        }
+        // Ensure button has event listener
+        const performanceTestBtn = contentArea.querySelector('#debug-run-performance-test');
+        if (performanceTestBtn && !performanceTestBtn.hasAttribute('data-has-listener')) {
+            performanceTestBtn.addEventListener('click', () => {
+                this.runPerformanceTest();
+            });
+            performanceTestBtn.setAttribute('data-has-listener', 'true');
+        }
     }
     /**
      * Updates state tab with current store state
@@ -1588,13 +1627,13 @@ export class DebugPanel {
     startRealTimeUpdates() {
         // Clear existing intervals
         this.stopRealTimeUpdates();
-        // Update logs tab every 1000ms (reduced frequency to prevent stuttering)
+        // Update logs tab every 2000ms (further reduced to prevent stuttering)
         this.logUpdateInterval = window.setInterval(() => {
             if (this.isVisible && this.currentTab === 'logs') {
                 this.updateLogsTab();
             }
-        }, 1000);
-        // Update other tabs every 5 seconds (reduced frequency to prevent stuttering)
+        }, 2000);
+        // Update other tabs every 10 seconds (further reduced to prevent stuttering)
         this.realTimeUpdateInterval = window.setInterval(() => {
             if (!this.isVisible)
                 return;
@@ -1619,7 +1658,7 @@ export class DebugPanel {
                     break;
                 // Removed 'events' from real-time updates - it only updates when events are recorded
             }
-        }, 5000);
+        }, 10000);
     }
     /**
      * Updates the embedded data tab with current information
