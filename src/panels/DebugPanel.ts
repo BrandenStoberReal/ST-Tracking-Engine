@@ -3,7 +3,7 @@ import {outfitStore} from '../common/Store';
 import {customMacroSystem} from '../services/CustomMacroService';
 import {debugLogger} from '../logging/DebugLogger';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+
 import {getCharacterOutfitData} from '../services/CharacterOutfitService';
 
 interface OutfitData {
@@ -27,12 +27,6 @@ interface UserOutfit {
 declare const toastr: any;
 declare const $: any;
 
-interface RecordedEvent {
-    timestamp: string;
-    event: string;
-    data: any;
-}
-
 export class DebugPanel {
     private isVisible: boolean = false;
     private domElement: HTMLElement | null = null;
@@ -40,60 +34,17 @@ export class DebugPanel {
     private eventListeners: any[] = [];
     private storeSubscription: (() => void) | null = null;
     private previousInstanceId: string | null = null;
-    private recordedEvents: RecordedEvent[] = [];
-    private isEventRecordingPaused: boolean = false;
     private realTimeUpdateInterval: number | null = null;
     private logUpdateInterval: number | null = null;
     private logsSortDescending: boolean = true; // true = newest first (descending)
-    private lastViewedEventCount: number = 0; // Track events seen when tab was last viewed
     private lastMacroCacheSize: number = 0; // Track macro cache size to avoid unnecessary updates
     private lastStorageSize: number = 0; // Cache storage size calculation
     private lastStateStringifyTime: number = 0; // Track when we last did expensive stringify operations
 
     constructor() {
-        // Subscribe to all extension events to record them
-        Object.values(EXTENSION_EVENTS).forEach(event => {
-            extensionEventBus.on(event, (data) => {
-                this.recordEvent(event, data);
-            });
-        });
     }
 
-    /**
-     * Records an event for display in the debug panel
-     */
-    recordEvent(event: string, data: any): void {
-        // Skip recording if paused
-        if (this.isEventRecordingPaused) {
-            return;
-        }
 
-        // Skip recording if limit reached to avoid unnecessary serialization work
-        if (this.recordedEvents.length >= 200) {
-            return;
-        }
-
-        // Sanitize and limit data size to prevent memory issues
-        const sanitizedData = this.sanitizeEventData(data);
-
-        this.recordedEvents.push({
-            timestamp: new Date().toISOString(),
-            event,
-            data: sanitizedData
-        });
-
-        // Update notification badge if panel is visible
-        if (this.isVisible) {
-            this.updateEventNotification();
-        }
-    }
-
-    /**
-     * Pauses or resumes event recording
-     */
-    setEventRecordingPaused(paused: boolean): void {
-        this.isEventRecordingPaused = paused;
-    }
 
     /**
      * Creates the debug panel DOM element and sets up its basic functionality
@@ -122,7 +73,6 @@ export class DebugPanel {
                   <button class="outfit-debug-tab ${this.currentTab === 'pointers' ? 'active' : ''}" data-tab="pointers">Pointers <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'performance' ? 'active' : ''}" data-tab="performance">Performance <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'logs' ? 'active' : ''}" data-tab="logs">Logs <span class="realtime-indicator">🔄</span></button>
-                   <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events<span class="event-notification" style="display: none;"></span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'embedded' ? 'active' : ''}" data-tab="embedded">Embedded <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'state' ? 'active' : ''}" data-tab="state">State <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'misc' ? 'active' : ''}" data-tab="misc">Misc <span class="realtime-indicator">🔄</span></button>
@@ -144,12 +94,6 @@ export class DebugPanel {
                 this.currentTab = tabName;
                 this.renderContent();
 
-                // Clear event notification when switching to events tab
-                if (tabName === 'events') {
-                    this.lastViewedEventCount = this.recordedEvents.length;
-                    this.updateEventNotification();
-                }
-
                 tabs.forEach(t => t.classList.remove('active'));
                 (event.target as HTMLElement).classList.add('active');
             });
@@ -158,84 +102,7 @@ export class DebugPanel {
         return panel;
     }
 
-    /**
-     * Renders the 'Events' tab with a log of dispatched events
-     */
-    renderEventsTab(container: HTMLElement): void {
-        let eventsHtml = `
-            <div class="debug-events-header">
-                <div class="events-controls">
-                    <input type="text" id="event-search" placeholder="Search events..." class="event-search-input">
-                    <select id="event-type-filter" class="event-filter-select">
-                        <option value="all">All Events</option>
-                        <option value="outfit-tracker-context-updated">Context Updated</option>
-                        <option value="outfit-tracker-outfit-changed">Outfit Changed</option>
-                        <option value="outfit-tracker-preset-loaded">Preset Loaded</option>
-                        <option value="outfit-tracker-preset-saved">Preset Saved</option>
-                        <option value="outfit-tracker-preset-deleted">Preset Deleted</option>
-                        <option value="outfit-tracker-preset-overwritten">Preset Overwritten</option>
-                        <option value="outfit-tracker-default-outfit-set">Default Outfit Set</option>
-                        <option value="outfit-tracker-default-outfit-cleared">Default Outfit Cleared</option>
-                        <option value="outfit-tracker-default-outfit-loaded">Default Outfit Loaded</option>
-                        <option value="outfit-tracker-panel-visibility-changed">Panel Visibility</option>
-                        <option value="outfit-tracker-chat-cleared">Chat Cleared</option>
-                        <option value="outfit-tracker-data-loaded">Data Loaded</option>
-                        <option value="outfit-tracker-settings-changed">Settings Changed</option>
-                        <option value="outfit-tracker-migration-completed">Migration Completed</option>
-                        <option value="outfit-tracker-instance-created">Instance Created</option>
-                        <option value="outfit-tracker-instance-deleted">Instance Deleted</option>
-                        <option value="outfit-tracker-character-outfit-synced">Character Outfit Synced</option>
-                    </select>
-                    <button id="pause-events-btn" class="menu_button">Pause</button>
-                    <button id="export-events-btn" class="menu_button">Export</button>
-                    <button id="clear-events-btn" class="menu_button">Clear Events</button>
-                </div>
-                <div class="events-stats">
-                    <span class="events-count">Total: ${this.recordedEvents.length}</span>
-                    <span class="events-filtered-count" style="display: none;">Filtered: 0</span>
-                </div>
-            </div>
-            <div class="debug-events-list">
-        `;
 
-        if (this.recordedEvents.length === 0) {
-            eventsHtml += '<p class="no-events">No events recorded yet.</p>';
-        } else {
-            eventsHtml += '<div class="events-container">';
-            eventsHtml += this.recordedEvents.slice().reverse().map((event, index) => {
-                const eventType = event.event;
-                const eventClass = this.getEventClass(eventType);
-                const eventIcon = this.getEventIcon(eventType);
-                const formattedTime = new Date(event.timestamp).toLocaleTimeString();
-                const hasData = event.data !== null && event.data !== undefined;
-
-                return `
-                    <div class="event-item ${eventClass}" data-event-type="${eventType}" data-index="${index}">
-                        <div class="event-header">
-                            <span class="event-icon">${eventIcon}</span>
-                            <span class="event-time">${formattedTime}</span>
-                            <span class="event-name">${eventType}</span>
-                            <button class="event-toggle-btn" title="Toggle details">▼</button>
-                        </div>
-                        ${hasData ? `
-                            <div class="event-details" style="display: none;">
-                                <pre>${JSON.stringify(event.data, null, 2)}</pre>
-                                <button class="copy-event-btn" title="Copy event data">📋</button>
-                            </div>
-                        ` : '<div class="event-no-data">No data</div>'}
-                    </div>
-                `;
-            }).join('');
-            eventsHtml += '</div>';
-        }
-
-        eventsHtml += '</div>';
-
-        container.innerHTML = eventsHtml;
-
-        // Add event listeners
-        this.setupEventListeners(container);
-    }
 
     /**
      * Shows the debug panel UI
@@ -310,61 +177,7 @@ export class DebugPanel {
         this.stopRealTimeUpdates();
     }
 
-    /**
-     * Sanitizes event data to prevent memory issues and improve readability
-     */
-    private sanitizeEventData(data: any): any {
-        if (data === null || data === undefined) {
-            return null;
-        }
 
-        try {
-            // Convert to JSON string and back to remove circular references
-            const jsonString = JSON.stringify(data, (key, value) => {
-                // Limit string length to prevent memory issues
-                if (typeof value === 'string' && value.length > 500) {
-                    return value.substring(0, 500) + '... [truncated]';
-                }
-                // Skip functions and complex objects that can't be serialized
-                if (typeof value === 'function') {
-                    return '[Function]';
-                }
-                return value;
-            });
-
-            return JSON.parse(jsonString);
-        } catch (error) {
-            return '[Unserializable data]';
-        }
-    }
-
-    /**
-     * Exports events to a JSON file
-     */
-    private exportEvents(): void {
-        try {
-            const exportData = {
-                exportTime: new Date().toISOString(),
-                totalEvents: this.recordedEvents.length,
-                events: this.recordedEvents
-            };
-
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-            const exportFileDefaultName = `outfit-events-export-${new Date().toISOString().slice(0, 19)}.json`;
-
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-
-            toastr.success('Events exported successfully!', 'Debug Panel');
-        } catch (error) {
-            debugLogger.log('Error exporting events:', error, 'error');
-            toastr.error('Error exporting events', 'Debug Panel');
-        }
-    }
 
     /**
      * Renders the content of the currently selected tab
@@ -389,7 +202,6 @@ export class DebugPanel {
             pointers: this.renderPointersTab.bind(this),
             performance: this.renderPerformanceTab.bind(this),
             logs: this.renderLogsTab.bind(this),
-            events: this.renderEventsTab.bind(this),
             embedded: this.renderEmbeddedDataTab.bind(this),
             state: this.renderStateTab.bind(this),
             misc: this.renderMiscTab.bind(this),
@@ -1475,27 +1287,7 @@ export class DebugPanel {
 
 
 
-    /**
-     * Updates the event notification badge on the events tab button
-     */
-    private updateEventNotification(): void {
-        if (!this.isVisible || !this.domElement) return;
 
-        const eventTabButton = this.domElement.querySelector('button[data-tab="events"]') as HTMLElement;
-        if (!eventTabButton) return;
-
-        const notificationBadge = eventTabButton.querySelector('.event-notification') as HTMLElement;
-        if (!notificationBadge) return;
-
-        const newEventCount = this.recordedEvents.length - this.lastViewedEventCount;
-
-        if (newEventCount > 0 && this.currentTab !== 'events') {
-            notificationBadge.textContent = newEventCount.toString();
-            notificationBadge.style.display = 'inline';
-        } else {
-            notificationBadge.style.display = 'none';
-        }
-    }
 
     /**
      * Updates misc tab with current information
@@ -1523,31 +1315,6 @@ export class DebugPanel {
         storeInfo.innerHTML = infoHtml;
     }
 
-    /**
-     * Gets CSS class for event type
-     */
-    private getEventClass(eventType: string): string {
-        const classMap: { [key: string]: string } = {
-            'outfit-tracker-context-updated': 'event-context',
-            'outfit-tracker-outfit-changed': 'event-outfit',
-            'outfit-tracker-preset-loaded': 'event-preset',
-            'outfit-tracker-preset-saved': 'event-preset',
-            'outfit-tracker-preset-deleted': 'event-preset',
-            'outfit-tracker-preset-overwritten': 'event-preset',
-            'outfit-tracker-default-outfit-set': 'event-default',
-            'outfit-tracker-default-outfit-cleared': 'event-default',
-            'outfit-tracker-default-outfit-loaded': 'event-default',
-            'outfit-tracker-panel-visibility-changed': 'event-panel',
-            'outfit-tracker-chat-cleared': 'event-chat',
-            'outfit-tracker-data-loaded': 'event-data',
-            'outfit-tracker-settings-changed': 'event-settings',
-            'outfit-tracker-migration-completed': 'event-migration',
-            'outfit-tracker-instance-created': 'event-instance',
-            'outfit-tracker-instance-deleted': 'event-instance',
-            'outfit-tracker-character-outfit-synced': 'event-sync'
-        };
-        return classMap[eventType] || 'event-generic';
-    }
 
     /**
      * Renders the 'State' tab with the current store state
@@ -1712,158 +1479,9 @@ export class DebugPanel {
         }
     }
 
-    /**
-     * Gets icon for event type
-     */
-    private getEventIcon(eventType: string): string {
-        const iconMap: { [key: string]: string } = {
-            'outfit-tracker-context-updated': '🔄',
-            'outfit-tracker-outfit-changed': '👔',
-            'outfit-tracker-preset-loaded': '📁',
-            'outfit-tracker-preset-saved': '💾',
-            'outfit-tracker-preset-deleted': '🗑️',
-            'outfit-tracker-preset-overwritten': '🔄',
-            'outfit-tracker-default-outfit-set': '⭐',
-            'outfit-tracker-default-outfit-cleared': '❌',
-            'outfit-tracker-default-outfit-loaded': '📥',
-            'outfit-tracker-panel-visibility-changed': '👁️',
-            'outfit-tracker-chat-cleared': '🗑️',
-            'outfit-tracker-data-loaded': '💾',
-            'outfit-tracker-settings-changed': '⚙️',
-            'outfit-tracker-migration-completed': '🚀',
-            'outfit-tracker-instance-created': '➕',
-            'outfit-tracker-instance-deleted': '➖',
-            'outfit-tracker-character-outfit-synced': '🔄'
-        };
-        return iconMap[eventType] || '📡';
-    }
 
-    /**
-     * Sets up event listeners for the events tab
-     */
-    private setupEventListeners(container: HTMLElement): void {
-        let isPaused = false;
 
-        // Search functionality
-        const searchInput = container.querySelector('#event-search') as HTMLInputElement;
-        const typeFilter = container.querySelector('#event-type-filter') as HTMLSelectElement;
-        const pauseBtn = container.querySelector('#pause-events-btn') as HTMLButtonElement;
-        const clearBtn = container.querySelector('#clear-events-btn') as HTMLButtonElement;
-        const exportBtn = container.querySelector('#export-events-btn') as HTMLButtonElement;
-        const totalCount = container.querySelector('.events-count') as HTMLElement;
-        const filteredCount = container.querySelector('.events-filtered-count') as HTMLElement;
 
-        const filterEvents = () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedType = typeFilter.value;
-            const eventItems = container.querySelectorAll('.event-item');
-            let visibleCount = 0;
-
-            eventItems.forEach(item => {
-                const eventType = (item as HTMLElement).dataset.eventType || '';
-                const eventName = (item.querySelector('.event-name') as HTMLElement)?.textContent?.toLowerCase() || '';
-                const eventData = (item.querySelector('.event-details pre') as HTMLElement)?.textContent?.toLowerCase() || '';
-
-                const typeMatch = selectedType === 'all' || eventType === selectedType;
-                const searchMatch = searchTerm === '' ||
-                    eventName.includes(searchTerm) ||
-                    eventData.includes(searchTerm);
-
-                if (typeMatch && searchMatch) {
-                    (item as HTMLElement).style.display = '';
-                    visibleCount++;
-                } else {
-                    (item as HTMLElement).style.display = 'none';
-                }
-            });
-
-            // Update filtered count
-            if (searchTerm || selectedType !== 'all') {
-                filteredCount.style.display = 'inline';
-                filteredCount.textContent = `Filtered: ${visibleCount}`;
-            } else {
-                filteredCount.style.display = 'none';
-            }
-        };
-
-        searchInput.addEventListener('input', filterEvents);
-        typeFilter.addEventListener('change', filterEvents);
-
-        // Pause/Resume functionality
-        pauseBtn.addEventListener('click', () => {
-            this.isEventRecordingPaused = !this.isEventRecordingPaused;
-            isPaused = this.isEventRecordingPaused;
-            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
-            pauseBtn.classList.toggle('paused', isPaused);
-
-            if (isPaused) {
-                toastr.info('Event recording paused', 'Debug Panel');
-            } else {
-                toastr.info('Event recording resumed', 'Debug Panel');
-            }
-        });
-
-        // Export events
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.exportEvents();
-            });
-        }
-
-        // Clear events
-        clearBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all events?')) {
-                this.recordedEvents = [];
-                this.renderContent();
-                toastr.success('Event log cleared!', 'Debug Panel');
-            }
-        });
-
-        // Event item interactions
-        const eventItems = container.querySelectorAll('.event-item');
-        eventItems.forEach(item => {
-            const toggleBtn = item.querySelector('.event-toggle-btn');
-            const details = item.querySelector('.event-details');
-
-            if (toggleBtn && details) {
-                toggleBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isVisible = (details as HTMLElement).style.display !== 'none';
-                    (details as HTMLElement).style.display = isVisible ? 'none' : 'block';
-                    (toggleBtn as HTMLElement).textContent = isVisible ? '▼' : '▲';
-                });
-            }
-
-            // Copy event data button
-            const copyBtn = item.querySelector('.copy-event-btn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const dataElement = item.querySelector('.event-details pre') as HTMLElement;
-                    if (dataElement) {
-                        navigator.clipboard.writeText(dataElement.textContent || '');
-                        toastr.success('Event data copied to clipboard!', 'Debug Panel');
-                    }
-                });
-            }
-
-            // Click to expand/collapse
-            item.addEventListener('click', (e) => {
-                if ((e.target as HTMLElement).tagName === 'BUTTON') return;
-
-                const details = item.querySelector('.event-details');
-                const toggleBtn = item.querySelector('.event-toggle-btn');
-
-                if (details) {
-                    const isVisible = (details as HTMLElement).style.display !== 'none';
-                    (details as HTMLElement).style.display = isVisible ? 'none' : 'block';
-                    if (toggleBtn) {
-                        (toggleBtn as HTMLElement).textContent = isVisible ? '▼' : '▲';
-                    }
-                }
-            });
-        });
-    }
 
     /**
      * Starts real-time update intervals for various tabs

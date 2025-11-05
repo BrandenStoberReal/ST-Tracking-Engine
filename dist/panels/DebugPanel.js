@@ -12,7 +12,6 @@ import { outfitStore } from '../common/Store.js';
 import { customMacroSystem } from '../services/CustomMacroService.js';
 import { debugLogger } from '../logging/DebugLogger.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
-import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 import { getCharacterOutfitData } from '../services/CharacterOutfitService.js';
 export class DebugPanel {
     constructor() {
@@ -22,51 +21,12 @@ export class DebugPanel {
         this.eventListeners = [];
         this.storeSubscription = null;
         this.previousInstanceId = null;
-        this.recordedEvents = [];
-        this.isEventRecordingPaused = false;
         this.realTimeUpdateInterval = null;
         this.logUpdateInterval = null;
         this.logsSortDescending = true; // true = newest first (descending)
-        this.lastViewedEventCount = 0; // Track events seen when tab was last viewed
         this.lastMacroCacheSize = 0; // Track macro cache size to avoid unnecessary updates
         this.lastStorageSize = 0; // Cache storage size calculation
         this.lastStateStringifyTime = 0; // Track when we last did expensive stringify operations
-        // Subscribe to all extension events to record them
-        Object.values(EXTENSION_EVENTS).forEach(event => {
-            extensionEventBus.on(event, (data) => {
-                this.recordEvent(event, data);
-            });
-        });
-    }
-    /**
-     * Records an event for display in the debug panel
-     */
-    recordEvent(event, data) {
-        // Skip recording if paused
-        if (this.isEventRecordingPaused) {
-            return;
-        }
-        // Skip recording if limit reached to avoid unnecessary serialization work
-        if (this.recordedEvents.length >= 200) {
-            return;
-        }
-        // Sanitize and limit data size to prevent memory issues
-        const sanitizedData = this.sanitizeEventData(data);
-        this.recordedEvents.push({
-            timestamp: new Date().toISOString(),
-            event,
-            data: sanitizedData
-        });
-        // Update notification badge if panel is visible
-        if (this.isVisible) {
-            this.updateEventNotification();
-        }
-    }
-    /**
-     * Pauses or resumes event recording
-     */
-    setEventRecordingPaused(paused) {
-        this.isEventRecordingPaused = paused;
     }
     /**
      * Creates the debug panel DOM element and sets up its basic functionality
@@ -92,7 +52,6 @@ export class DebugPanel {
                   <button class="outfit-debug-tab ${this.currentTab === 'pointers' ? 'active' : ''}" data-tab="pointers">Pointers <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'performance' ? 'active' : ''}" data-tab="performance">Performance <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'logs' ? 'active' : ''}" data-tab="logs">Logs <span class="realtime-indicator">🔄</span></button>
-                   <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events<span class="event-notification" style="display: none;"></span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'embedded' ? 'active' : ''}" data-tab="embedded">Embedded <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'state' ? 'active' : ''}" data-tab="state">State <span class="realtime-indicator">🔄</span></button>
                   <button class="outfit-debug-tab ${this.currentTab === 'misc' ? 'active' : ''}" data-tab="misc">Misc <span class="realtime-indicator">🔄</span></button>
@@ -109,90 +68,11 @@ export class DebugPanel {
                     return;
                 this.currentTab = tabName;
                 this.renderContent();
-                // Clear event notification when switching to events tab
-                if (tabName === 'events') {
-                    this.lastViewedEventCount = this.recordedEvents.length;
-                    this.updateEventNotification();
-                }
                 tabs.forEach(t => t.classList.remove('active'));
                 event.target.classList.add('active');
             });
         });
         return panel;
-    }
-    /**
-     * Renders the 'Events' tab with a log of dispatched events
-     */
-    renderEventsTab(container) {
-        let eventsHtml = `
-            <div class="debug-events-header">
-                <div class="events-controls">
-                    <input type="text" id="event-search" placeholder="Search events..." class="event-search-input">
-                    <select id="event-type-filter" class="event-filter-select">
-                        <option value="all">All Events</option>
-                        <option value="outfit-tracker-context-updated">Context Updated</option>
-                        <option value="outfit-tracker-outfit-changed">Outfit Changed</option>
-                        <option value="outfit-tracker-preset-loaded">Preset Loaded</option>
-                        <option value="outfit-tracker-preset-saved">Preset Saved</option>
-                        <option value="outfit-tracker-preset-deleted">Preset Deleted</option>
-                        <option value="outfit-tracker-preset-overwritten">Preset Overwritten</option>
-                        <option value="outfit-tracker-default-outfit-set">Default Outfit Set</option>
-                        <option value="outfit-tracker-default-outfit-cleared">Default Outfit Cleared</option>
-                        <option value="outfit-tracker-default-outfit-loaded">Default Outfit Loaded</option>
-                        <option value="outfit-tracker-panel-visibility-changed">Panel Visibility</option>
-                        <option value="outfit-tracker-chat-cleared">Chat Cleared</option>
-                        <option value="outfit-tracker-data-loaded">Data Loaded</option>
-                        <option value="outfit-tracker-settings-changed">Settings Changed</option>
-                        <option value="outfit-tracker-migration-completed">Migration Completed</option>
-                        <option value="outfit-tracker-instance-created">Instance Created</option>
-                        <option value="outfit-tracker-instance-deleted">Instance Deleted</option>
-                        <option value="outfit-tracker-character-outfit-synced">Character Outfit Synced</option>
-                    </select>
-                    <button id="pause-events-btn" class="menu_button">Pause</button>
-                    <button id="export-events-btn" class="menu_button">Export</button>
-                    <button id="clear-events-btn" class="menu_button">Clear Events</button>
-                </div>
-                <div class="events-stats">
-                    <span class="events-count">Total: ${this.recordedEvents.length}</span>
-                    <span class="events-filtered-count" style="display: none;">Filtered: 0</span>
-                </div>
-            </div>
-            <div class="debug-events-list">
-        `;
-        if (this.recordedEvents.length === 0) {
-            eventsHtml += '<p class="no-events">No events recorded yet.</p>';
-        }
-        else {
-            eventsHtml += '<div class="events-container">';
-            eventsHtml += this.recordedEvents.slice().reverse().map((event, index) => {
-                const eventType = event.event;
-                const eventClass = this.getEventClass(eventType);
-                const eventIcon = this.getEventIcon(eventType);
-                const formattedTime = new Date(event.timestamp).toLocaleTimeString();
-                const hasData = event.data !== null && event.data !== undefined;
-                return `
-                    <div class="event-item ${eventClass}" data-event-type="${eventType}" data-index="${index}">
-                        <div class="event-header">
-                            <span class="event-icon">${eventIcon}</span>
-                            <span class="event-time">${formattedTime}</span>
-                            <span class="event-name">${eventType}</span>
-                            <button class="event-toggle-btn" title="Toggle details">▼</button>
-                        </div>
-                        ${hasData ? `
-                            <div class="event-details" style="display: none;">
-                                <pre>${JSON.stringify(event.data, null, 2)}</pre>
-                                <button class="copy-event-btn" title="Copy event data">📋</button>
-                            </div>
-                        ` : '<div class="event-no-data">No data</div>'}
-                    </div>
-                `;
-            }).join('');
-            eventsHtml += '</div>';
-        }
-        eventsHtml += '</div>';
-        container.innerHTML = eventsHtml;
-        // Add event listeners
-        this.setupEventListeners(container);
     }
     /**
      * Shows the debug panel UI
@@ -256,56 +136,6 @@ export class DebugPanel {
         this.stopRealTimeUpdates();
     }
     /**
-     * Sanitizes event data to prevent memory issues and improve readability
-     */
-    sanitizeEventData(data) {
-        if (data === null || data === undefined) {
-            return null;
-        }
-        try {
-            // Convert to JSON string and back to remove circular references
-            const jsonString = JSON.stringify(data, (key, value) => {
-                // Limit string length to prevent memory issues
-                if (typeof value === 'string' && value.length > 500) {
-                    return value.substring(0, 500) + '... [truncated]';
-                }
-                // Skip functions and complex objects that can't be serialized
-                if (typeof value === 'function') {
-                    return '[Function]';
-                }
-                return value;
-            });
-            return JSON.parse(jsonString);
-        }
-        catch (error) {
-            return '[Unserializable data]';
-        }
-    }
-    /**
-     * Exports events to a JSON file
-     */
-    exportEvents() {
-        try {
-            const exportData = {
-                exportTime: new Date().toISOString(),
-                totalEvents: this.recordedEvents.length,
-                events: this.recordedEvents
-            };
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-            const exportFileDefaultName = `outfit-events-export-${new Date().toISOString().slice(0, 19)}.json`;
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            toastr.success('Events exported successfully!', 'Debug Panel');
-        }
-        catch (error) {
-            debugLogger.log('Error exporting events:', error, 'error');
-            toastr.error('Error exporting events', 'Debug Panel');
-        }
-    }
-    /**
      * Renders the content of the currently selected tab
      */
     renderContent() {
@@ -324,7 +154,6 @@ export class DebugPanel {
             pointers: this.renderPointersTab.bind(this),
             performance: this.renderPerformanceTab.bind(this),
             logs: this.renderLogsTab.bind(this),
-            events: this.renderEventsTab.bind(this),
             embedded: this.renderEmbeddedDataTab.bind(this),
             state: this.renderStateTab.bind(this),
             misc: this.renderMiscTab.bind(this),
@@ -790,40 +619,73 @@ export class DebugPanel {
         }, 100);
     }
     /**
-     * Updates macros tab with current macro values
+     * Renders the 'Performance' tab with performance metrics
      */
-    updateMacrosTab() {
-        var _a, _b;
-        const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
-        if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros')
-            return;
-        // Check if content has been rendered
-        const cacheInfo = contentArea.querySelector('.macro-cache-info');
-        const cacheTable = contentArea.querySelector('.macro-cache-table');
-        if (!cacheInfo || !cacheTable)
-            return;
-        const currentCacheSize = customMacroSystem.macroValueCache.size;
-        // Only update if cache size changed
-        if (currentCacheSize === this.lastMacroCacheSize) {
-            // Just update the timestamp
-            const updateTime = new Date().toLocaleTimeString();
-            const sizeText = ((_b = cacheInfo.innerHTML.match(/Cached entries: \d+/)) === null || _b === void 0 ? void 0 : _b[0]) || `Cached entries: ${currentCacheSize}`;
-            cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
-            return;
+    renderPerformanceTab(container) {
+        const state = outfitStore.getState();
+        // Calculate performance metrics
+        const botInstanceCount = Object.keys(state.botInstances).reduce((total, charId) => {
+            return total + Object.keys(state.botInstances[charId]).length;
+        }, 0);
+        const userInstanceCount = Object.keys(state.userInstances).length;
+        // Estimate storage size
+        const stateStr = JSON.stringify(state);
+        const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
+        let performanceHtml = '<div class="debug-performance-content">';
+        performanceHtml += '<h4>Performance Metrics</h4>';
+        performanceHtml += '<div class="performance-info">';
+        // General metrics
+        performanceHtml += `<div><strong>Total Bot Instances:</strong> ${botInstanceCount}</div>`;
+        performanceHtml += `<div><strong>Total User Instances:</strong> ${userInstanceCount}</div>`;
+        performanceHtml += `<div><strong>Total Outfit Slots:</strong> ${(botInstanceCount + userInstanceCount) * 19}</div>`;
+        performanceHtml += `<div><strong>Estimated Storage Size:</strong> ${estimatedStorageSize}</div>`;
+        // Macro performance
+        performanceHtml += '<h5>Macro System Performance:</h5>';
+        performanceHtml += `<div><strong>Current Cache Size:</strong> ${customMacroSystem.macroValueCache.size} items</div>`;
+        // Performance indicators
+        performanceHtml += '<h5>Performance Indicators:</h5>';
+        performanceHtml += '<div class="performance-indicators">';
+        // Check for potentially large data
+        if (botInstanceCount > 50) {
+            performanceHtml += '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
         }
-        this.lastMacroCacheSize = currentCacheSize;
-        // Update macro cache info
-        const updateTime = new Date().toLocaleTimeString();
-        cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
-        // Update macro cache table (only if cache size changed)
-        const tbody = cacheTable.querySelector('tbody');
-        if (tbody && currentCacheSize !== this.lastMacroCacheSize) {
-            let tbodyHtml = '';
-            for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
-                const timestamp = new Date(entry.timestamp).toISOString();
-                tbodyHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
-            }
-            tbody.innerHTML = tbodyHtml;
+        else if (botInstanceCount > 20) {
+            performanceHtml += '<div class="info">ℹ️ Moderate number of bot instances</div>';
+        }
+        else {
+            performanceHtml += '<div class="good">✅ Low number of bot instances</div>';
+        }
+        if (userInstanceCount > 10) {
+            performanceHtml += '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
+        }
+        else {
+            performanceHtml += '<div class="good">✅ Reasonable number of user instances</div>';
+        }
+        const storageKB = new Blob([stateStr]).size / 1024;
+        if (storageKB > 1000) { // More than 1MB
+            performanceHtml += '<div class="warning">⚠️ Large storage size detected - consider cleanup</div>';
+        }
+        else if (storageKB > 500) { // More than 500KB
+            performanceHtml += '<div class="info">ℹ️ Moderate storage size</div>';
+        }
+        else {
+            performanceHtml += '<div class="good">✅ Reasonable storage size</div>';
+        }
+        performanceHtml += '</div>';
+        // Add performance testing section
+        performanceHtml += '<h5>Performance Testing:</h5>';
+        performanceHtml += '<div class="performance-testing">';
+        performanceHtml += '<button id="debug-run-performance-test" class="menu_button">Run Performance Test</button>';
+        performanceHtml += '<div id="performance-test-results"></div>';
+        performanceHtml += '</div>';
+        performanceHtml += '</div></div>';
+        container.innerHTML = performanceHtml;
+        // Add event listener for performance testing
+        const performanceTestBtn = container.querySelector('#debug-run-performance-test');
+        if (performanceTestBtn) {
+            performanceTestBtn.addEventListener('click', () => {
+                this.runPerformanceTest();
+            });
         }
     }
     /**
@@ -1046,73 +908,40 @@ export class DebugPanel {
         container.innerHTML = pointersHtml;
     }
     /**
-     * Renders the 'Performance' tab with performance metrics
+     * Updates macros tab with current macro values
      */
-    renderPerformanceTab(container) {
-        const state = outfitStore.getState();
-        // Calculate performance metrics
-        const botInstanceCount = Object.keys(state.botInstances).reduce((total, charId) => {
-            return total + Object.keys(state.botInstances[charId]).length;
-        }, 0);
-        const userInstanceCount = Object.keys(state.userInstances).length;
-        // Estimate storage size
-        const stateStr = JSON.stringify(state);
-        const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
-        let performanceHtml = '<div class="debug-performance-content">';
-        performanceHtml += '<h4>Performance Metrics</h4>';
-        performanceHtml += '<div class="performance-info">';
-        // General metrics
-        performanceHtml += `<div><strong>Total Bot Instances:</strong> ${botInstanceCount}</div>`;
-        performanceHtml += `<div><strong>Total User Instances:</strong> ${userInstanceCount}</div>`;
-        performanceHtml += `<div><strong>Total Outfit Slots:</strong> ${(botInstanceCount + userInstanceCount) * 19}</div>`;
-        performanceHtml += `<div><strong>Estimated Storage Size:</strong> ${estimatedStorageSize}</div>`;
-        // Macro performance
-        performanceHtml += '<h5>Macro System Performance:</h5>';
-        performanceHtml += `<div><strong>Current Cache Size:</strong> ${customMacroSystem.macroValueCache.size} items</div>`;
-        // Performance indicators
-        performanceHtml += '<h5>Performance Indicators:</h5>';
-        performanceHtml += '<div class="performance-indicators">';
-        // Check for potentially large data
-        if (botInstanceCount > 50) {
-            performanceHtml += '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
+    updateMacrosTab() {
+        var _a, _b;
+        const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros')
+            return;
+        // Check if content has been rendered
+        const cacheInfo = contentArea.querySelector('.macro-cache-info');
+        const cacheTable = contentArea.querySelector('.macro-cache-table');
+        if (!cacheInfo || !cacheTable)
+            return;
+        const currentCacheSize = customMacroSystem.macroValueCache.size;
+        // Only update if cache size changed
+        if (currentCacheSize === this.lastMacroCacheSize) {
+            // Just update the timestamp
+            const updateTime = new Date().toLocaleTimeString();
+            const sizeText = ((_b = cacheInfo.innerHTML.match(/Cached entries: \d+/)) === null || _b === void 0 ? void 0 : _b[0]) || `Cached entries: ${currentCacheSize}`;
+            cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
+            return;
         }
-        else if (botInstanceCount > 20) {
-            performanceHtml += '<div class="info">ℹ️ Moderate number of bot instances</div>';
-        }
-        else {
-            performanceHtml += '<div class="good">✅ Low number of bot instances</div>';
-        }
-        if (userInstanceCount > 10) {
-            performanceHtml += '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
-        }
-        else {
-            performanceHtml += '<div class="good">✅ Reasonable number of user instances</div>';
-        }
-        const storageKB = new Blob([stateStr]).size / 1024;
-        if (storageKB > 1000) { // More than 1MB
-            performanceHtml += '<div class="warning">⚠️ Large storage size detected - consider cleanup</div>';
-        }
-        else if (storageKB > 500) { // More than 500KB
-            performanceHtml += '<div class="info">ℹ️ Moderate storage size</div>';
-        }
-        else {
-            performanceHtml += '<div class="good">✅ Reasonable storage size</div>';
-        }
-        performanceHtml += '</div>';
-        // Add performance testing section
-        performanceHtml += '<h5>Performance Testing:</h5>';
-        performanceHtml += '<div class="performance-testing">';
-        performanceHtml += '<button id="debug-run-performance-test" class="menu_button">Run Performance Test</button>';
-        performanceHtml += '<div id="performance-test-results"></div>';
-        performanceHtml += '</div>';
-        performanceHtml += '</div></div>';
-        container.innerHTML = performanceHtml;
-        // Add event listener for performance testing
-        const performanceTestBtn = container.querySelector('#debug-run-performance-test');
-        if (performanceTestBtn) {
-            performanceTestBtn.addEventListener('click', () => {
-                this.runPerformanceTest();
-            });
+        this.lastMacroCacheSize = currentCacheSize;
+        // Update macro cache info
+        const updateTime = new Date().toLocaleTimeString();
+        cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
+        // Update macro cache table (only if cache size changed)
+        const tbody = cacheTable.querySelector('tbody');
+        if (tbody && currentCacheSize !== this.lastMacroCacheSize) {
+            let tbodyHtml = '';
+            for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
+                const timestamp = new Date(entry.timestamp).toISOString();
+                tbodyHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
+            }
+            tbody.innerHTML = tbodyHtml;
         }
     }
     /**
@@ -1272,27 +1101,6 @@ export class DebugPanel {
         }
     }
     /**
-     * Updates the event notification badge on the events tab button
-     */
-    updateEventNotification() {
-        if (!this.isVisible || !this.domElement)
-            return;
-        const eventTabButton = this.domElement.querySelector('button[data-tab="events"]');
-        if (!eventTabButton)
-            return;
-        const notificationBadge = eventTabButton.querySelector('.event-notification');
-        if (!notificationBadge)
-            return;
-        const newEventCount = this.recordedEvents.length - this.lastViewedEventCount;
-        if (newEventCount > 0 && this.currentTab !== 'events') {
-            notificationBadge.textContent = newEventCount.toString();
-            notificationBadge.style.display = 'inline';
-        }
-        else {
-            notificationBadge.style.display = 'none';
-        }
-    }
-    /**
      * Updates misc tab with current information
      */
     updateMiscTab() {
@@ -1314,31 +1122,6 @@ export class DebugPanel {
         infoHtml += '<h5>Settings:</h5>';
         infoHtml += '<pre>' + JSON.stringify(state.settings, null, 2) + '</pre>';
         storeInfo.innerHTML = infoHtml;
-    }
-    /**
-     * Gets CSS class for event type
-     */
-    getEventClass(eventType) {
-        const classMap = {
-            'outfit-tracker-context-updated': 'event-context',
-            'outfit-tracker-outfit-changed': 'event-outfit',
-            'outfit-tracker-preset-loaded': 'event-preset',
-            'outfit-tracker-preset-saved': 'event-preset',
-            'outfit-tracker-preset-deleted': 'event-preset',
-            'outfit-tracker-preset-overwritten': 'event-preset',
-            'outfit-tracker-default-outfit-set': 'event-default',
-            'outfit-tracker-default-outfit-cleared': 'event-default',
-            'outfit-tracker-default-outfit-loaded': 'event-default',
-            'outfit-tracker-panel-visibility-changed': 'event-panel',
-            'outfit-tracker-chat-cleared': 'event-chat',
-            'outfit-tracker-data-loaded': 'event-data',
-            'outfit-tracker-settings-changed': 'event-settings',
-            'outfit-tracker-migration-completed': 'event-migration',
-            'outfit-tracker-instance-created': 'event-instance',
-            'outfit-tracker-instance-deleted': 'event-instance',
-            'outfit-tracker-character-outfit-synced': 'event-sync'
-        };
-        return classMap[eventType] || 'event-generic';
     }
     /**
      * Renders the 'State' tab with the current store state
@@ -1481,145 +1264,6 @@ export class DebugPanel {
         else {
             this.show();
         }
-    }
-    /**
-     * Gets icon for event type
-     */
-    getEventIcon(eventType) {
-        const iconMap = {
-            'outfit-tracker-context-updated': '🔄',
-            'outfit-tracker-outfit-changed': '👔',
-            'outfit-tracker-preset-loaded': '📁',
-            'outfit-tracker-preset-saved': '💾',
-            'outfit-tracker-preset-deleted': '🗑️',
-            'outfit-tracker-preset-overwritten': '🔄',
-            'outfit-tracker-default-outfit-set': '⭐',
-            'outfit-tracker-default-outfit-cleared': '❌',
-            'outfit-tracker-default-outfit-loaded': '📥',
-            'outfit-tracker-panel-visibility-changed': '👁️',
-            'outfit-tracker-chat-cleared': '🗑️',
-            'outfit-tracker-data-loaded': '💾',
-            'outfit-tracker-settings-changed': '⚙️',
-            'outfit-tracker-migration-completed': '🚀',
-            'outfit-tracker-instance-created': '➕',
-            'outfit-tracker-instance-deleted': '➖',
-            'outfit-tracker-character-outfit-synced': '🔄'
-        };
-        return iconMap[eventType] || '📡';
-    }
-    /**
-     * Sets up event listeners for the events tab
-     */
-    setupEventListeners(container) {
-        let isPaused = false;
-        // Search functionality
-        const searchInput = container.querySelector('#event-search');
-        const typeFilter = container.querySelector('#event-type-filter');
-        const pauseBtn = container.querySelector('#pause-events-btn');
-        const clearBtn = container.querySelector('#clear-events-btn');
-        const exportBtn = container.querySelector('#export-events-btn');
-        const totalCount = container.querySelector('.events-count');
-        const filteredCount = container.querySelector('.events-filtered-count');
-        const filterEvents = () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedType = typeFilter.value;
-            const eventItems = container.querySelectorAll('.event-item');
-            let visibleCount = 0;
-            eventItems.forEach(item => {
-                var _a, _b, _c, _d;
-                const eventType = item.dataset.eventType || '';
-                const eventName = ((_b = (_a = item.querySelector('.event-name')) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.toLowerCase()) || '';
-                const eventData = ((_d = (_c = item.querySelector('.event-details pre')) === null || _c === void 0 ? void 0 : _c.textContent) === null || _d === void 0 ? void 0 : _d.toLowerCase()) || '';
-                const typeMatch = selectedType === 'all' || eventType === selectedType;
-                const searchMatch = searchTerm === '' ||
-                    eventName.includes(searchTerm) ||
-                    eventData.includes(searchTerm);
-                if (typeMatch && searchMatch) {
-                    item.style.display = '';
-                    visibleCount++;
-                }
-                else {
-                    item.style.display = 'none';
-                }
-            });
-            // Update filtered count
-            if (searchTerm || selectedType !== 'all') {
-                filteredCount.style.display = 'inline';
-                filteredCount.textContent = `Filtered: ${visibleCount}`;
-            }
-            else {
-                filteredCount.style.display = 'none';
-            }
-        };
-        searchInput.addEventListener('input', filterEvents);
-        typeFilter.addEventListener('change', filterEvents);
-        // Pause/Resume functionality
-        pauseBtn.addEventListener('click', () => {
-            this.isEventRecordingPaused = !this.isEventRecordingPaused;
-            isPaused = this.isEventRecordingPaused;
-            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
-            pauseBtn.classList.toggle('paused', isPaused);
-            if (isPaused) {
-                toastr.info('Event recording paused', 'Debug Panel');
-            }
-            else {
-                toastr.info('Event recording resumed', 'Debug Panel');
-            }
-        });
-        // Export events
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.exportEvents();
-            });
-        }
-        // Clear events
-        clearBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all events?')) {
-                this.recordedEvents = [];
-                this.renderContent();
-                toastr.success('Event log cleared!', 'Debug Panel');
-            }
-        });
-        // Event item interactions
-        const eventItems = container.querySelectorAll('.event-item');
-        eventItems.forEach(item => {
-            const toggleBtn = item.querySelector('.event-toggle-btn');
-            const details = item.querySelector('.event-details');
-            if (toggleBtn && details) {
-                toggleBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isVisible = details.style.display !== 'none';
-                    details.style.display = isVisible ? 'none' : 'block';
-                    toggleBtn.textContent = isVisible ? '▼' : '▲';
-                });
-            }
-            // Copy event data button
-            const copyBtn = item.querySelector('.copy-event-btn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const dataElement = item.querySelector('.event-details pre');
-                    if (dataElement) {
-                        navigator.clipboard.writeText(dataElement.textContent || '');
-                        toastr.success('Event data copied to clipboard!', 'Debug Panel');
-                    }
-                });
-            }
-            // Click to expand/collapse
-            item.addEventListener('click', (e) => {
-                if (e.target.tagName === 'BUTTON')
-                    return;
-                const details = item.querySelector('.event-details');
-                const toggleBtn = item.querySelector('.event-toggle-btn');
-                if (details) {
-                    const isVisible = details.style.display !== 'none';
-                    details.style.display = isVisible ? 'none' : 'block';
-                    if (toggleBtn) {
-                        toggleBtn.textContent = isVisible ? '▼' : '▲';
-                    }
-                }
-            });
-        });
     }
     /**
      * Starts real-time update intervals for various tabs
