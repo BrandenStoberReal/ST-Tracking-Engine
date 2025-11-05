@@ -92,9 +92,6 @@ export function deepClone(obj) {
         if (obj === null || typeof obj !== 'object') {
             return obj;
         }
-        if (Object.prototype.toString.call(obj) === '[object Date]') {
-            return new Date(obj.getTime());
-        }
         if (visited.has(obj)) {
             return visited.get(obj);
         }
@@ -116,7 +113,7 @@ export function deepClone(obj) {
             }
             return clonedObj;
         }
-        // For other objects (functions, custom classes, etc.), return as-is to avoid issues
+        // For other objects (Dates, functions, custom classes, etc.), return as-is to avoid issues
         return obj;
     }
     return clone(obj);
