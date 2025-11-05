@@ -288,7 +288,7 @@ class OutfitStore {
                 debugLog(`[OutfitStore] savePreset called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
                 return;
             }
-            
+
             const key = this._generateBotPresetKey(characterId, instanceId);
 
             const botPresets = this.state.presets?.bot || {};
@@ -317,7 +317,7 @@ class OutfitStore {
                 debugLog(`[OutfitStore] deletePreset called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
                 return;
             }
-            
+
             const key = this._generateBotPresetKey(characterId, instanceId);
 
             const botPresets = this.state.presets?.bot || {};
@@ -350,7 +350,7 @@ class OutfitStore {
                 debugLog(`[OutfitStore] deleteAllPresetsForCharacter called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
                 return;
             }
-            
+
             const key = this._generateBotPresetKey(characterId, instanceId);
 
             const botPresets = this.state.presets?.bot || {};
@@ -379,7 +379,7 @@ class OutfitStore {
                 debugLog(`[OutfitStore] getAllPresets called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
                 return {};
             }
-            
+
             const key = this._generateBotPresetKey(characterId, instanceId);
 
             const botPresets = this.state.presets?.bot || {};

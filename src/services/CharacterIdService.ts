@@ -170,7 +170,7 @@ export async function migrateAllCharacters(): Promise<number> {
             const existingId = getCharacterId(character);
 
             debugLog(`[CharacterIdService] Checking character "${characterName}" for existing ID...`, null, 'debug');
-            
+
             if (!existingId) {
                 const newCharacterId = generateGUID();
                 debugLog(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`, null, 'info');

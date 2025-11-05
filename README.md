@@ -374,8 +374,6 @@ browser-dependent nature of the SillyTavern extension:
 The tests are located in the `tests/` directory and include setup files that mock the SillyTavern context and browser
 APIs. See `tests/README.md` for detailed testing information.
 
-
-
 ### Developer Documentation
 
 For more detailed information about the internal systems, please see the following documentation:

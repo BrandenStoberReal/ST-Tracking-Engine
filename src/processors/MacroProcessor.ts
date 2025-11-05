@@ -95,7 +95,7 @@ class MacroProcessor {
                 // Show the unique character ID being used for debugging
                 debugLog('[OutfitTracker] Unique character ID used for instance calculation:', uniqueCharacterId);
                 debugLog('[OutfitTracker] Outfit values removed:', outfitValues);
-                
+
                 // Generate instance ID from the processed message with outfit values removed for consistent ID calculation
                 const instanceId = await generateInstanceIdFromText(processedMessage, []);
 
@@ -105,7 +105,7 @@ class MacroProcessor {
                 // This prevents unnecessary updates that could cause flip-flopping
                 const currentInstanceId = outfitStore.getCurrentInstanceId();
                 debugLog('[OutfitTracker] Current instance ID:', currentInstanceId);
-                
+
                 if (currentInstanceId !== instanceId) {
                     debugLog('[OutfitTracker] Instance ID changed from', {
                         from: currentInstanceId,
@@ -298,7 +298,7 @@ class MacroProcessor {
 
         // Clean up any double spaces that might result from the removal
         resultText = resultText.replace(/\s+/g, " ").trim();
-        
+
         return resultText;
     }
 }
