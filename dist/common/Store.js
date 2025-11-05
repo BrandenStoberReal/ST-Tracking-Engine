@@ -1,7 +1,7 @@
 import { DEFAULT_SETTINGS } from '../config/constants.js';
 import { deepClone } from '../utils/utilities.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 class OutfitStore {
     constructor() {
         this.state = {

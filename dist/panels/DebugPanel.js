@@ -28,6 +28,8 @@ export class DebugPanel {
         this.logUpdateInterval = null;
         this.logsSortDescending = true; // true = newest first (descending)
         this.lastViewedEventCount = 0; // Track events seen when tab was last viewed
+        this.lastMacroCacheSize = 0; // Track macro cache size to avoid unnecessary updates
+        this.lastStorageSize = 0; // Cache storage size calculation
         // Subscribe to all extension events to record them
         Object.values(EXTENSION_EVENTS).forEach(event => {
             extensionEventBus.on(event, (data) => {
@@ -434,6 +436,53 @@ export class DebugPanel {
         // This method is kept for future use if needed
     }
     /**
+     * Exports current logs to a downloadable .log file
+     */
+    exportLogsToFile() {
+        const logs = debugLogger.getLogs();
+        if (logs.length === 0) {
+            toastr.warning('No logs to export!', 'Debug Panel');
+            return;
+        }
+        // Sort logs by timestamp (newest first for export)
+        const sortedLogs = [...logs].sort((a, b) => {
+            const timeA = new Date(a.timestamp).getTime();
+            const timeB = new Date(b.timestamp).getTime();
+            return timeB - timeA; // Newest first
+        });
+        // Format logs for export
+        const logLines = sortedLogs.map(log => {
+            const timestamp = new Date(log.timestamp).toISOString();
+            const level = log.level.toUpperCase().padEnd(5);
+            const message = log.message;
+            let logLine = `[${timestamp}] [${level}] ${message}`;
+            // Add data if present
+            if (log.data !== null && log.data !== undefined) {
+                try {
+                    const dataStr = JSON.stringify(log.data, null, 2);
+                    logLine += '\n' + dataStr.split('\n').map(line => `    ${line}`).join('\n');
+                }
+                catch (error) {
+                    logLine += `\n    [Error serializing data: ${error}]`;
+                }
+            }
+            return logLine;
+        });
+        // Create the full log content
+        const logContent = logLines.join('\n\n') + '\n';
+        // Create and download the file
+        const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `st-outfits-logs-${new Date().toISOString().split('T')[0]}.log`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toastr.success(`Exported ${logs.length} log entries!`, 'Debug Panel');
+    }
+    /**
      * Updates logs tab with new log entries
      */
     updateLogsTab() {
@@ -456,7 +505,7 @@ export class DebugPanel {
      * Updates macros tab with current macro values
      */
     updateMacrosTab() {
-        var _a;
+        var _a, _b;
         const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
         if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros')
             return;
@@ -465,9 +514,19 @@ export class DebugPanel {
         const cacheTable = contentArea.querySelector('.macro-cache-table');
         if (!cacheInfo || !cacheTable)
             return;
+        const currentCacheSize = customMacroSystem.macroValueCache.size;
+        // Only update if cache size changed
+        if (currentCacheSize === this.lastMacroCacheSize) {
+            // Just update the timestamp
+            const updateTime = new Date().toLocaleTimeString();
+            const sizeText = ((_b = cacheInfo.innerHTML.match(/Cached entries: \d+/)) === null || _b === void 0 ? void 0 : _b[0]) || `Cached entries: ${currentCacheSize}`;
+            cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
+            return;
+        }
+        this.lastMacroCacheSize = currentCacheSize;
         // Update macro cache info
         const updateTime = new Date().toLocaleTimeString();
-        cacheInfo.innerHTML = `Cached entries: ${customMacroSystem.macroValueCache.size} <small>(Updated: ${updateTime})</small>`;
+        cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
         // Update macro cache table
         const tbody = cacheTable.querySelector('tbody');
         if (tbody) {
@@ -687,6 +746,7 @@ export class DebugPanel {
                 <button id="toggle-logs-sort" class="menu_button" title="Toggle sort direction">
                     ${this.logsSortDescending ? '⬇️ Newest First' : '⬆️ Oldest First'}
                 </button>
+                <button id="export-logs-btn" class="menu_button">Export Logs</button>
                 <button id="clear-logs-btn" class="menu_button">Clear Logs</button>
             </div>
             <div class="debug-logs-list">
@@ -737,6 +797,7 @@ export class DebugPanel {
         const searchInput = container.querySelector('#log-search');
         const levelFilter = container.querySelector('#log-level-filter');
         const sortBtn = container.querySelector('#toggle-logs-sort');
+        const exportBtn = container.querySelector('#export-logs-btn');
         const clearBtn = container.querySelector('#clear-logs-btn');
         const filterLogs = () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -760,6 +821,9 @@ export class DebugPanel {
         sortBtn.addEventListener('click', () => {
             this.logsSortDescending = !this.logsSortDescending;
             this.renderContent();
+        });
+        exportBtn.addEventListener('click', () => {
+            this.exportLogsToFile();
         });
         clearBtn.addEventListener('click', () => {
             debugLogger.clearLogs();
@@ -1111,8 +1175,13 @@ export class DebugPanel {
             return total + Object.keys(state.botInstances[charId]).length;
         }, 0);
         const userInstanceCount = Object.keys(state.userInstances).length;
-        const stateStr = JSON.stringify(state);
-        const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
+        // Only recalculate storage size every 10 updates to reduce performance impact
+        let estimatedStorageSize;
+        if (Math.random() < 0.1) { // 10% chance to recalculate
+            const stateStr = JSON.stringify(state);
+            this.lastStorageSize = new Blob([stateStr]).size / 1024;
+        }
+        estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
         const updateTime = new Date().toLocaleTimeString();
         // Update performance info
         let infoHtml = `<div><strong>Total Bot Instances:</strong> ${botInstanceCount}</div>`;
@@ -1120,7 +1189,7 @@ export class DebugPanel {
         infoHtml += `<div><strong>Total Outfit Slots:</strong> ${(botInstanceCount + userInstanceCount) * 19}</div>`;
         infoHtml += `<div><strong>Estimated Storage Size:</strong> ${estimatedStorageSize}</div>`;
         infoHtml += `<div><strong>Current Cache Size:</strong> ${customMacroSystem.macroValueCache.size} items</div>`;
-        infoHtml += `<div><small>Last updated: ${updateTime}</small></div>`;
+        infoHtml += `<div><small>Last updated: ${updateTime}</small></small></div>`;
         // Update performance indicators
         infoHtml += '<h5>Performance Indicators:</h5>';
         infoHtml += '<div class="performance-indicators">';
@@ -1139,11 +1208,10 @@ export class DebugPanel {
         else {
             infoHtml += '<div class="good">✅ Reasonable number of user instances</div>';
         }
-        const storageKB = new Blob([stateStr]).size / 1024;
-        if (storageKB > 1000) {
+        if (this.lastStorageSize > 1000) {
             infoHtml += '<div class="warning">⚠️ Large storage size detected</div>';
         }
-        else if (storageKB > 500) {
+        else if (this.lastStorageSize > 500) {
             infoHtml += '<div class="info">ℹ️ Moderate storage size</div>';
         }
         else {
@@ -1171,27 +1239,15 @@ export class DebugPanel {
         }
     }
     /**
-     * Updates events tab with current event count
-     */
-    updateEventsTab() {
-        var _a;
-        const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
-        if (!contentArea || contentArea.getAttribute('data-tab') !== 'events')
-            return;
-        // Update the total events count
-        const totalCount = contentArea.querySelector('.events-count');
-        if (totalCount) {
-            totalCount.textContent = `Total: ${this.recordedEvents.length}`;
-        }
-    }
-    /**
      * Updates the event notification badge on the events tab button
      */
     updateEventNotification() {
-        if (!this.domElement)
+        if (!this.isVisible || !this.domElement)
             return;
         const eventTabButton = this.domElement.querySelector('button[data-tab="events"]');
-        const notificationBadge = eventTabButton === null || eventTabButton === void 0 ? void 0 : eventTabButton.querySelector('.event-notification');
+        if (!eventTabButton)
+            return;
+        const notificationBadge = eventTabButton.querySelector('.event-notification');
         if (!notificationBadge)
             return;
         const newEventCount = this.recordedEvents.length - this.lastViewedEventCount;
@@ -1538,13 +1594,13 @@ export class DebugPanel {
     startRealTimeUpdates() {
         // Clear existing intervals
         this.stopRealTimeUpdates();
-        // Update logs tab every 500ms
+        // Update logs tab every 1000ms (reduced frequency to prevent stuttering)
         this.logUpdateInterval = window.setInterval(() => {
             if (this.isVisible && this.currentTab === 'logs') {
                 this.updateLogsTab();
             }
-        }, 500);
-        // Update other tabs every 2 seconds
+        }, 1000);
+        // Update other tabs every 5 seconds (reduced frequency to prevent stuttering)
         this.realTimeUpdateInterval = window.setInterval(() => {
             if (!this.isVisible)
                 return;
@@ -1561,17 +1617,15 @@ export class DebugPanel {
                 case 'embedded':
                     this.updateEmbeddedDataTab();
                     break;
-                case 'events':
-                    this.updateEventsTab();
-                    break;
                 case 'state':
                     this.updateStateTab();
                     break;
                 case 'misc':
                     this.updateMiscTab();
                     break;
+                // Removed 'events' from real-time updates - it only updates when events are recorded
             }
-        }, 2000);
+        }, 5000);
     }
     /**
      * Updates the embedded data tab with current information

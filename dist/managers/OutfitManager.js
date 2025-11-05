@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { ALL_SLOTS } from '../config/constants.js';
 import { invalidateSpecificMacroCaches } from '../services/CustomMacroService.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 export class OutfitManager {
     constructor(slots = ALL_SLOTS) {
         this.slots = slots;

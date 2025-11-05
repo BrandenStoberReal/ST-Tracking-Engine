@@ -12,7 +12,7 @@ import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils
 import { debugLog } from '../logging/DebugLogger.js';
 import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService.js';
 import { getCharacterOutfitData } from './CharacterOutfitService.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
  */

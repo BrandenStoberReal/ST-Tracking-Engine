@@ -46,6 +46,8 @@ export class DebugPanel {
     private logUpdateInterval: number | null = null;
     private logsSortDescending: boolean = true; // true = newest first (descending)
     private lastViewedEventCount: number = 0; // Track events seen when tab was last viewed
+    private lastMacroCacheSize: number = 0; // Track macro cache size to avoid unnecessary updates
+    private lastStorageSize: number = 0; // Cache storage size calculation
 
     constructor() {
         // Subscribe to all extension events to record them
@@ -525,6 +527,179 @@ export class DebugPanel {
     }
 
     /**
+     * Renders the 'Logs' tab with logs from the DebugLogger
+     */
+    renderLogsTab(container: HTMLElement): void {
+        const logs = debugLogger.getLogs();
+
+        let logsHtml = `
+            <div class="debug-logs-header">
+                <input type="text" id="log-search" placeholder="Search logs...">
+                <select id="log-level-filter">
+                    <option value="all">All Levels</option>
+                    <option value="info">Info</option>
+                    <option value="warn">Warn</option>
+                    <option value="error">Error</option>
+                </select>
+                <button id="toggle-logs-sort" class="menu_button" title="Toggle sort direction">
+                    ${this.logsSortDescending ? '⬇️ Newest First' : '⬆️ Oldest First'}
+                </button>
+                <button id="export-logs-btn" class="menu_button">Export Logs</button>
+                <button id="clear-logs-btn" class="menu_button">Clear Logs</button>
+            </div>
+            <div class="debug-logs-list">
+        `;
+
+        if (logs.length === 0) {
+            logsHtml += '<p>No logs available.</p>';
+        } else {
+            // Sort logs based on timestamp
+            const sortedLogs = [...logs].sort((a, b) => {
+                const timeA = new Date(a.timestamp).getTime();
+                const timeB = new Date(b.timestamp).getTime();
+                return this.logsSortDescending ? timeB - timeA : timeA - timeB;
+            });
+
+            logsHtml += sortedLogs.map(log => {
+                const hasData = log.data !== null && log.data !== undefined;
+                const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
+                const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
+
+                if (hasData) {
+                    return `
+                        <div class="${logItemClasses}" ${logItemAttributes}>
+                            <details>
+                                <summary>
+                                    <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
+                                    <span class="log-level">[${log.level}]</span>
+                                    <span class="log-message">${log.message}</span>
+                                </summary>
+                                <div class="log-data">
+                                    <pre>${JSON.stringify(log.data, null, 2)}</pre>
+                                </div>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="${logItemClasses}" ${logItemAttributes}>
+                            <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
+                            <span class="log-level">[${log.level}]</span>
+                            <span class="log-message">${log.message}</span>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        logsHtml += '</div>';
+
+        container.innerHTML = logsHtml;
+
+        const searchInput = container.querySelector('#log-search') as HTMLInputElement;
+        const levelFilter = container.querySelector('#log-level-filter') as HTMLSelectElement;
+        const sortBtn = container.querySelector('#toggle-logs-sort') as HTMLButtonElement;
+        const exportBtn = container.querySelector('#export-logs-btn') as HTMLButtonElement;
+        const clearBtn = container.querySelector('#clear-logs-btn') as HTMLButtonElement;
+
+        const filterLogs = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedLevel = levelFilter.value;
+            const logItems = container.querySelectorAll('.log-item');
+
+            logItems.forEach(item => {
+                const level = (item as HTMLElement).dataset.level;
+                const message = (item as HTMLElement).dataset.message;
+                const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
+                const isSearchMatch = message?.includes(searchTerm);
+
+                if (isLevelMatch && isSearchMatch) {
+                    (item as HTMLElement).style.display = '';
+                } else {
+                    (item as HTMLElement).style.display = 'none';
+                }
+            });
+        };
+
+        searchInput.addEventListener('input', filterLogs);
+        levelFilter.addEventListener('change', filterLogs);
+
+        sortBtn.addEventListener('click', () => {
+            this.logsSortDescending = !this.logsSortDescending;
+            this.renderContent();
+        });
+
+        exportBtn.addEventListener('click', () => {
+            this.exportLogsToFile();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            debugLogger.clearLogs();
+            this.renderContent();
+            toastr.success('Logs cleared!', 'Debug Panel');
+        });
+    }
+
+    /**
+     * Exports current logs to a downloadable .log file
+     */
+    private exportLogsToFile(): void {
+        const logs = debugLogger.getLogs();
+
+        if (logs.length === 0) {
+            toastr.warning('No logs to export!', 'Debug Panel');
+            return;
+        }
+
+        // Sort logs by timestamp (newest first for export)
+        const sortedLogs = [...logs].sort((a, b) => {
+            const timeA = new Date(a.timestamp).getTime();
+            const timeB = new Date(b.timestamp).getTime();
+            return timeB - timeA; // Newest first
+        });
+
+        // Format logs for export
+        const logLines = sortedLogs.map(log => {
+            const timestamp = new Date(log.timestamp).toISOString();
+            const level = log.level.toUpperCase().padEnd(5);
+            const message = log.message;
+
+            let logLine = `[${timestamp}] [${level}] ${message}`;
+
+            // Add data if present
+            if (log.data !== null && log.data !== undefined) {
+                try {
+                    const dataStr = JSON.stringify(log.data, null, 2);
+                    logLine += '\n' + dataStr.split('\n').map(line => `    ${line}`).join('\n');
+                } catch (error) {
+                    logLine += `\n    [Error serializing data: ${error}]`;
+                }
+            }
+
+            return logLine;
+        });
+
+        // Create the full log content
+        const logContent = logLines.join('\n\n') + '\n';
+
+        // Create and download the file
+        const blob = new Blob([logContent], {type: 'text/plain;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `st-outfits-logs-${new Date().toISOString().split('T')[0]}.log`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+        toastr.success(`Exported ${logs.length} log entries!`, 'Debug Panel');
+    }
+
+    /**
      * Updates logs tab with new log entries
      */
     private updateLogsTab(): void {
@@ -541,34 +716,6 @@ export class DebugPanel {
         // Only update if there are new logs
         if (logs.length > logItems.length) {
             this.renderLogsTab(contentArea as HTMLElement);
-        }
-    }
-
-    /**
-     * Updates macros tab with current macro values
-     */
-    private updateMacrosTab(): void {
-        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
-        if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros') return;
-
-        // Check if content has been rendered
-        const cacheInfo = contentArea.querySelector('.macro-cache-info');
-        const cacheTable = contentArea.querySelector('.macro-cache-table');
-        if (!cacheInfo || !cacheTable) return;
-
-        // Update macro cache info
-        const updateTime = new Date().toLocaleTimeString();
-        cacheInfo.innerHTML = `Cached entries: ${customMacroSystem.macroValueCache.size} <small>(Updated: ${updateTime})</small>`;
-
-        // Update macro cache table
-        const tbody = (cacheTable as HTMLTableElement).querySelector('tbody');
-        if (tbody) {
-            let tbodyHtml = '';
-            for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
-                const timestamp = new Date(entry.timestamp).toISOString();
-                tbodyHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
-            }
-            tbody.innerHTML = tbodyHtml;
         }
     }
 
@@ -784,111 +931,44 @@ export class DebugPanel {
     }
 
     /**
-     * Renders the 'Logs' tab with logs from the DebugLogger
+     * Updates macros tab with current macro values
      */
-    renderLogsTab(container: HTMLElement): void {
-        const logs = debugLogger.getLogs();
+    private updateMacrosTab(): void {
+        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'macros') return;
 
-        let logsHtml = `
-            <div class="debug-logs-header">
-                <input type="text" id="log-search" placeholder="Search logs...">
-                <select id="log-level-filter">
-                    <option value="all">All Levels</option>
-                    <option value="info">Info</option>
-                    <option value="warn">Warn</option>
-                    <option value="error">Error</option>
-                </select>
-                <button id="toggle-logs-sort" class="menu_button" title="Toggle sort direction">
-                    ${this.logsSortDescending ? '⬇️ Newest First' : '⬆️ Oldest First'}
-                </button>
-                <button id="clear-logs-btn" class="menu_button">Clear Logs</button>
-            </div>
-            <div class="debug-logs-list">
-        `;
+        // Check if content has been rendered
+        const cacheInfo = contentArea.querySelector('.macro-cache-info');
+        const cacheTable = contentArea.querySelector('.macro-cache-table');
+        if (!cacheInfo || !cacheTable) return;
 
-        if (logs.length === 0) {
-            logsHtml += '<p>No logs available.</p>';
-        } else {
-            // Sort logs based on timestamp
-            const sortedLogs = [...logs].sort((a, b) => {
-                const timeA = new Date(a.timestamp).getTime();
-                const timeB = new Date(b.timestamp).getTime();
-                return this.logsSortDescending ? timeB - timeA : timeA - timeB;
-            });
+        const currentCacheSize = customMacroSystem.macroValueCache.size;
 
-            logsHtml += sortedLogs.map(log => {
-                const hasData = log.data !== null && log.data !== undefined;
-                const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
-                const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
-
-                if (hasData) {
-                    return `
-                        <div class="${logItemClasses}" ${logItemAttributes}>
-                            <details>
-                                <summary>
-                                    <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
-                                    <span class="log-level">[${log.level}]</span>
-                                    <span class="log-message">${log.message}</span>
-                                </summary>
-                                <div class="log-data">
-                                    <pre>${JSON.stringify(log.data, null, 2)}</pre>
-                                </div>
-                            </details>
-                        </div>
-                    `;
-                } else {
-                    return `
-                        <div class="${logItemClasses}" ${logItemAttributes}>
-                            <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
-                            <span class="log-level">[${log.level}]</span>
-                            <span class="log-message">${log.message}</span>
-                        </div>
-                    `;
-                }
-            }).join('');
+        // Only update if cache size changed
+        if (currentCacheSize === this.lastMacroCacheSize) {
+            // Just update the timestamp
+            const updateTime = new Date().toLocaleTimeString();
+            const sizeText = cacheInfo.innerHTML.match(/Cached entries: \d+/)?.[0] || `Cached entries: ${currentCacheSize}`;
+            cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
+            return;
         }
 
-        logsHtml += '</div>';
+        this.lastMacroCacheSize = currentCacheSize;
 
-        container.innerHTML = logsHtml;
+        // Update macro cache info
+        const updateTime = new Date().toLocaleTimeString();
+        cacheInfo.innerHTML = `Cached entries: ${currentCacheSize} <small>(Updated: ${updateTime})</small>`;
 
-        const searchInput = container.querySelector('#log-search') as HTMLInputElement;
-        const levelFilter = container.querySelector('#log-level-filter') as HTMLSelectElement;
-        const sortBtn = container.querySelector('#toggle-logs-sort') as HTMLButtonElement;
-        const clearBtn = container.querySelector('#clear-logs-btn') as HTMLButtonElement;
-
-        const filterLogs = () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedLevel = levelFilter.value;
-            const logItems = container.querySelectorAll('.log-item');
-
-            logItems.forEach(item => {
-                const level = (item as HTMLElement).dataset.level;
-                const message = (item as HTMLElement).dataset.message;
-                const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
-                const isSearchMatch = message?.includes(searchTerm);
-
-                if (isLevelMatch && isSearchMatch) {
-                    (item as HTMLElement).style.display = '';
-                } else {
-                    (item as HTMLElement).style.display = 'none';
-                }
-            });
-        };
-
-        searchInput.addEventListener('input', filterLogs);
-        levelFilter.addEventListener('change', filterLogs);
-
-        sortBtn.addEventListener('click', () => {
-            this.logsSortDescending = !this.logsSortDescending;
-            this.renderContent();
-        });
-
-        clearBtn.addEventListener('click', () => {
-            debugLogger.clearLogs();
-            this.renderContent();
-            toastr.success('Logs cleared!', 'Debug Panel');
-        });
+        // Update macro cache table
+        const tbody = (cacheTable as HTMLTableElement).querySelector('tbody');
+        if (tbody) {
+            let tbodyHtml = '';
+            for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
+                const timestamp = new Date(entry.timestamp).toISOString();
+                tbodyHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
+            }
+            tbody.innerHTML = tbodyHtml;
+        }
     }
 
     /**
@@ -1289,8 +1369,15 @@ export class DebugPanel {
             return total + Object.keys(state.botInstances[charId]).length;
         }, 0);
         const userInstanceCount = Object.keys(state.userInstances).length;
-        const stateStr = JSON.stringify(state);
-        const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
+
+        // Only recalculate storage size every 10 updates to reduce performance impact
+        let estimatedStorageSize: string;
+        if (Math.random() < 0.1) { // 10% chance to recalculate
+            const stateStr = JSON.stringify(state);
+            this.lastStorageSize = new Blob([stateStr]).size / 1024;
+        }
+        estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
+
         const updateTime = new Date().toLocaleTimeString();
 
         // Update performance info
@@ -1299,7 +1386,7 @@ export class DebugPanel {
         infoHtml += `<div><strong>Total Outfit Slots:</strong> ${(botInstanceCount + userInstanceCount) * 19}</div>`;
         infoHtml += `<div><strong>Estimated Storage Size:</strong> ${estimatedStorageSize}</div>`;
         infoHtml += `<div><strong>Current Cache Size:</strong> ${customMacroSystem.macroValueCache.size} items</div>`;
-        infoHtml += `<div><small>Last updated: ${updateTime}</small></div>`;
+        infoHtml += `<div><small>Last updated: ${updateTime}</small></small></div>`;
 
         // Update performance indicators
         infoHtml += '<h5>Performance Indicators:</h5>';
@@ -1319,10 +1406,9 @@ export class DebugPanel {
             infoHtml += '<div class="good">✅ Reasonable number of user instances</div>';
         }
 
-        const storageKB = new Blob([stateStr]).size / 1024;
-        if (storageKB > 1000) {
+        if (this.lastStorageSize > 1000) {
             infoHtml += '<div class="warning">⚠️ Large storage size detected</div>';
-        } else if (storageKB > 500) {
+        } else if (this.lastStorageSize > 500) {
             infoHtml += '<div class="info">ℹ️ Moderate storage size</div>';
         } else {
             infoHtml += '<div class="good">✅ Reasonable storage size</div>';
@@ -1350,29 +1436,18 @@ export class DebugPanel {
         }
     }
 
-    /**
-     * Updates events tab with current event count
-     */
-    private updateEventsTab(): void {
-        const contentArea = this.domElement?.querySelector('.outfit-debug-content');
-        if (!contentArea || contentArea.getAttribute('data-tab') !== 'events') return;
 
-        // Update the total events count
-        const totalCount = contentArea.querySelector('.events-count') as HTMLElement;
-        if (totalCount) {
-            totalCount.textContent = `Total: ${this.recordedEvents.length}`;
-        }
-    }
 
     /**
      * Updates the event notification badge on the events tab button
      */
     private updateEventNotification(): void {
-        if (!this.domElement) return;
+        if (!this.isVisible || !this.domElement) return;
 
         const eventTabButton = this.domElement.querySelector('button[data-tab="events"]') as HTMLElement;
-        const notificationBadge = eventTabButton?.querySelector('.event-notification') as HTMLElement;
+        if (!eventTabButton) return;
 
+        const notificationBadge = eventTabButton.querySelector('.event-notification') as HTMLElement;
         if (!notificationBadge) return;
 
         const newEventCount = this.recordedEvents.length - this.lastViewedEventCount;
@@ -1760,14 +1835,14 @@ export class DebugPanel {
         // Clear existing intervals
         this.stopRealTimeUpdates();
 
-        // Update logs tab every 500ms
+        // Update logs tab every 1000ms (reduced frequency to prevent stuttering)
         this.logUpdateInterval = window.setInterval(() => {
             if (this.isVisible && this.currentTab === 'logs') {
                 this.updateLogsTab();
             }
-        }, 500);
+        }, 1000);
 
-        // Update other tabs every 2 seconds
+        // Update other tabs every 5 seconds (reduced frequency to prevent stuttering)
         this.realTimeUpdateInterval = window.setInterval(() => {
             if (!this.isVisible) return;
 
@@ -1784,17 +1859,15 @@ export class DebugPanel {
                 case 'embedded':
                     this.updateEmbeddedDataTab();
                     break;
-                case 'events':
-                    this.updateEventsTab();
-                    break;
                 case 'state':
                     this.updateStateTab();
                     break;
                 case 'misc':
                     this.updateMiscTab();
                     break;
+                // Removed 'events' from real-time updates - it only updates when events are recorded
             }
-        }, 2000);
+        }, 5000);
     }
 
     /**

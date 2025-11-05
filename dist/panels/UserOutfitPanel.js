@@ -12,7 +12,7 @@ import { formatSlotName as utilsFormatSlotName } from '../utils/utilities.js';
 import { areSystemMessagesEnabled } from '../utils/SettingsUtil.js';
 import { outfitStore } from '../common/Store.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 /**
  * UserOutfitPanel - Manages the UI for the user character's outfit tracking
  * This class creates and manages a draggable panel for viewing and modifying

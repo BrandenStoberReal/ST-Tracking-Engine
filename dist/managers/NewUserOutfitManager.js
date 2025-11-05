@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { OutfitManager } from './OutfitManager.js';
 import { outfitStore } from '../common/Store.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 export class NewUserOutfitManager extends OutfitManager {
     constructor(slots) {
         super(slots);

@@ -11,7 +11,7 @@ import { ALL_SLOTS } from '../config/constants.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { findCharacterById, getCharacterId } from './CharacterIdService.js';
 import { outfitStore } from '../common/Store.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 /**
  * Gets the SillyTavern context
  */

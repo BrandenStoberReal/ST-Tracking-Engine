@@ -16,7 +16,7 @@ import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { findCharacterById } from '../services/CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 /**
  * BotOutfitPanel - Manages the UI for the bot character's outfit tracking
  * This class creates and manages a draggable panel for viewing and modifying

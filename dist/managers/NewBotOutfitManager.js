@@ -11,7 +11,7 @@ import { OutfitManager } from './OutfitManager.js';
 import { outfitStore } from '../common/Store.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { getCharacterDefaultOutfitById, setCharacterDefaultOutfitById } from '../services/CharacterOutfitService.js';
-import { extensionEventBus, EXTENSION_EVENTS } from '../core/events.js';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 export class NewBotOutfitManager extends OutfitManager {
     constructor(slots) {
         super(slots);
