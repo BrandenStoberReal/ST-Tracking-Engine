@@ -1666,6 +1666,219 @@ input:checked + .slider:before {
     border-color: #e74c3c !important;
 }
 
+/* Embedded Data Tab Styles */
+.debug-embedded-content {
+    padding: 8px;
+}
+
+.debug-embedded-content h4 {
+    margin: 0 0 12px 0;
+    font-size: 1.2em;
+    color: #ecf0f1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 4px;
+}
+
+.debug-embedded-content h5 {
+    margin: 16px 0 8px 0;
+    font-size: 1.1em;
+    color: #bdc3c7;
+}
+
+.embedded-search-container {
+    margin-bottom: 12px;
+}
+
+.embedded-search-container input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #5d6d7e;
+    border-radius: 4px;
+    background: rgba(44, 62, 80, 0.8);
+    color: #ecf0f1;
+    font-size: 0.9em;
+}
+
+.embedded-search-container input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+.embedded-character-item {
+    background: rgba(52, 73, 94, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    padding: 10px;
+    transition: all 0.2s ease;
+}
+
+.embedded-character-item:hover {
+    background: rgba(52, 73, 94, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.embedded-character-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.embedded-character-name {
+    font-weight: 600;
+    color: #ecf0f1;
+}
+
+.embedded-character-id {
+    font-size: 0.85em;
+    color: #95a5a6;
+    margin-left: 8px;
+}
+
+.embedded-character-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.embedded-character-actions button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    color: #ecf0f1;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    transition: all 0.2s ease;
+}
+
+.embedded-character-actions button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.embedded-character-summary {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.embedded-status {
+    font-size: 0.85em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.embedded-status.has-default {
+    background: rgba(46, 204, 113, 0.2);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+    color: #2ecc71;
+}
+
+.embedded-status.no-default {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+}
+
+.embedded-status.has-presets {
+    background: rgba(52, 152, 219, 0.2);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    color: #3498db;
+}
+
+.embedded-status.no-presets {
+    background: rgba(149, 165, 166, 0.2);
+    border: 1px solid rgba(149, 165, 166, 0.3);
+    color: #95a5a6;
+}
+
+.embedded-last-modified {
+    font-size: 0.8em;
+    color: #7f8c8d;
+    margin-left: auto;
+}
+
+.embedded-character-details {
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 8px;
+}
+
+.embedded-character-details h6 {
+    margin: 0 0 6px 0;
+    font-size: 0.95em;
+    color: #bdc3c7;
+}
+
+.embedded-character-details pre {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 0.8em;
+    color: #ecf0f1;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.embedded-stats {
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+    padding: 8px;
+    background: rgba(44, 62, 80, 0.4);
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.embedded-stats span {
+    color: #bdc3c7;
+}
+
+.no-embedded-data,
+.no-characters {
+    color: #95a5a6;
+    font-style: italic;
+    padding: 16px;
+    text-align: center;
+    background: rgba(44, 62, 80, 0.3);
+    border-radius: 4px;
+    margin: 12px 0;
+}
+
+.embedded-migration-tools {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(52, 73, 94, 0.4);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.embedded-migration-tools .menu_button {
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+#migration-results {
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+#migration-results p {
+    margin: 0;
+    color: #ecf0f1;
+}
+
 /* Responsive design for debug panel */
 @media (max-width: 768px) {
     .outfit-debug-panel {

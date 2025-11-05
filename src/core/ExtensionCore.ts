@@ -18,6 +18,7 @@ import {OutfitDataService} from '../services/OutfitDataService';
 import {macroProcessor} from '../processors/MacroProcessor';
 import {debugLog} from '../logging/DebugLogger';
 import {migrateAllCharacters} from '../services/CharacterIdService';
+import {migrateDefaultOutfitsToCharacterCards} from '../services/CharacterOutfitService';
 
 declare const window: any;
 
@@ -93,6 +94,11 @@ function setupApi(botManager: any, userManager: any, botPanel: any, userPanel: a
     window.wipeAllOutfits = () => outfitDataService.wipeAllOutfits(); // Make it directly accessible globally
     extension_api.migrateCharacterIds = () => migrateAllCharacters();
     window.migrateCharacterIds = () => migrateAllCharacters(); // Make it directly accessible globally
+    extension_api.migrateDefaultOutfitsToCharacterCards = async () => {
+        const defaultOutfitsMigrated = await migrateDefaultOutfitsToCharacterCards();
+        return {defaultOutfitsMigrated};
+    };
+    window.migrateDefaultOutfitsToCharacterCards = extension_api.migrateDefaultOutfitsToCharacterCards; // Make it directly accessible globally
     extension_api.getOutfitExtensionStatus = () => ({
         core: true,
         autoOutfit: autoOutfitSystem?.getStatus?.() ?? false,
@@ -282,6 +288,18 @@ export async function initializeExtension(): Promise<void> {
     } catch (error) {
         debugLog('Error during character migration:', error, 'error');
         console.error('[ST-Outfits] Error during character migration:', error);
+    }
+
+    // Migrate existing default outfits to character cards
+    try {
+        debugLog('Starting default outfit migration to character cards...', null, 'info');
+        console.log('[ST-Outfits] Starting default outfit migration to character cards...');
+        const defaultOutfitsMigrated = await migrateDefaultOutfitsToCharacterCards();
+        debugLog(`Default outfit migration completed. ${defaultOutfitsMigrated} characters had default outfits migrated.`, null, 'info');
+        console.log(`[ST-Outfits] Default outfit migration completed. ${defaultOutfitsMigrated} characters had default outfits migrated.`);
+    } catch (error) {
+        debugLog('Error during default outfit migration:', error, 'error');
+        console.error('[ST-Outfits] Error during default outfit migration:', error);
     }
 
     const outfitDataService = new OutfitDataService(dataManager);

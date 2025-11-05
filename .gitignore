@@ -4,3 +4,5 @@ QWEN.md
 GEMINI.md
 /.qwen/
 /.gemini/
+/AGENTS.md
+/docs/examples/powerUserSettings_example.json

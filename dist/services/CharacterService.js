@@ -10,7 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { getOrCreateCharacterId } from './CharacterIdService.js';
+import { getOrCreateCharacterId, findCharacterById } from './CharacterIdService.js';
+import { getCharacterOutfitData } from './CharacterOutfitService.js';
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
  */
@@ -49,6 +50,36 @@ function refreshMacroProcessing() {
     }
 }
 /**
+ * Syncs embedded outfit data from character card to extension storage
+ * @param {string} characterId - The character ID
+ * @returns {Promise<void>}
+ */
+function syncEmbeddedOutfitData(characterId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const embeddedData = getCharacterOutfitData(findCharacterById(characterId));
+            if (!embeddedData) {
+                return;
+            }
+            // Sync default outfit
+            if (embeddedData.defaultOutfit) {
+                debugLog(`[CharacterService] Syncing embedded default outfit for character ${characterId}`, null, 'info');
+                // The default outfit is now embedded, so we don't need to sync it to settings
+                // But we could potentially migrate old settings here if needed
+            }
+            // Sync presets
+            if (embeddedData.presets) {
+                debugLog(`[CharacterService] Syncing embedded presets for character ${characterId}`, null, 'info');
+                // For now, presets are loaded on-demand from character cards
+                // We could sync them to extension storage if needed for performance
+            }
+        }
+        catch (error) {
+            debugLog('[CharacterService] Error syncing embedded outfit data:', error, 'error');
+        }
+    });
+}
+/**
  * Updates outfit managers and panels for the current character
  * @param {object} botManager - Bot outfit manager instance
  * @param {object} userManager - User outfit manager instance
@@ -83,6 +114,8 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
                     const characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
                     if (characterName) {
                         botManager.setCharacter(characterName, characterUniqueId);
+                        // Sync any embedded outfit data from the character card
+                        yield syncEmbeddedOutfitData(characterUniqueId);
                     }
                 }
             }

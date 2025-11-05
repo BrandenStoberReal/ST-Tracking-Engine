@@ -1,9 +1,19 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { dragElementWithSave, resizeElement } from '../common/shared.js';
 import { outfitStore } from '../common/Store.js';
 import { customMacroSystem } from '../services/CustomMacroService.js';
 import { debugLogger } from '../logging/DebugLogger.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
+import { getCharacterOutfitData } from '../services/CharacterOutfitService.js';
 export class DebugPanel {
     constructor() {
         this.isVisible = false;
@@ -71,16 +81,17 @@ export class DebugPanel {
                     <span class="outfit-debug-action" id="outfit-debug-close">×</span>
                 </div>
             </div>
-            <div class="outfit-debug-tabs">
-                <button class="outfit-debug-tab ${this.currentTab === 'instances' ? 'active' : ''}" data-tab="instances">Instances <span class="realtime-indicator">🔄</span></button>
-                <button class="outfit-debug-tab ${this.currentTab === 'macros' ? 'active' : ''}" data-tab="macros">Macros <span class="realtime-indicator">🔄</span></button>
-                 <button class="outfit-debug-tab ${this.currentTab === 'pointers' ? 'active' : ''}" data-tab="pointers">Pointers <span class="realtime-indicator">🔄</span></button>
-                 <button class="outfit-debug-tab ${this.currentTab === 'performance' ? 'active' : ''}" data-tab="performance">Performance <span class="realtime-indicator">🔄</span></button>
-                 <button class="outfit-debug-tab ${this.currentTab === 'logs' ? 'active' : ''}" data-tab="logs">Logs <span class="realtime-indicator">🔄</span></button>
-                 <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events</button>
-                 <button class="outfit-debug-tab ${this.currentTab === 'state' ? 'active' : ''}" data-tab="state">State <span class="realtime-indicator">🔄</span></button>
-                 <button class="outfit-debug-tab ${this.currentTab === 'misc' ? 'active' : ''}" data-tab="misc">Misc <span class="realtime-indicator">🔄</span></button>
-            </div>
+             <div class="outfit-debug-tabs">
+                 <button class="outfit-debug-tab ${this.currentTab === 'instances' ? 'active' : ''}" data-tab="instances">Instances <span class="realtime-indicator">🔄</span></button>
+                 <button class="outfit-debug-tab ${this.currentTab === 'macros' ? 'active' : ''}" data-tab="macros">Macros <span class="realtime-indicator">🔄</span></button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'pointers' ? 'active' : ''}" data-tab="pointers">Pointers <span class="realtime-indicator">🔄</span></button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'performance' ? 'active' : ''}" data-tab="performance">Performance <span class="realtime-indicator">🔄</span></button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'logs' ? 'active' : ''}" data-tab="logs">Logs <span class="realtime-indicator">🔄</span></button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'events' ? 'active' : ''}" data-tab="events">Events</button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'embedded' ? 'active' : ''}" data-tab="embedded">Embedded <span class="realtime-indicator">🔄</span></button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'state' ? 'active' : ''}" data-tab="state">State <span class="realtime-indicator">🔄</span></button>
+                  <button class="outfit-debug-tab ${this.currentTab === 'misc' ? 'active' : ''}" data-tab="misc">Misc <span class="realtime-indicator">🔄</span></button>
+             </div>
             <div class="outfit-debug-content" id="outfit-debug-tab-content"></div>
         `;
         document.body.appendChild(panel);
@@ -299,6 +310,9 @@ export class DebugPanel {
                 case 'performance':
                     this.updatePerformanceTab();
                     break;
+                case 'embedded':
+                    this.updateEmbeddedDataTab();
+                    break;
                 case 'state':
                     this.updateStateTab();
                     break;
@@ -470,6 +484,7 @@ export class DebugPanel {
             performance: this.renderPerformanceTab.bind(this),
             logs: this.renderLogsTab.bind(this),
             events: this.renderEventsTab.bind(this),
+            embedded: this.renderEmbeddedDataTab.bind(this),
             state: this.renderStateTab.bind(this),
             misc: this.renderMiscTab.bind(this),
         };
@@ -1269,6 +1284,204 @@ export class DebugPanel {
                     }
                 }
             });
+        });
+    }
+    /**
+     * Renders the 'Embedded Data' tab for debugging character card embedded outfit data
+     */
+    renderEmbeddedDataTab(container) {
+        var _a, _b, _c, _d, _e, _f;
+        const context = ((_b = (_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) === null || _b === void 0 ? void 0 : _b.call(_a)) || ((_d = (_c = window).getContext) === null || _d === void 0 ? void 0 : _d.call(_c));
+        let embeddedHtml = '<div class="debug-embedded-content">';
+        embeddedHtml += '<h4>Character Card Embedded Outfit Data</h4>';
+        embeddedHtml += '<div class="embedded-info">';
+        if (!context || !context.characters) {
+            embeddedHtml += '<p class="no-characters">No characters available for embedded data inspection.</p>';
+        }
+        else {
+            embeddedHtml += '<div class="embedded-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
+            embeddedHtml += '<h5>Characters with Embedded Outfit Data:</h5>';
+            let charactersWithEmbeddedData = 0;
+            for (let i = 0; i < context.characters.length; i++) {
+                const character = context.characters[i];
+                const characterName = character.name || `Character ${i + 1}`;
+                const characterId = ((_f = (_e = character.data) === null || _e === void 0 ? void 0 : _e.extensions) === null || _f === void 0 ? void 0 : _f.character_id) || 'No ID';
+                const embeddedData = getCharacterOutfitData(character);
+                if (embeddedData) {
+                    charactersWithEmbeddedData++;
+                    const hasDefaultOutfit = embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0;
+                    const presetCount = embeddedData.presets ? Object.keys(embeddedData.presets).length : 0;
+                    const hasPresets = presetCount > 0;
+                    const lastModified = embeddedData.lastModified ? new Date(embeddedData.lastModified).toLocaleString() : 'Unknown';
+                    embeddedHtml += `
+                        <div class="embedded-character-item" data-character-name="${characterName.toLowerCase()}" data-character-id="${characterId}">
+                            <div class="embedded-character-header">
+                                <span class="embedded-character-name">${characterName}</span>
+                                <span class="embedded-character-id">(${characterId})</span>
+                                <div class="embedded-character-actions">
+                                    <button class="copy-embedded-btn" title="Copy embedded data">📋</button>
+                                    <button class="view-embedded-btn" title="Toggle details">▼</button>
+                                </div>
+                            </div>
+                            <div class="embedded-character-summary">
+                                <span class="embedded-status ${hasDefaultOutfit ? 'has-default' : 'no-default'}">
+                                    ${hasDefaultOutfit ? '✅' : '❌'} Default Outfit
+                                </span>
+                                <span class="embedded-status ${hasPresets ? 'has-presets' : 'no-presets'}">
+                                    ${hasPresets ? '📁' : '📂'} ${presetCount} Presets
+                                </span>
+                                <span class="embedded-last-modified">Modified: ${lastModified}</span>
+                            </div>
+                            <div class="embedded-character-details" style="display: none;">
+                                <h6>Embedded Data:</h6>
+                                <pre>${JSON.stringify(embeddedData, null, 2)}</pre>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            if (charactersWithEmbeddedData === 0) {
+                embeddedHtml += '<p class="no-embedded-data">No characters have embedded outfit data.</p>';
+            }
+            embeddedHtml += `<div class="embedded-stats">
+                <span>Total Characters: ${context.characters.length}</span>
+                <span>With Embedded Data: ${charactersWithEmbeddedData}</span>
+                <span>Without Embedded Data: ${context.characters.length - charactersWithEmbeddedData}</span>
+            </div>`;
+        }
+        embeddedHtml += '</div>';
+        // Add migration section
+        embeddedHtml += '<h4>Migration Tools</h4>';
+        embeddedHtml += '<div class="embedded-migration-tools">';
+        embeddedHtml += '<button id="migrate-default-outfits-btn" class="menu_button">Migrate Default Outfits to Cards</button>';
+        embeddedHtml += '<button id="migrate-presets-btn" class="menu_button">Migrate Presets to Cards</button>';
+        embeddedHtml += '<div id="migration-results"></div>';
+        embeddedHtml += '</div>';
+        embeddedHtml += '</div>';
+        container.innerHTML = embeddedHtml;
+        // Add event listeners
+        setTimeout(() => {
+            // Search functionality
+            const searchInput = container.querySelector('#embedded-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const characterItems = container.querySelectorAll('.embedded-character-item');
+                    characterItems.forEach(item => {
+                        var _a;
+                        const characterName = item.dataset.characterName || '';
+                        const characterId = item.dataset.characterId || '';
+                        const itemText = ((_a = item.textContent) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || '';
+                        if (characterName.includes(searchTerm) ||
+                            characterId.includes(searchTerm) ||
+                            itemText.includes(searchTerm)) {
+                            item.style.display = '';
+                        }
+                        else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            // Character item interactions
+            const characterItems = container.querySelectorAll('.embedded-character-item');
+            characterItems.forEach(item => {
+                const viewBtn = item.querySelector('.view-embedded-btn');
+                const copyBtn = item.querySelector('.copy-embedded-btn');
+                const details = item.querySelector('.embedded-character-details');
+                if (viewBtn && details) {
+                    viewBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isVisible = details.style.display !== 'none';
+                        details.style.display = isVisible ? 'none' : 'block';
+                        viewBtn.textContent = isVisible ? '▼' : '▲';
+                    });
+                }
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', (e) => {
+                        var _a;
+                        e.stopPropagation();
+                        const dataElement = item.querySelector('.embedded-character-details pre');
+                        if (dataElement) {
+                            navigator.clipboard.writeText(dataElement.textContent || '');
+                            (_a = window.toastr) === null || _a === void 0 ? void 0 : _a.success('Embedded data copied to clipboard!', 'Debug Panel');
+                        }
+                    });
+                }
+            });
+            // Migration buttons
+            const migrateDefaultsBtn = container.querySelector('#migrate-default-outfits-btn');
+            const migratePresetsBtn = container.querySelector('#migrate-presets-btn');
+            const resultsDiv = container.querySelector('#migration-results');
+            if (migrateDefaultsBtn) {
+                migrateDefaultsBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                    var _a, _b, _c, _d;
+                    if (resultsDiv) {
+                        resultsDiv.innerHTML = '<p>Migrating default outfits...</p>';
+                    }
+                    try {
+                        const result = yield ((_b = (_a = window).migrateDefaultOutfitsToCharacterCards) === null || _b === void 0 ? void 0 : _b.call(_a));
+                        if (resultsDiv) {
+                            resultsDiv.innerHTML = `<p>✅ Migration completed: ${(result === null || result === void 0 ? void 0 : result.defaultOutfitsMigrated) || 0} characters migrated.</p>`;
+                        }
+                        this.renderContent(); // Refresh the tab
+                        (_c = window.toastr) === null || _c === void 0 ? void 0 : _c.success('Default outfits migrated!', 'Debug Panel');
+                    }
+                    catch (error) {
+                        if (resultsDiv) {
+                            resultsDiv.innerHTML = '<p>❌ Migration failed. Check console for details.</p>';
+                        }
+                        debugLogger.log('Migration error:', error, 'error');
+                        (_d = window.toastr) === null || _d === void 0 ? void 0 : _d.error('Migration failed', 'Debug Panel');
+                    }
+                }));
+            }
+            if (migratePresetsBtn) {
+                migratePresetsBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                    var _a, _b;
+                    if (resultsDiv) {
+                        resultsDiv.innerHTML = '<p>Migrating presets...</p>';
+                    }
+                    try {
+                        // Note: Preset migration is not implemented as we only embed default outfits
+                        if (resultsDiv) {
+                            resultsDiv.innerHTML = '<p>ℹ️ Preset migration is not available. Only default outfits are embedded.</p>';
+                        }
+                        (_a = window.toastr) === null || _a === void 0 ? void 0 : _a.info('Preset migration not available', 'Debug Panel');
+                    }
+                    catch (error) {
+                        if (resultsDiv) {
+                            resultsDiv.innerHTML = '<p>❌ Migration failed. Check console for details.</p>';
+                        }
+                        debugLogger.log('Migration error:', error, 'error');
+                        (_b = window.toastr) === null || _b === void 0 ? void 0 : _b.error('Migration failed', 'Debug Panel');
+                    }
+                }));
+            }
+        }, 100);
+    }
+    /**
+     * Updates the embedded data tab with current information
+     */
+    updateEmbeddedDataTab() {
+        var _a;
+        const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
+        if (!contentArea || contentArea.getAttribute('data-tab') !== 'embedded')
+            return;
+        // Check if content has been rendered
+        const embeddedInfo = contentArea.querySelector('.embedded-info');
+        if (!embeddedInfo)
+            return;
+        // For now, just update the timestamp display. Full re-render could be expensive
+        const lastModifiedElements = contentArea.querySelectorAll('.embedded-last-modified');
+        lastModifiedElements.forEach(element => {
+            var _a;
+            // Update "Modified: X" text with current time indicator
+            const currentTime = new Date().toLocaleTimeString();
+            if ((_a = element.textContent) === null || _a === void 0 ? void 0 : _a.includes('Modified:')) {
+                // Keep original timestamp but add a visual indicator that we're live
+                element.innerHTML = element.innerHTML.replace(/Modified: ([^<]*)/, `Modified: $1 <small>(Live: ${currentTime})</small>`);
+            }
         });
     }
 }
