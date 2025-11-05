@@ -64,7 +64,7 @@ export class NewBotOutfitManager extends OutfitManager {
 
     loadOutfit(): void {
         if (!this.characterId || !this.outfitInstanceId) {
-            debugLog('[NewBotOutfitManager] Cannot load outfit - missing characterId or outfitInstanceId', null, 'warn');
+            debugLog('[NewBotOutfitManager] Cannot load outfit - missing characterId or outfitInstanceId', null, 'debug');
             this.slots.forEach(slot => {
                 this.currentValues[slot] = 'None';
             });

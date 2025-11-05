@@ -1,7 +1,7 @@
 import {dragElementWithSave, resizeElement} from '../common/shared';
 import {extractCommands} from '../processors/StringProcessor';
 import {LLMUtility} from '../utils/LLMUtility';
-import {formatSlotName as utilsFormatSlotName} from '../utils/utilities';
+import {formatSlotName} from '../utils/utilities';
 import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
 import {outfitStore} from '../common/Store';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
@@ -230,7 +230,7 @@ export class BotOutfitPanel {
             slotElement.dataset.slot = slot.name;
 
             slotElement.innerHTML = `
-                <div class="slot-label">${this.formatSlotName(slot.name)}</div>
+                <div class="slot-label">${formatSlotName(slot.name)}</div>
                 <div class="slot-value" title="${slot.value}">${slot.value}</div>
                 <div class="slot-actions">
                     <button class="slot-change">Change</button>
@@ -431,15 +431,6 @@ export class BotOutfitPanel {
         }
     }
 
-
-    /**
-     * Formats a slot name for display
-     * @param {string} name - The slot name to format
-     * @returns {string} The formatted slot name
-     */
-    formatSlotName(name: string): string {
-        return utilsFormatSlotName(name);
-    }
 
     /**
      * Gets character data from the current context

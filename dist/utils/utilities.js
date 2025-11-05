@@ -147,6 +147,9 @@ export function deepMerge(target, source) {
  * @returns {string} The formatted slot name
  */
 export function formatSlotName(slotName) {
+    if (typeof slotName !== 'string') {
+        return 'Unknown';
+    }
     const slotNameMap = {
         'topunderwear': 'Top Underwear / Inner Top',
         'bottomunderwear': 'Bottom Underwear / Inner Bottom',
@@ -170,7 +173,7 @@ export function formatSlotName(slotName) {
     let result = slotName.replace(/([a-z])([A-Z])/g, '$1 $2');
     result = result.charAt(0).toUpperCase() + result.slice(1);
     result = result.replace(/-/g, ' ');
-    result = result.replace(/underwear/g, 'Underwear');
+    result = result.replace(/underwear/gi, 'Underwear');
     return result;
 }
 /**

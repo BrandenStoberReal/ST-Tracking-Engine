@@ -19,7 +19,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
     loadOutfit(): void {
         if (!this.outfitInstanceId) {
-            debugLog('[NewUserOutfitManager] Cannot load outfit - missing outfitInstanceId', null, 'warn');
+            debugLog('[NewUserOutfitManager] Cannot load outfit - missing outfitInstanceId', null, 'debug');
             this.slots.forEach(slot => {
                 this.currentValues[slot] = 'None';
             });
@@ -431,7 +431,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
     loadOutfitFromInstanceId(instanceId: string): { [key: string]: string } {
         if (!instanceId) {
-            debugLog('[NewUserOutfitManager] Cannot load outfit - missing instanceId', null, 'warn');
+            debugLog('[NewUserOutfitManager] Cannot load outfit - missing instanceId', null, 'debug');
             const defaultOutfit: { [key: string]: string } = {};
             this.slots.forEach(slot => {
                 defaultOutfit[slot] = 'None';

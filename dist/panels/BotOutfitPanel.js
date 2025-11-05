@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { dragElementWithSave, resizeElement } from '../common/shared.js';
 import { extractCommands } from '../processors/StringProcessor.js';
 import { LLMUtility } from '../utils/LLMUtility.js';
-import { formatSlotName as utilsFormatSlotName } from '../utils/utilities.js';
+import { formatSlotName } from '../utils/utilities.js';
 import { areSystemMessagesEnabled } from '../utils/SettingsUtil.js';
 import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
@@ -189,7 +189,7 @@ export class BotOutfitPanel {
             slotElement.className = 'outfit-slot';
             slotElement.dataset.slot = slot.name;
             slotElement.innerHTML = `
-                <div class="slot-label">${this.formatSlotName(slot.name)}</div>
+                <div class="slot-label">${formatSlotName(slot.name)}</div>
                 <div class="slot-value" title="${slot.value}">${slot.value}</div>
                 <div class="slot-actions">
                     <button class="slot-change">Change</button>
@@ -361,14 +361,6 @@ export class BotOutfitPanel {
                 extendedTimeOut: 8000
             });
         }
-    }
-    /**
-     * Formats a slot name for display
-     * @param {string} name - The slot name to format
-     * @returns {string} The formatted slot name
-     */
-    formatSlotName(name) {
-        return utilsFormatSlotName(name);
     }
     /**
      * Gets character data from the current context

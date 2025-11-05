@@ -5,7 +5,7 @@
  */
 export const CLOTHING_SLOTS = [
     'headwear', 'topwear', 'topunderwear', 'bottomwear',
-    'bottomunderwear', 'footwear', 'footunderwear'
+    'footwear', 'footunderwear'
 ];
 /**
  * Array of accessory slot names used in the outfit system

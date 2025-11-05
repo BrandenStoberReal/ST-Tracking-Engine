@@ -33,7 +33,7 @@ interface DefaultSettings {
  */
 export const CLOTHING_SLOTS: string[] = [
     'headwear', 'topwear', 'topunderwear', 'bottomwear',
-    'bottomunderwear', 'footwear', 'footunderwear'
+    'footwear', 'footunderwear'
 ];
 
 /**

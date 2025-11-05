@@ -160,6 +160,10 @@ export function deepMerge<T extends object, U extends object>(target: T, source:
  * @returns {string} The formatted slot name
  */
 export function formatSlotName(slotName: string): string {
+    if (typeof slotName !== 'string') {
+        return 'Unknown';
+    }
+
     const slotNameMap: { [key: string]: string } = {
         'topunderwear': 'Top Underwear / Inner Top',
         'bottomunderwear': 'Bottom Underwear / Inner Bottom',
@@ -186,7 +190,7 @@ export function formatSlotName(slotName: string): string {
 
     result = result.charAt(0).toUpperCase() + result.slice(1);
     result = result.replace(/-/g, ' ');
-    result = result.replace(/underwear/g, 'Underwear');
+    result = result.replace(/underwear/gi, 'Underwear');
 
     return result;
 }
