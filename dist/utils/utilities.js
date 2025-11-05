@@ -87,26 +87,39 @@ export function safeGet(obj, path, defaultValue = null) {
  * @returns {any} A deep clone of the input object
  */
 export function deepClone(obj) {
-    if (obj === null || typeof obj !== 'object') {
+    const visited = new WeakMap();
+    function clone(obj) {
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+        if (obj instanceof Date) {
+            return new Date(obj.getTime());
+        }
+        if (visited.has(obj)) {
+            return visited.get(obj);
+        }
+        if (Array.isArray(obj)) {
+            const clonedArr = [];
+            visited.set(obj, clonedArr);
+            for (let i = 0; i < obj.length; i++) {
+                clonedArr[i] = clone(obj[i]);
+            }
+            return clonedArr;
+        }
+        if (typeof obj === 'object') {
+            const clonedObj = {};
+            visited.set(obj, clonedObj);
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    clonedObj[key] = clone(obj[key]);
+                }
+            }
+            return clonedObj;
+        }
+        // Default return to satisfy TypeScript
         return obj;
     }
-    if (obj instanceof Date) {
-        return new Date(obj.getTime());
-    }
-    if (Array.isArray(obj)) {
-        return obj.map(item => deepClone(item));
-    }
-    if (typeof obj === 'object') {
-        const clonedObj = {};
-        for (const key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                clonedObj[key] = deepClone(obj[key]);
-            }
-        }
-        return clonedObj;
-    }
-    // Default return to satisfy TypeScript
-    return obj;
+    return clone(obj);
 }
 /**
  * Performs a deep merge of two objects

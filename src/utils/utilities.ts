@@ -92,28 +92,43 @@ export function safeGet(obj: any, path: string, defaultValue: any = null): any {
  * @returns {any} A deep clone of the input object
  */
 export function deepClone<T>(obj: T): T {
-    if (obj === null || typeof obj !== 'object') {
+    const visited = new WeakMap();
+
+    function clone(obj: any): any {
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+        if (obj instanceof Date) {
+            return new Date(obj.getTime());
+        }
+        if (visited.has(obj)) {
+            return visited.get(obj);
+        }
+        if (Array.isArray(obj)) {
+            const clonedArr: any[] = [];
+            visited.set(obj, clonedArr);
+            for (let i = 0; i < obj.length; i++) {
+                clonedArr[i] = clone(obj[i]);
+            }
+            return clonedArr;
+        }
+        if (typeof obj === 'object') {
+            const clonedObj = {} as any;
+            visited.set(obj, clonedObj);
+
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    clonedObj[key] = clone(obj[key]);
+                }
+            }
+            return clonedObj;
+        }
+
+        // Default return to satisfy TypeScript
         return obj;
     }
-    if (obj instanceof Date) {
-        return new Date(obj.getTime()) as any;
-    }
-    if (Array.isArray(obj)) {
-        return obj.map(item => deepClone(item)) as any;
-    }
-    if (typeof obj === 'object') {
-        const clonedObj = {} as T;
 
-        for (const key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                clonedObj[key] = deepClone(obj[key]);
-            }
-        }
-        return clonedObj;
-    }
-
-    // Default return to satisfy TypeScript
-    return obj;
+    return clone(obj);
 }
 
 /**
