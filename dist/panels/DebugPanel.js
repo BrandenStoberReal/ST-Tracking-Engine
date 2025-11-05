@@ -273,6 +273,9 @@ export class DebugPanel {
                     <option value="warn">Warn</option>
                     <option value="error">Error</option>
                 </select>
+                <button id="expand-all-logs-btn" class="menu_button" title="Expand all log details">📖 Expand All</button>
+                <button id="collapse-all-logs-btn" class="menu_button" title="Collapse all log details">📕 Collapse All</button>
+                <button id="refresh-logs-btn" class="menu_button" title="Refresh logs">🔄 Refresh</button>
                 <button id="toggle-logs-sort" class="menu_button" title="Toggle sort direction">
                     ${this.logsSortDescending ? '⬇️ Newest First' : '⬆️ Oldest First'}
                 </button>
@@ -330,6 +333,9 @@ export class DebugPanel {
         container.innerHTML = logsHtml;
         const searchInput = container.querySelector('#log-search');
         const levelFilter = container.querySelector('#log-level-filter');
+        const expandAllBtn = container.querySelector('#expand-all-logs-btn');
+        const collapseAllBtn = container.querySelector('#collapse-all-logs-btn');
+        const refreshBtn = container.querySelector('#refresh-logs-btn');
         const sortBtn = container.querySelector('#toggle-logs-sort');
         const exportBtn = container.querySelector('#export-logs-btn');
         const clearBtn = container.querySelector('#clear-logs-btn');
@@ -352,6 +358,21 @@ export class DebugPanel {
         };
         searchInput.addEventListener('input', filterLogs);
         levelFilter.addEventListener('change', filterLogs);
+        expandAllBtn.addEventListener('click', () => {
+            const detailsElements = container.querySelectorAll('.log-item details');
+            detailsElements.forEach(details => {
+                details.open = true;
+            });
+        });
+        collapseAllBtn.addEventListener('click', () => {
+            const detailsElements = container.querySelectorAll('.log-item details');
+            detailsElements.forEach(details => {
+                details.open = false;
+            });
+        });
+        refreshBtn.addEventListener('click', () => {
+            this.renderLogsTab(container);
+        });
         sortBtn.addEventListener('click', () => {
             this.logsSortDescending = !this.logsSortDescending;
             this.renderContent();
@@ -400,12 +421,16 @@ export class DebugPanel {
             const timeB = new Date(b.timestamp).getTime();
             return timeB - timeA; // Newest first
         });
-        // Format logs for export
-        const logLines = sortedLogs.map(log => {
+        // Group similar logs
+        const groupedLogs = this.groupSimilarLogs(sortedLogs);
+        // Format grouped logs for export
+        const logLines = groupedLogs.map(group => {
+            const log = group.logs[0]; // Use the first (most recent) log for display
             const timestamp = new Date(log.timestamp).toISOString();
             const level = log.level.toUpperCase().padEnd(5);
             const message = log.message;
-            let logLine = `[${timestamp}] [${level}] ${message}`;
+            const countSuffix = group.count > 1 ? ` (${group.count}x)` : '';
+            let logLine = `[${timestamp}] [${level}] ${message}${countSuffix}`;
             // Add data if present
             if (log.data !== null && log.data !== undefined) {
                 try {
@@ -430,7 +455,7 @@ export class DebugPanel {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        toastr.success(`Exported ${logs.length} log entries!`, 'Debug Panel');
+        toastr.success(`Exported ${groupedLogs.length} unique log entries (${logs.length} total)!`, 'Debug Panel');
     }
     /**
      * Updates logs tab with new log entries
@@ -448,7 +473,20 @@ export class DebugPanel {
         const logItems = contentArea.querySelectorAll('.log-item');
         // Only update if there are new logs
         if (logs.length > logItems.length) {
-            this.renderLogsTab(contentArea);
+            // Check if settings drawer might be affected - use a more targeted update
+            const settingsDrawer = document.querySelector('.inline-drawer-content');
+            const isDrawerPotentiallyOpen = settingsDrawer && window.getComputedStyle(settingsDrawer).display !== 'none';
+            // If drawer might be open, delay the update to avoid interference
+            if (isDrawerPotentiallyOpen) {
+                setTimeout(() => {
+                    if (this.isVisible && this.currentTab === 'logs') {
+                        this.renderLogsTab(contentArea);
+                    }
+                }, 100);
+            }
+            else {
+                this.renderLogsTab(contentArea);
+            }
         }
     }
     /**
@@ -1295,12 +1333,20 @@ export class DebugPanel {
     startRealTimeUpdates() {
         // Clear existing intervals
         this.stopRealTimeUpdates();
-        // Update logs tab every 2000ms (further reduced to prevent stuttering)
+        // Update logs tab every 5000ms (reduced frequency to prevent drawer collapsing)
         this.logUpdateInterval = window.setInterval(() => {
             if (this.isVisible && this.currentTab === 'logs') {
-                this.updateLogsTab();
+                // Check if user is actively interacting with settings to avoid collapsing drawer
+                const settingsPanel = document.getElementById('extensions_settings');
+                const isUserInteractingWithSettings = settingsPanel &&
+                    (settingsPanel.contains(document.activeElement) ||
+                        settingsPanel.matches(':hover'));
+                // Only update logs if user is not actively using settings
+                if (!isUserInteractingWithSettings) {
+                    this.updateLogsTab();
+                }
             }
-        }, 2000);
+        }, 5000);
         // Update other tabs every 10 seconds (further reduced to prevent stuttering)
         this.realTimeUpdateInterval = window.setInterval(() => {
             if (!this.isVisible)
