@@ -879,12 +879,8 @@ export class DebugPanel {
      * Gets the extension version
      */
     private getExtensionVersion(): string {
-        try {
-            const manifest = (window as any).extension_manifest || {};
-            return manifest.version || 'Unknown';
-        } catch {
-            return 'Unknown';
-        }
+        // Version from manifest.json - updated during build process
+        return '2.0.0-dev-unstable';
     }
 
     /**

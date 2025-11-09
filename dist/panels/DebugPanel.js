@@ -632,16 +632,118 @@ export class DebugPanel {
     }
     // ===== MISC TAB HELPER METHODS =====
     /**
+     * Renders the 'Misc' tab for other functions
+     */
+    renderMiscTab(container) {
+        let miscHtml = '<div class="debug-tab-content">';
+        // System Information Section
+        miscHtml += '<h4>🖥️ System Information</h4>';
+        miscHtml += '<div class="system-info">';
+        miscHtml += `<div><strong>Extension Version:</strong> ${this.getExtensionVersion()}</div>`;
+        miscHtml += `<div><strong>Browser:</strong> ${this.getBrowserInfo()}</div>`;
+        miscHtml += `<div><strong>Platform:</strong> ${navigator.platform}</div>`;
+        miscHtml += `<div><strong>User Agent:</strong> ${navigator.userAgent.substring(0, 50)}...</div>`;
+        miscHtml += `<div><strong>Language:</strong> ${navigator.language}</div>`;
+        miscHtml += `<div><strong>Timezone:</strong> ${Intl.DateTimeFormat().resolvedOptions().timeZone}</div>`;
+        miscHtml += `<div><strong>Screen:</strong> ${screen.width}x${screen.height} (${window.devicePixelRatio}x)</div>`;
+        miscHtml += `<div><strong>Memory Usage:</strong> ${this.getMemoryUsage()}</div>`;
+        miscHtml += '</div>';
+        // Extension Health Check
+        miscHtml += '<h4>🏥 Extension Health Check</h4>';
+        miscHtml += '<div class="health-check">';
+        miscHtml += '<div class="health-status">';
+        miscHtml += `<div class="health-item"><span class="health-label">Store:</span> <span class="health-value ${this.checkStoreHealth() ? 'status-active' : 'status-inactive'}">${this.checkStoreHealth() ? '✅ Healthy' : '❌ Issues'}</span></div>`;
+        miscHtml += `<div class="health-item"><span class="health-label">Panels:</span> <span class="health-value ${this.checkPanelsHealth() ? 'status-active' : 'status-inactive'}">${this.checkPanelsHealth() ? '✅ Loaded' : '❌ Issues'}</span></div>`;
+        miscHtml += `<div class="health-item"><span class="health-label">Macros:</span> <span class="health-value ${this.checkMacrosHealth() ? 'status-active' : 'status-inactive'}">${this.checkMacrosHealth() ? '✅ Working' : '❌ Issues'}</span></div>`;
+        miscHtml += `<div class="health-item"><span class="health-label">Event Bus:</span> <span class="health-value ${this.checkEventBusHealth() ? 'status-active' : 'status-inactive'}">${this.checkEventBusHealth() ? '✅ Active' : '❌ Issues'}</span></div>`;
+        miscHtml += '</div>';
+        miscHtml += '<button id="run-health-check" class="menu_button">🔄 Run Full Health Check</button>';
+        miscHtml += '</div>';
+        // Quick Actions Section
+        miscHtml += '<h4>⚡ Quick Actions</h4>';
+        miscHtml += '<div class="quick-actions">';
+        miscHtml += '<button id="reset-panel-positions" class="menu_button">Reset Panel Positions</button>';
+        miscHtml += '<button id="clear-all-caches" class="menu_button">Clear All Caches</button>';
+        miscHtml += '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
+        miscHtml += '<button id="force-gc" class="menu_button">Force Garbage Collection</button>';
+        miscHtml += '<button id="create-backup" class="menu_button">Create Emergency Backup</button>';
+        miscHtml += '<button id="show-extension-info" class="menu_button">Show Extension Info</button>';
+        miscHtml += '</div>';
+        // Debug Functions Section
+        miscHtml += '<h4>🔧 Debug Functions</h4>';
+        miscHtml += '<div class="debug-functions">';
+        miscHtml += '<button id="debug-refresh-store" class="menu_button">Refresh Store State</button>';
+        miscHtml += '<button id="debug-clear-cache" class="menu_button">Clear Macro Cache</button>';
+        miscHtml += '<button id="debug-wipe-all" class="menu_button danger-button">WIPE ALL DATA</button>';
+        miscHtml += '<button id="debug-export-data" class="menu_button">Export All Data</button>';
+        miscHtml += '<button id="debug-import-data" class="menu_button">Import Data</button>';
+        miscHtml += '<input type="file" id="debug-import-file" style="display: none;" accept=".json">';
+        miscHtml += '</div>';
+        miscHtml += '</div>';
+        container.innerHTML = miscHtml;
+        // Add button event listeners after content is inserted
+        setTimeout(() => {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+            // Health Check
+            (_a = document.getElementById('run-health-check')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+                this.runFullHealthCheck();
+            });
+            // Quick Actions
+            (_b = document.getElementById('reset-panel-positions')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+                this.resetPanelPositions();
+            });
+            (_c = document.getElementById('clear-all-caches')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
+                this.clearAllCaches();
+            });
+            (_d = document.getElementById('reset-settings')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => {
+                this.resetSettingsToDefaults();
+            });
+            (_e = document.getElementById('force-gc')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', () => {
+                this.forceGarbageCollection();
+            });
+            (_f = document.getElementById('create-backup')) === null || _f === void 0 ? void 0 : _f.addEventListener('click', () => {
+                this.createEmergencyBackup();
+            });
+            (_g = document.getElementById('show-extension-info')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', () => {
+                this.showExtensionInfo();
+            });
+            // Debug Functions
+            (_h = document.getElementById('debug-refresh-store')) === null || _h === void 0 ? void 0 : _h.addEventListener('click', () => {
+                // Re-render to show updated store state
+                this.renderContent();
+            });
+            (_j = document.getElementById('debug-clear-cache')) === null || _j === void 0 ? void 0 : _j.addEventListener('click', () => {
+                customMacroSystem.clearCache();
+                toastr.success('Macro cache cleared!', 'Debug Panel');
+                this.renderContent();
+            });
+            (_k = document.getElementById('debug-wipe-all')) === null || _k === void 0 ? void 0 : _k.addEventListener('click', () => {
+                if (confirm('Are you sure you want to wipe all outfit data? This cannot be undone.')) {
+                    if (window.wipeAllOutfits) {
+                        window.wipeAllOutfits();
+                        this.renderContent();
+                    }
+                }
+            });
+            (_l = document.getElementById('debug-export-data')) === null || _l === void 0 ? void 0 : _l.addEventListener('click', () => {
+                this.exportOutfitData();
+            });
+            (_m = document.getElementById('debug-import-data')) === null || _m === void 0 ? void 0 : _m.addEventListener('click', () => {
+                var _a;
+                (_a = document.getElementById('debug-import-file')) === null || _a === void 0 ? void 0 : _a.click();
+            });
+            (_o = document.getElementById('debug-import-file')) === null || _o === void 0 ? void 0 : _o.addEventListener('change', (e) => {
+                var _a;
+                this.importOutfitData((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0]);
+            });
+        }, 100);
+    }
+    /**
      * Gets the extension version
      */
     getExtensionVersion() {
-        try {
-            const manifest = window.extension_manifest || {};
-            return manifest.version || 'Unknown';
-        }
-        catch (_a) {
-            return 'Unknown';
-        }
+        // Version from manifest.json - updated during build process
+        return '2.0.0-dev-unstable';
     }
     /**
      * Gets browser information
@@ -671,7 +773,8 @@ export class DebugPanel {
                 return `${used}MB / ${total}MB (Limit: ${limit}MB)`;
             }
         }
-        catch (_a) { }
+        catch (_a) {
+        }
         return 'Not available';
     }
     /**
@@ -839,34 +942,6 @@ export class DebugPanel {
         catch (error) {
             toastr.error('Failed to create emergency backup', 'Debug Panel');
         }
-    }
-    /**
-     * Shows extension information
-     */
-    showExtensionInfo() {
-        const info = {
-            version: this.getExtensionVersion(),
-            loadedModules: {
-                store: !!outfitStore,
-                panels: !!(window.botOutfitPanel && window.userOutfitPanel),
-                macroSystem: !!customMacroSystem,
-                eventBus: !!extensionEventBus,
-                debugPanel: !!this
-            },
-            globalAPIs: {
-                outfitTracker: !!window.outfitTracker,
-                wipeAllOutfits: !!window.wipeAllOutfits,
-                refreshOutfitMacros: !!window.refreshOutfitMacros
-            },
-            services: {
-                characterService: !!window.characterService,
-                llmService: !!window.llmService,
-                eventService: !!window.eventService,
-                storageService: !!window.storageService
-            }
-        };
-        console.log('Extension Information:', info);
-        toastr.info('Extension info logged to console!', 'Debug Panel');
     }
     /**
      * Renders the 'Instances' tab with instance browser functionality
@@ -1283,111 +1358,32 @@ export class DebugPanel {
         }, 100);
     }
     /**
-     * Renders the 'Misc' tab for other functions
+     * Shows extension information
      */
-    renderMiscTab(container) {
-        let miscHtml = '<div class="debug-tab-content">';
-        // System Information Section
-        miscHtml += '<h4>🖥️ System Information</h4>';
-        miscHtml += '<div class="system-info">';
-        miscHtml += `<div><strong>Extension Version:</strong> ${this.getExtensionVersion()}</div>`;
-        miscHtml += `<div><strong>Browser:</strong> ${this.getBrowserInfo()}</div>`;
-        miscHtml += `<div><strong>Platform:</strong> ${navigator.platform}</div>`;
-        miscHtml += `<div><strong>User Agent:</strong> ${navigator.userAgent.substring(0, 50)}...</div>`;
-        miscHtml += `<div><strong>Language:</strong> ${navigator.language}</div>`;
-        miscHtml += `<div><strong>Timezone:</strong> ${Intl.DateTimeFormat().resolvedOptions().timeZone}</div>`;
-        miscHtml += `<div><strong>Screen:</strong> ${screen.width}x${screen.height} (${window.devicePixelRatio}x)</div>`;
-        miscHtml += `<div><strong>Memory Usage:</strong> ${this.getMemoryUsage()}</div>`;
-        miscHtml += '</div>';
-        // Extension Health Check
-        miscHtml += '<h4>🏥 Extension Health Check</h4>';
-        miscHtml += '<div class="health-check">';
-        miscHtml += '<div class="health-status">';
-        miscHtml += `<div class="health-item"><span class="health-label">Store:</span> <span class="health-value ${this.checkStoreHealth() ? 'status-active' : 'status-inactive'}">${this.checkStoreHealth() ? '✅ Healthy' : '❌ Issues'}</span></div>`;
-        miscHtml += `<div class="health-item"><span class="health-label">Panels:</span> <span class="health-value ${this.checkPanelsHealth() ? 'status-active' : 'status-inactive'}">${this.checkPanelsHealth() ? '✅ Loaded' : '❌ Issues'}</span></div>`;
-        miscHtml += `<div class="health-item"><span class="health-label">Macros:</span> <span class="health-value ${this.checkMacrosHealth() ? 'status-active' : 'status-inactive'}">${this.checkMacrosHealth() ? '✅ Working' : '❌ Issues'}</span></div>`;
-        miscHtml += `<div class="health-item"><span class="health-label">Event Bus:</span> <span class="health-value ${this.checkEventBusHealth() ? 'status-active' : 'status-inactive'}">${this.checkEventBusHealth() ? '✅ Active' : '❌ Issues'}</span></div>`;
-        miscHtml += '</div>';
-        miscHtml += '<button id="run-health-check" class="menu_button">🔄 Run Full Health Check</button>';
-        miscHtml += '</div>';
-        // Quick Actions Section
-        miscHtml += '<h4>⚡ Quick Actions</h4>';
-        miscHtml += '<div class="quick-actions">';
-        miscHtml += '<button id="reset-panel-positions" class="menu_button">Reset Panel Positions</button>';
-        miscHtml += '<button id="clear-all-caches" class="menu_button">Clear All Caches</button>';
-        miscHtml += '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
-        miscHtml += '<button id="force-gc" class="menu_button">Force Garbage Collection</button>';
-        miscHtml += '<button id="create-backup" class="menu_button">Create Emergency Backup</button>';
-        miscHtml += '<button id="show-extension-info" class="menu_button">Show Extension Info</button>';
-        miscHtml += '</div>';
-        // Debug Functions Section
-        miscHtml += '<h4>🔧 Debug Functions</h4>';
-        miscHtml += '<div class="debug-functions">';
-        miscHtml += '<button id="debug-refresh-store" class="menu_button">Refresh Store State</button>';
-        miscHtml += '<button id="debug-clear-cache" class="menu_button">Clear Macro Cache</button>';
-        miscHtml += '<button id="debug-wipe-all" class="menu_button danger-button">WIPE ALL DATA</button>';
-        miscHtml += '<button id="debug-export-data" class="menu_button">Export All Data</button>';
-        miscHtml += '<button id="debug-import-data" class="menu_button">Import Data</button>';
-        miscHtml += '<input type="file" id="debug-import-file" style="display: none;" accept=".json">';
-        miscHtml += '</div>';
-        miscHtml += '</div>';
-        container.innerHTML = miscHtml;
-        // Add button event listeners after content is inserted
-        setTimeout(() => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-            // Health Check
-            (_a = document.getElementById('run-health-check')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-                this.runFullHealthCheck();
-            });
-            // Quick Actions
-            (_b = document.getElementById('reset-panel-positions')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
-                this.resetPanelPositions();
-            });
-            (_c = document.getElementById('clear-all-caches')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
-                this.clearAllCaches();
-            });
-            (_d = document.getElementById('reset-settings')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => {
-                this.resetSettingsToDefaults();
-            });
-            (_e = document.getElementById('force-gc')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', () => {
-                this.forceGarbageCollection();
-            });
-            (_f = document.getElementById('create-backup')) === null || _f === void 0 ? void 0 : _f.addEventListener('click', () => {
-                this.createEmergencyBackup();
-            });
-            (_g = document.getElementById('show-extension-info')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', () => {
-                this.showExtensionInfo();
-            });
-            // Debug Functions
-            (_h = document.getElementById('debug-refresh-store')) === null || _h === void 0 ? void 0 : _h.addEventListener('click', () => {
-                // Re-render to show updated store state
-                this.renderContent();
-            });
-            (_j = document.getElementById('debug-clear-cache')) === null || _j === void 0 ? void 0 : _j.addEventListener('click', () => {
-                customMacroSystem.clearCache();
-                toastr.success('Macro cache cleared!', 'Debug Panel');
-                this.renderContent();
-            });
-            (_k = document.getElementById('debug-wipe-all')) === null || _k === void 0 ? void 0 : _k.addEventListener('click', () => {
-                if (confirm('Are you sure you want to wipe all outfit data? This cannot be undone.')) {
-                    if (window.wipeAllOutfits) {
-                        window.wipeAllOutfits();
-                        this.renderContent();
-                    }
-                }
-            });
-            (_l = document.getElementById('debug-export-data')) === null || _l === void 0 ? void 0 : _l.addEventListener('click', () => {
-                this.exportOutfitData();
-            });
-            (_m = document.getElementById('debug-import-data')) === null || _m === void 0 ? void 0 : _m.addEventListener('click', () => {
-                var _a;
-                (_a = document.getElementById('debug-import-file')) === null || _a === void 0 ? void 0 : _a.click();
-            });
-            (_o = document.getElementById('debug-import-file')) === null || _o === void 0 ? void 0 : _o.addEventListener('change', (e) => {
-                var _a;
-                this.importOutfitData((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0]);
-            });
-        }, 100);
+    showExtensionInfo() {
+        const info = {
+            version: this.getExtensionVersion(),
+            loadedModules: {
+                store: !!outfitStore,
+                panels: !!(window.botOutfitPanel && window.userOutfitPanel),
+                macroSystem: !!customMacroSystem,
+                eventBus: !!extensionEventBus,
+                debugPanel: !!this
+            },
+            globalAPIs: {
+                outfitTracker: !!window.outfitTracker,
+                wipeAllOutfits: !!window.wipeAllOutfits,
+                refreshOutfitMacros: !!window.refreshOutfitMacros
+            },
+            services: {
+                characterService: !!window.characterService,
+                llmService: !!window.llmService,
+                eventService: !!window.eventService,
+                storageService: !!window.storageService
+            }
+        };
+        console.log('Extension Information:', info);
+        toastr.info('Extension info logged to console!', 'Debug Panel');
     }
     /**
      * Export all outfit data to a JSON file
