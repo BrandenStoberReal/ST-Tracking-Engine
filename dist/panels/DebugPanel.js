@@ -1043,20 +1043,7 @@ export class DebugPanel {
      * Renders the 'Misc' tab for other functions
      */
     renderMiscTab(container) {
-        const state = outfitStore.getState();
         let miscHtml = '<div class="debug-misc-content">';
-        miscHtml += '<h4>Store State Information</h4>';
-        miscHtml += '<div class="store-info">';
-        // Show key store properties
-        const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
-        miscHtml += `<div><strong>Current Character:</strong> ${currentCharName}</div>`;
-        miscHtml += `<div><strong>Current Chat ID:</strong> ${state.currentChatId || 'None'}</div>`;
-        miscHtml += `<div><strong>Current Outfit Instance ID:</strong> ${state.currentOutfitInstanceId || 'None'}</div>`;
-        miscHtml += `<div><strong>Bot Panels Visible:</strong> ${state.panelVisibility.bot ? 'Yes' : 'No'}</div>`;
-        miscHtml += `<div><strong>User Panels Visible:</strong> ${state.panelVisibility.user ? 'Yes' : 'No'}</div>`;
-        miscHtml += '<h5>Settings:</h5>';
-        miscHtml += '<pre>' + JSON.stringify(state.settings, null, 2) + '</pre>';
-        miscHtml += '</div>';
         // Add buttons for various debug functions
         miscHtml += '<h4>Debug Functions</h4>';
         miscHtml += '<div class="debug-functions">';
@@ -1565,24 +1552,7 @@ export class DebugPanel {
      * Updates misc tab with current information
      */
     updateMiscTab() {
-        var _a;
-        const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
-        if (!contentArea || contentArea.getAttribute('data-tab') !== 'misc')
-            return;
-        // Check if content has been rendered
-        const storeInfo = contentArea.querySelector('.store-info');
-        if (!storeInfo)
-            return;
-        const state = outfitStore.getState();
-        const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
-        let infoHtml = `<div><strong>Current Character:</strong> ${currentCharName}</div>`;
-        infoHtml += `<div><strong>Current Chat ID:</strong> ${state.currentChatId || 'None'}</div>`;
-        infoHtml += `<div><strong>Current Outfit Instance ID:</strong> ${state.currentOutfitInstanceId || 'None'}</div>`;
-        infoHtml += `<div><strong>Bot Panels Visible:</strong> ${state.panelVisibility.bot ? 'Yes' : 'No'}</div>`;
-        infoHtml += `<div><strong>User Panels Visible:</strong> ${state.panelVisibility.user ? 'Yes' : 'No'}</div>`;
-        infoHtml += '<h5>Settings:</h5>';
-        infoHtml += '<pre>' + JSON.stringify(state.settings, null, 2) + '</pre>';
-        storeInfo.innerHTML = infoHtml;
+        // Misc tab no longer has real-time content to update
     }
     /**
      * Starts real-time update intervals for various tabs
@@ -1621,9 +1591,6 @@ export class DebugPanel {
                     break;
                 case 'state':
                     this.updateStateTab();
-                    break;
-                case 'misc':
-                    this.updateMiscTab();
                     break;
                 // Removed 'events' from real-time updates - it only updates when events are recorded
             }
