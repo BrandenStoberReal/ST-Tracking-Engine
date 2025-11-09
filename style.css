@@ -938,6 +938,55 @@ input:checked + .slider:before {
     color: #ffffff;
 }
 
+/* Debug Tab Content - Standardized styling for all debug panel tabs */
+.debug-tab-content {
+    padding: 10px;
+}
+
+.debug-tab-content h4 {
+    margin: 15px 0 8px 0;
+    font-size: 1.1em;
+    color: #ecf0f1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 4px;
+}
+
+.debug-tab-content h5 {
+    margin: 10px 0 6px 0;
+    font-size: 1em;
+    color: #bdc3c7;
+}
+
+/* Standardized search container for debug tabs */
+.debug-search-container {
+    margin-bottom: 12px;
+}
+
+.debug-search-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #ecf0f1;
+    font-size: 0.9em;
+}
+
+.debug-search-container input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+/* Standardized controls container for debug tabs */
+.debug-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 /* Debug Panel Styles */
 .outfit-debug-panel {
     position: fixed;
@@ -1222,30 +1271,65 @@ input:checked + .slider:before {
     padding-bottom: 4px;
 }
 
-.macro-values-table, .macro-cache-table, .pointer-values-table {
+.macro-values-table, .macro-cache-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
 }
 
 .macro-values-table th, .macro-values-table td,
-.macro-cache-table th, .macro-cache-table td,
-.pointer-values-table th, .pointer-values-table td {
+.macro-cache-table th, .macro-cache-table td {
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 6px 8px;
     text-align: left;
     font-size: 0.85em;
 }
 
-.macro-values-table th, .macro-cache-table th,
-.pointer-values-table th {
+.macro-values-table th, .macro-cache-table th {
     background: rgba(0, 0, 0, 0.3);
     color: #ecf0f1;
 }
 
 .macro-values-table tr:nth-child(even),
-.macro-cache-table tr:nth-child(even),
-.pointer-values-table tr:nth-child(even) {
+.macro-cache-table tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Standardized table styling for debug tabs */
+.debug-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.debug-table th,
+.debug-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85em;
+}
+
+.debug-table th {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    color: #f39c12;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.debug-table td {
+    color: #ecf0f1;
+}
+
+.debug-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.debug-table tr:nth-child(even) {
     background: rgba(0, 0, 0, 0.15);
 }
 

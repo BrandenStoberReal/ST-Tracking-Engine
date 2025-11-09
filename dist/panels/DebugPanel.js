@@ -170,7 +170,7 @@ export class DebugPanel {
         const state = outfitStore.getState();
         const botInstances = state.botInstances;
         const userInstances = state.userInstances;
-        let macrosHtml = '<div class="debug-macros-list">';
+        let macrosHtml = '<div class="debug-tab-content">';
         // Show macro information
         macrosHtml += '<h4>Current Macro Values</h4>';
         macrosHtml += '<div class="macro-info">';
@@ -243,8 +243,11 @@ export class DebugPanel {
     renderLogsTab(container) {
         const logs = debugLogger.getLogs();
         let logsHtml = `
-            <div class="debug-logs-header">
+            <div class="debug-tab-content">
+            <div class="debug-search-container">
                 <input type="text" id="log-search" placeholder="Search logs...">
+            </div>
+            <div class="debug-controls">
                 <select id="log-level-filter">
                     <option value="all">All Levels</option>
                     <option value="info">Info</option>
@@ -308,6 +311,7 @@ export class DebugPanel {
             }).join('');
         }
         logsHtml += '</div>';
+        logsHtml += '</div>';
         container.innerHTML = logsHtml;
         const searchInput = container.querySelector('#log-search');
         const levelFilter = container.querySelector('#log-level-filter');
@@ -370,7 +374,7 @@ export class DebugPanel {
     renderEmbeddedDataTab(container) {
         var _a, _b, _c, _d, _e, _f;
         const context = ((_b = (_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) === null || _b === void 0 ? void 0 : _b.call(_a)) || ((_d = (_c = window).getContext) === null || _d === void 0 ? void 0 : _d.call(_c));
-        let embeddedHtml = '<div class="debug-embedded-content">';
+        let embeddedHtml = '<div class="debug-tab-content">';
         embeddedHtml += '<h4>Character Card Embedded Outfit Data</h4>';
         // Count total default outfits
         let totalDefaultOutfits = 0;
@@ -394,7 +398,7 @@ export class DebugPanel {
             embeddedHtml += '<p class="no-characters">No characters available for embedded data inspection.</p>';
         }
         else {
-            embeddedHtml += '<div class="embedded-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
+            embeddedHtml += '<div class="debug-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
             embeddedHtml += '<h5>Characters with Embedded Outfit Data:</h5>';
             let charactersWithEmbeddedData = 0;
             for (let i = 0; i < context.characters.length; i++) {
@@ -568,7 +572,7 @@ export class DebugPanel {
         // Estimate storage size
         const stateStr = JSON.stringify(state);
         const estimatedStorageSize = `${(new Blob([stateStr]).size / 1024).toFixed(2)} KB`;
-        let performanceHtml = '<div class="debug-performance-content">';
+        let performanceHtml = '<div class="debug-tab-content">';
         performanceHtml += '<h4>Performance Metrics</h4>';
         performanceHtml += '<div class="performance-info">';
         // General metrics
@@ -632,9 +636,9 @@ export class DebugPanel {
         const state = outfitStore.getState();
         const botInstances = state.botInstances;
         const userInstances = state.userInstances;
-        let instancesHtml = '<div class="debug-instances-list">';
+        let instancesHtml = '<div class="debug-tab-content">';
         // Add search input
-        instancesHtml += '<div class="instance-search-container"><input type="text" id="instance-search" placeholder="Search instances..."></div>';
+        instancesHtml += '<div class="debug-search-container"><input type="text" id="instance-search" placeholder="Search instances..."></div>';
         // Add bot instances
         instancesHtml += '<h4>Bot Instances</h4>';
         if (Object.keys(botInstances).length === 0) {
@@ -778,7 +782,7 @@ export class DebugPanel {
     renderPointersTab(container) {
         const state = outfitStore.getState();
         const references = state.references;
-        let pointersHtml = '<div class="debug-pointers-list">';
+        let pointersHtml = '<div class="debug-tab-content">';
         // Current Context Section
         pointersHtml += '<h4>📍 Current Context</h4>';
         pointersHtml += '<div class="pointer-context-section">';
@@ -1023,7 +1027,7 @@ export class DebugPanel {
      */
     renderStateTab(container) {
         const state = outfitStore.getState();
-        let stateHtml = '<div class="debug-state-content">';
+        let stateHtml = '<div class="debug-tab-content">';
         stateHtml += '<h4>Current Store State</h4>';
         stateHtml += '<button id="copy-state-btn" class="menu_button">Copy to Clipboard</button>';
         stateHtml += '<div class="state-info">';
@@ -1043,7 +1047,7 @@ export class DebugPanel {
      * Renders the 'Misc' tab for other functions
      */
     renderMiscTab(container) {
-        let miscHtml = '<div class="debug-misc-content">';
+        let miscHtml = '<div class="debug-tab-content">';
         // Add buttons for various debug functions
         miscHtml += '<h4>Debug Functions</h4>';
         miscHtml += '<div class="debug-functions">';
