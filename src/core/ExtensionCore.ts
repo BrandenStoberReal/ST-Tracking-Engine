@@ -1,4 +1,5 @@
 import {updateForCurrentCharacter} from '../services/CharacterService';
+import {generateOutfitFromLLM, importOutfitFromCharacterCard} from '../services/LLMService';
 import {customMacroSystem} from '../services/CustomMacroService';
 import {extension_api} from '../common/shared';
 import {outfitStore} from '../common/Store';
@@ -85,12 +86,20 @@ function isMobileUserAgent(userAgent: string): boolean {
  * @param {any} outfitDataService - The outfit data service instance
  * @returns {void}
  */
-function setupApi(botManager: any, userManager: any, botPanel: any, userPanel: any, autoOutfitSystem: any, outfitDataService: any): void {
+function setupApi(botManager: any, userManager: any, botPanel: any, userPanel: any, autoOutfitSystem: any, outfitDataService: any, storageService?: any, dataManager?: any, eventService?: any): void {
     extension_api.botOutfitPanel = botPanel;
     extension_api.userOutfitPanel = userPanel;
     extension_api.autoOutfitSystem = autoOutfitSystem;
     extension_api.wipeAllOutfits = () => outfitDataService.wipeAllOutfits();
     window.wipeAllOutfits = () => outfitDataService.wipeAllOutfits(); // Make it directly accessible globally
+
+    // Attach services to window for debug panel
+    window.characterService = {updateForCurrentCharacter};
+    window.llmService = {generateOutfitFromLLM, importOutfitFromCharacterCard};
+    window.eventService = eventService;
+    window.storageService = storageService;
+    window.dataManager = dataManager;
+    window.outfitDataService = outfitDataService;
 
     extension_api.getOutfitExtensionStatus = () => ({
         core: true,
@@ -294,20 +303,20 @@ export async function initializeExtension(): Promise<void> {
     outfitStore.setAutoOutfitSystem(autoOutfitSystem);
     debugLog('Global references set', null, 'info');
 
-    setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem, outfitDataService);
+    const eventService = setupEventListeners({
+        botManager, userManager, botPanel, userPanel, autoOutfitSystem,
+        updateForCurrentCharacter: () => updateForCurrentCharacter(botManager, userManager, botPanel, userPanel),
+        processMacrosInFirstMessage: () => macroProcessor.processMacrosInFirstMessage(STContext),
+        context: STContext
+    });
+
+    setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem, outfitDataService, storageService, dataManager, eventService);
     initSettings(autoOutfitSystem, AutoOutfitSystem, STContext);
     await registerOutfitCommands(botManager, userManager, autoOutfitSystem);
     customMacroSystem.registerMacros(STContext);
     createSettingsUI(AutoOutfitSystem, autoOutfitSystem, STContext);
     debugLog('Extension components initialized', null, 'info');
 
-    // Pass the STContext to the event listeners setup
-    setupEventListeners({
-        botManager, userManager, botPanel, userPanel, autoOutfitSystem,
-        updateForCurrentCharacter: () => updateForCurrentCharacter(botManager, userManager, botPanel, userPanel),
-        processMacrosInFirstMessage: () => macroProcessor.processMacrosInFirstMessage(STContext),
-        context: STContext
-    });
     debugLog('Event listeners set up', null, 'info');
 
     updatePanelStyles();

@@ -1,6 +1,12 @@
 // Mock for browser globals that are available in SillyTavern but not in test environment
 (global as any).$ = jest.fn();
 (global as any).jQuery = (global as any).$;
+(global as any).toastr = {
+    success: jest.fn(),
+    error: jest.fn(),
+    warning: jest.fn(),
+    info: jest.fn()
+};
 
 // Mock SillyTavern's global object
 (global as any).SillyTavern = {
@@ -58,11 +64,21 @@
     clear: jest.fn()
 };
 
+(global as any).sessionStorage = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn()
+};
+
 (global as any).console = {
     ...console,
     log: jest.fn(),
     error: jest.fn(),
-    warn: jest.fn()
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn()
 };
 
 // Mock fetch API
@@ -71,9 +87,126 @@
         json: () => Promise.resolve({}),
         text: () => Promise.resolve(''),
         ok: true,
-        status: 200
+        status: 200,
+        headers: new Map()
     })
 );
+
+// Mock DOM APIs
+(global as any).document = {
+    ...document,
+    createElement: jest.fn((tagName: string) => {
+        const element = {
+            tagName: tagName.toUpperCase(),
+            style: {},
+            className: '',
+            id: '',
+            textContent: '',
+            innerHTML: '',
+            appendChild: jest.fn(),
+            removeChild: jest.fn(),
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            setAttribute: jest.fn(),
+            getAttribute: jest.fn(),
+            querySelector: jest.fn(),
+            querySelectorAll: jest.fn(() => []),
+            classList: {
+                add: jest.fn(),
+                remove: jest.fn(),
+                toggle: jest.fn(),
+                contains: jest.fn(() => false)
+            },
+            parentNode: null,
+            children: [],
+            click: jest.fn(),
+            focus: jest.fn(),
+            blur: jest.fn()
+        };
+        return element;
+    }),
+    body: {
+        appendChild: jest.fn(),
+        removeChild: jest.fn(),
+        style: {}
+    },
+    head: {
+        appendChild: jest.fn()
+    },
+    getElementById: jest.fn(() => null),
+    querySelector: jest.fn(() => null),
+    querySelectorAll: jest.fn(() => []),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn()
+};
+
+// Mock window APIs
+(global as any).window = {
+    ...((global as any).window || {}),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    setTimeout: jest.fn((fn: () => void) => fn()),
+    clearTimeout: jest.fn(),
+    setInterval: jest.fn((fn: () => void) => fn()),
+    clearInterval: jest.fn(),
+    requestAnimationFrame: jest.fn((fn: () => void) => fn()),
+    cancelAnimationFrame: jest.fn(),
+    getComputedStyle: jest.fn(() => ({})),
+    innerWidth: 1920,
+    innerHeight: 1080,
+    scrollX: 0,
+    scrollY: 0,
+    navigator: {
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        clipboard: {
+            writeText: jest.fn(() => Promise.resolve()),
+            readText: jest.fn(() => Promise.resolve(''))
+        }
+    },
+    location: {
+        href: 'http://localhost:8000',
+        pathname: '/',
+        search: '',
+        hash: ''
+    },
+    history: {
+        pushState: jest.fn(),
+        replaceState: jest.fn(),
+        back: jest.fn(),
+        forward: jest.fn()
+    }
+};
+
+// Mock performance API
+(global as any).performance = {
+    now: jest.fn(() => Date.now()),
+    mark: jest.fn(),
+    measure: jest.fn(),
+    getEntriesByName: jest.fn(() => []),
+    getEntriesByType: jest.fn(() => [])
+};
+
+// Mock URL API
+(global as any).URL = class {
+    static createObjectURL = jest.fn(() => 'blob:mock-url');
+    static revokeObjectURL = jest.fn();
+    href: string;
+
+    constructor(url: string) {
+        this.href = url;
+    }
+};
+
+// Mock Blob API
+(global as any).Blob = class {
+    size: number;
+    type: string;
+
+    constructor(parts: any[], options?: any) {
+        this.size = parts ? parts.join('').length : 0;
+        this.type = options?.type || '';
+    }
+};
 
 // Mock extension settings and context based on documentation
 const mockContext = {

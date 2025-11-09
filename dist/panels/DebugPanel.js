@@ -773,36 +773,6 @@ export class DebugPanel {
         });
     }
     /**
-     * Gets detailed information about a reference
-     */
-    getReferenceDetails(key, value) {
-        if (!value)
-            return 'N/A';
-        try {
-            switch (key) {
-                case 'currentCharacterId':
-                    return `Character ID: ${value}`;
-                case 'currentChatId':
-                    return `Chat ID: ${value}`;
-                case 'currentOutfitInstanceId':
-                    return `Instance ID: ${value}`;
-                case 'debugMode':
-                    return `Debug mode: ${value ? 'Enabled' : 'Disabled'}`;
-                case 'autoSave':
-                    return `Auto-save: ${value ? 'Enabled' : 'Disabled'}`;
-                default:
-                    if (typeof value === 'object') {
-                        const keys = Object.keys(value);
-                        return `${keys.length} properties`;
-                    }
-                    return typeof value === 'string' ? `"${value}"` : String(value);
-            }
-        }
-        catch (error) {
-            return 'Error getting details';
-        }
-    }
-    /**
      * Renders the 'Pointers' tab
      */
     renderPointersTab(container) {
@@ -980,6 +950,36 @@ export class DebugPanel {
         pointersHtml += '</div>';
         pointersHtml += '</div>';
         container.innerHTML = pointersHtml;
+    }
+    /**
+     * Gets detailed information about a reference
+     */
+    getReferenceDetails(key, value) {
+        if (!value)
+            return 'N/A';
+        try {
+            switch (key) {
+                case 'currentCharacterId':
+                    return `Character ID: ${value}`;
+                case 'currentChatId':
+                    return `Chat ID: ${value}`;
+                case 'currentOutfitInstanceId':
+                    return `Instance ID: ${value}`;
+                case 'debugMode':
+                    return `Debug mode: ${value ? 'Enabled' : 'Disabled'}`;
+                case 'autoSave':
+                    return `Auto-save: ${value ? 'Enabled' : 'Disabled'}`;
+                default:
+                    if (typeof value === 'object') {
+                        const keys = Object.keys(value);
+                        return `${keys.length} properties`;
+                    }
+                    return typeof value === 'string' ? `"${value}"` : String(value);
+            }
+        }
+        catch (error) {
+            return 'Error getting details';
+        }
     }
     /**
      * Runs performance tests and displays results
