@@ -1439,6 +1439,65 @@ input:checked + .slider:before {
     box-shadow: 0 3px 6px rgba(231, 76, 60, 0.4) !important;
 }
 
+/* Misc Tab Specific Styles */
+.system-info {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 0.85em;
+}
+
+.system-info div {
+    margin-bottom: 4px;
+    padding: 2px 0;
+}
+
+.system-info div:last-child {
+    margin-bottom: 0;
+}
+
+.health-check {
+    margin-bottom: 16px;
+}
+
+.health-status {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.health-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 0.85em;
+}
+
+.health-item .health-label {
+    font-weight: 500;
+}
+
+.health-item .health-value {
+    font-weight: 600;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.quick-actions .menu_button {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.85em;
+    text-align: center;
+}
+
 /* Scrollbar styling for debug panel */
 .outfit-debug-content::-webkit-scrollbar {
     width: 8px;

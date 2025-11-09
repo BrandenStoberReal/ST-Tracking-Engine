@@ -3,6 +3,7 @@ import {outfitStore} from '../common/Store';
 import {customMacroSystem} from '../services/CustomMacroService';
 import {debugLogger} from '../logging/DebugLogger';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
+import {extensionEventBus} from '../core/events';
 
 import {getCharacterOutfitData} from '../services/CharacterOutfitService';
 
@@ -748,6 +749,346 @@ export class DebugPanel {
         }
     }
 
+    // ===== MISC TAB HELPER METHODS =====
+
+    /**
+     * Renders the 'Misc' tab for other functions
+     */
+    renderMiscTab(container: HTMLElement): void {
+        let miscHtml = '<div class="debug-tab-content">';
+
+        // System Information Section
+        miscHtml += '<h4>🖥️ System Information</h4>';
+        miscHtml += '<div class="system-info">';
+        miscHtml += `<div><strong>Extension Version:</strong> ${this.getExtensionVersion()}</div>`;
+        miscHtml += `<div><strong>Browser:</strong> ${this.getBrowserInfo()}</div>`;
+        miscHtml += `<div><strong>Platform:</strong> ${navigator.platform}</div>`;
+        miscHtml += `<div><strong>User Agent:</strong> ${navigator.userAgent.substring(0, 50)}...</div>`;
+        miscHtml += `<div><strong>Language:</strong> ${navigator.language}</div>`;
+        miscHtml += `<div><strong>Timezone:</strong> ${Intl.DateTimeFormat().resolvedOptions().timeZone}</div>`;
+        miscHtml += `<div><strong>Screen:</strong> ${screen.width}x${screen.height} (${window.devicePixelRatio}x)</div>`;
+        miscHtml += `<div><strong>Memory Usage:</strong> ${this.getMemoryUsage()}</div>`;
+        miscHtml += '</div>';
+
+        // Extension Health Check
+        miscHtml += '<h4>🏥 Extension Health Check</h4>';
+        miscHtml += '<div class="health-check">';
+        miscHtml += '<div class="health-status">';
+        miscHtml += `<div class="health-item"><span class="health-label">Store:</span> <span class="health-value ${this.checkStoreHealth() ? 'status-active' : 'status-inactive'}">${this.checkStoreHealth() ? '✅ Healthy' : '❌ Issues'}</span></div>`;
+        miscHtml += `<div class="health-item"><span class="health-label">Panels:</span> <span class="health-value ${this.checkPanelsHealth() ? 'status-active' : 'status-inactive'}">${this.checkPanelsHealth() ? '✅ Loaded' : '❌ Issues'}</span></div>`;
+        miscHtml += `<div class="health-item"><span class="health-label">Macros:</span> <span class="health-value ${this.checkMacrosHealth() ? 'status-active' : 'status-inactive'}">${this.checkMacrosHealth() ? '✅ Working' : '❌ Issues'}</span></div>`;
+        miscHtml += `<div class="health-item"><span class="health-label">Event Bus:</span> <span class="health-value ${this.checkEventBusHealth() ? 'status-active' : 'status-inactive'}">${this.checkEventBusHealth() ? '✅ Active' : '❌ Issues'}</span></div>`;
+        miscHtml += '</div>';
+        miscHtml += '<button id="run-health-check" class="menu_button">🔄 Run Full Health Check</button>';
+        miscHtml += '</div>';
+
+        // Quick Actions Section
+        miscHtml += '<h4>⚡ Quick Actions</h4>';
+        miscHtml += '<div class="quick-actions">';
+        miscHtml += '<button id="reset-panel-positions" class="menu_button">Reset Panel Positions</button>';
+        miscHtml += '<button id="clear-all-caches" class="menu_button">Clear All Caches</button>';
+        miscHtml += '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
+        miscHtml += '<button id="force-gc" class="menu_button">Force Garbage Collection</button>';
+        miscHtml += '<button id="create-backup" class="menu_button">Create Emergency Backup</button>';
+        miscHtml += '<button id="show-extension-info" class="menu_button">Show Extension Info</button>';
+        miscHtml += '</div>';
+
+        // Debug Functions Section
+        miscHtml += '<h4>🔧 Debug Functions</h4>';
+        miscHtml += '<div class="debug-functions">';
+        miscHtml += '<button id="debug-refresh-store" class="menu_button">Refresh Store State</button>';
+        miscHtml += '<button id="debug-clear-cache" class="menu_button">Clear Macro Cache</button>';
+        miscHtml += '<button id="debug-wipe-all" class="menu_button danger-button">WIPE ALL DATA</button>';
+        miscHtml += '<button id="debug-export-data" class="menu_button">Export All Data</button>';
+        miscHtml += '<button id="debug-import-data" class="menu_button">Import Data</button>';
+        miscHtml += '<input type="file" id="debug-import-file" style="display: none;" accept=".json">';
+        miscHtml += '</div>';
+
+        miscHtml += '</div>';
+
+        container.innerHTML = miscHtml;
+
+        // Add button event listeners after content is inserted
+        setTimeout(() => {
+            // Health Check
+            document.getElementById('run-health-check')?.addEventListener('click', () => {
+                this.runFullHealthCheck();
+            });
+
+            // Quick Actions
+            document.getElementById('reset-panel-positions')?.addEventListener('click', () => {
+                this.resetPanelPositions();
+            });
+
+            document.getElementById('clear-all-caches')?.addEventListener('click', () => {
+                this.clearAllCaches();
+            });
+
+            document.getElementById('reset-settings')?.addEventListener('click', () => {
+                this.resetSettingsToDefaults();
+            });
+
+            document.getElementById('force-gc')?.addEventListener('click', () => {
+                this.forceGarbageCollection();
+            });
+
+            document.getElementById('create-backup')?.addEventListener('click', () => {
+                this.createEmergencyBackup();
+            });
+
+            document.getElementById('show-extension-info')?.addEventListener('click', () => {
+                this.showExtensionInfo();
+            });
+
+            // Debug Functions
+            document.getElementById('debug-refresh-store')?.addEventListener('click', () => {
+                // Re-render to show updated store state
+                this.renderContent();
+            });
+
+            document.getElementById('debug-clear-cache')?.addEventListener('click', () => {
+                customMacroSystem.clearCache();
+                toastr.success('Macro cache cleared!', 'Debug Panel');
+                this.renderContent();
+            });
+
+            document.getElementById('debug-wipe-all')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to wipe all outfit data? This cannot be undone.')) {
+                    if ((window as any).wipeAllOutfits) {
+                        (window as any).wipeAllOutfits();
+                        this.renderContent();
+                    }
+                }
+            });
+
+            document.getElementById('debug-export-data')?.addEventListener('click', () => {
+                this.exportOutfitData();
+            });
+
+            document.getElementById('debug-import-data')?.addEventListener('click', () => {
+                document.getElementById('debug-import-file')?.click();
+            });
+
+            document.getElementById('debug-import-file')?.addEventListener('change', (e) => {
+                this.importOutfitData((e.target as HTMLInputElement).files?.[0]);
+            });
+        }, 100);
+    }
+
+    /**
+     * Gets the extension version
+     */
+    private getExtensionVersion(): string {
+        try {
+            const manifest = (window as any).extension_manifest || {};
+            return manifest.version || 'Unknown';
+        } catch {
+            return 'Unknown';
+        }
+    }
+
+    /**
+     * Gets browser information
+     */
+    private getBrowserInfo(): string {
+        const ua = navigator.userAgent;
+        if (ua.includes('Chrome')) return 'Chrome';
+        if (ua.includes('Firefox')) return 'Firefox';
+        if (ua.includes('Safari')) return 'Safari';
+        if (ua.includes('Edge')) return 'Edge';
+        return 'Unknown';
+    }
+
+    /**
+     * Gets memory usage information
+     */
+    private getMemoryUsage(): string {
+        try {
+            if ('memory' in performance) {
+                const mem = (performance as any).memory;
+                const used = Math.round(mem.usedJSHeapSize / 1024 / 1024);
+                const total = Math.round(mem.totalJSHeapSize / 1024 / 1024);
+                const limit = Math.round(mem.jsHeapSizeLimit / 1024 / 1024);
+                return `${used}MB / ${total}MB (Limit: ${limit}MB)`;
+            }
+        } catch {
+        }
+        return 'Not available';
+    }
+
+    /**
+     * Checks store health
+     */
+    private checkStoreHealth(): boolean {
+        try {
+            const state = outfitStore.getState();
+            return state && typeof state === 'object' && typeof state.botInstances === 'object' && typeof state.userInstances === 'object';
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Checks panels health
+     */
+    private checkPanelsHealth(): boolean {
+        try {
+            return !!(window.botOutfitPanel && window.userOutfitPanel);
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Checks macros health
+     */
+    private checkMacrosHealth(): boolean {
+        try {
+            return customMacroSystem && typeof customMacroSystem.registerMacros === 'function';
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Checks event bus health
+     */
+    private checkEventBusHealth(): boolean {
+        try {
+            return extensionEventBus && typeof extensionEventBus.emit === 'function';
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Runs a full health check
+     */
+    private runFullHealthCheck(): void {
+        const results = {
+            store: this.checkStoreHealth(),
+            panels: this.checkPanelsHealth(),
+            macros: this.checkMacrosHealth(),
+            eventBus: this.checkEventBusHealth(),
+            timestamp: new Date().toISOString()
+        };
+
+        const healthy = Object.values(results).filter(v => typeof v === 'boolean').every(v => v);
+        const message = healthy ?
+            `✅ All systems healthy! (${Object.values(results).filter(v => v === true).length}/${Object.keys(results).length - 1})` :
+            `❌ Issues detected. Check individual components.`;
+
+        toastr.info(message, 'Health Check Complete');
+        console.log('Extension Health Check Results:', results);
+    }
+
+    /**
+     * Resets panel positions
+     */
+    private resetPanelPositions(): void {
+        try {
+            if (window.botOutfitPanel) {
+                window.botOutfitPanel.domElement.style.top = '100px';
+                window.botOutfitPanel.domElement.style.left = '20px';
+            }
+            if (window.userOutfitPanel) {
+                window.userOutfitPanel.domElement.style.top = '100px';
+                window.userOutfitPanel.domElement.style.right = '20px';
+            }
+            toastr.success('Panel positions reset!', 'Debug Panel');
+        } catch (error) {
+            toastr.error('Failed to reset panel positions', 'Debug Panel');
+        }
+    }
+
+    /**
+     * Clears all caches
+     */
+    private clearAllCaches(): void {
+        try {
+            customMacroSystem.clearCache();
+            // Clear any other caches here if they exist
+            toastr.success('All caches cleared!', 'Debug Panel');
+        } catch (error) {
+            toastr.error('Failed to clear caches', 'Debug Panel');
+        }
+    }
+
+    /**
+     * Resets settings to defaults
+     */
+    private resetSettingsToDefaults(): void {
+        if (confirm('Are you sure you want to reset all settings to defaults? This will not affect your outfit data.')) {
+            try {
+                const defaultSettings = {
+                    autoOpenBot: false,
+                    autoOpenUser: false,
+                    position: 'right',
+                    enableSysMessages: true,
+                    autoOutfitSystem: false,
+                    debugMode: false,
+                    autoOutfitPrompt: '',
+                    autoOutfitConnectionProfile: null,
+                    botPanelColors: {primary: '#6a4fc1', border: '#8a7fdb', shadow: '#6a4fc1'},
+                    userPanelColors: {primary: '#1a78d1', border: '#5da6f0', shadow: '#1a78d1'},
+                    defaultBotPresets: {},
+                    defaultUserPresets: {}
+                };
+
+                outfitStore.setState({settings: defaultSettings});
+                outfitStore.saveState();
+
+                toastr.success('Settings reset to defaults!', 'Debug Panel');
+                this.renderContent(); // Refresh to show updated settings
+            } catch (error) {
+                toastr.error('Failed to reset settings', 'Debug Panel');
+            }
+        }
+    }
+
+    /**
+     * Forces garbage collection
+     */
+    private forceGarbageCollection(): void {
+        try {
+            if (window.gc) {
+                window.gc();
+                toastr.success('Garbage collection forced!', 'Debug Panel');
+            } else {
+                toastr.info('Garbage collection not available in this browser', 'Debug Panel');
+            }
+        } catch (error) {
+            toastr.error('Failed to force garbage collection', 'Debug Panel');
+        }
+    }
+
+    /**
+     * Creates an emergency backup
+     */
+    private createEmergencyBackup(): void {
+        try {
+            const state = outfitStore.getState();
+            const backup = {
+                timestamp: new Date().toISOString(),
+                version: this.getExtensionVersion(),
+                data: state
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const filename = `emergency-backup-${new Date().toISOString().slice(0, 19)}.json`;
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', filename);
+            linkElement.click();
+
+            toastr.success('Emergency backup created!', 'Debug Panel');
+        } catch (error) {
+            toastr.error('Failed to create emergency backup', 'Debug Panel');
+        }
+    }
+
     /**
      * Renders the 'Instances' tab with instance browser functionality
      */
@@ -1224,59 +1565,33 @@ export class DebugPanel {
     }
 
     /**
-     * Renders the 'Misc' tab for other functions
+     * Shows extension information
      */
-    renderMiscTab(container: HTMLElement): void {
-        let miscHtml = '<div class="debug-tab-content">';
+    private showExtensionInfo(): void {
+        const info = {
+            version: this.getExtensionVersion(),
+            loadedModules: {
+                store: !!outfitStore,
+                panels: !!(window.botOutfitPanel && window.userOutfitPanel),
+                macroSystem: !!customMacroSystem,
+                eventBus: !!extensionEventBus,
+                debugPanel: !!this
+            },
+            globalAPIs: {
+                outfitTracker: !!(window as any).outfitTracker,
+                wipeAllOutfits: !!(window as any).wipeAllOutfits,
+                refreshOutfitMacros: !!(window as any).refreshOutfitMacros
+            },
+            services: {
+                characterService: !!(window as any).characterService,
+                llmService: !!(window as any).llmService,
+                eventService: !!(window as any).eventService,
+                storageService: !!(window as any).storageService
+            }
+        };
 
-        // Add buttons for various debug functions
-        miscHtml += '<h4>Debug Functions</h4>';
-        miscHtml += '<div class="debug-functions">';
-        miscHtml += '<button id="debug-refresh-store" class="menu_button">Refresh Store State</button>';
-        miscHtml += '<button id="debug-clear-cache" class="menu_button">Clear Macro Cache</button>';
-        miscHtml += '<button id="debug-wipe-all" class="menu_button danger-button">WIPE ALL DATA</button>';
-        miscHtml += '<button id="debug-export-data" class="menu_button">Export All Data</button>';
-        miscHtml += '<button id="debug-import-data" class="menu_button">Import Data</button>';
-        miscHtml += '<input type="file" id="debug-import-file" style="display: none;" accept=".json">';
-        miscHtml += '</div>';
-
-        // Add event listeners for debug functions
-        container.innerHTML = miscHtml;
-
-        // Add button event listeners after content is inserted
-        setTimeout(() => {
-            document.getElementById('debug-refresh-store')?.addEventListener('click', () => {
-                // Re-render to show updated store state
-                this.renderContent();
-            });
-
-            document.getElementById('debug-clear-cache')?.addEventListener('click', () => {
-                customMacroSystem.clearCache();
-                toastr.success('Macro cache cleared!', 'Debug Panel');
-                this.renderContent();
-            });
-
-            document.getElementById('debug-wipe-all')?.addEventListener('click', () => {
-                if (confirm('Are you sure you want to wipe all outfit data? This cannot be undone.')) {
-                    if ((window as any).wipeAllOutfits) {
-                        (window as any).wipeAllOutfits();
-                        this.renderContent();
-                    }
-                }
-            });
-
-            document.getElementById('debug-export-data')?.addEventListener('click', () => {
-                this.exportOutfitData();
-            });
-
-            document.getElementById('debug-import-data')?.addEventListener('click', () => {
-                document.getElementById('debug-import-file')?.click();
-            });
-
-            document.getElementById('debug-import-file')?.addEventListener('change', (e) => {
-                this.importOutfitData((e.target as HTMLInputElement).files?.[0]);
-            });
-        }, 100);
+        console.log('Extension Information:', info);
+        toastr.info('Extension info logged to console!', 'Debug Panel');
     }
 
     /**
