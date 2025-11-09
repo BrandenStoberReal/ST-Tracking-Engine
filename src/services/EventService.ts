@@ -75,6 +75,7 @@ class EventService {
 
     setupExtensionEventListeners(): void {
         extensionEventBus.on(EXTENSION_EVENTS.OUTFIT_DATA_LOADED, () => this.handleOutfitDataLoaded());
+        extensionEventBus.on(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, (data: any) => this.handlePanelVisibilityChanged(data));
     }
 
     handleAppReady(): void {
@@ -231,6 +232,13 @@ class EventService {
             }
         } catch (error) {
             debugLog('[OutfitTracker] Error trying to refresh UI:', error);
+        }
+    }
+
+    handlePanelVisibilityChanged(data: any): void {
+        if (data && data.panelType && typeof data.visible === 'boolean') {
+            debugLog(`[OutfitTracker] Panel visibility changed: ${data.panelType} panel is now ${data.visible ? 'visible' : 'hidden'}`);
+            outfitStore.setPanelVisibility(data.panelType, data.visible);
         }
     }
 
