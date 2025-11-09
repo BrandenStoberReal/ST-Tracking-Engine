@@ -2029,6 +2029,183 @@ input:checked + .slider:before {
     margin-bottom: 4px;
 }
 
+/* Debug Pointers Tab Styles */
+.debug-pointers-list {
+    padding: 8px 0;
+}
+
+.debug-pointers-list h4 {
+    margin: 15px 0 8px 0;
+    font-size: 1.1em;
+    color: #f39c12;
+    border-bottom: 1px solid rgba(243, 156, 18, 0.3);
+    padding-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pointer-context-section,
+.pointer-references-section,
+.pointer-api-section,
+.pointer-services-section,
+.pointer-memory-section {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.context-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.context-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.context-item:last-child {
+    border-bottom: none;
+}
+
+.context-label {
+    font-weight: 600;
+    color: #bdc3c7;
+    min-width: 80px;
+}
+
+.context-value {
+    font-weight: 500;
+    color: #ecf0f1;
+}
+
+.status-active {
+    color: #2ecc71 !important;
+}
+
+.status-inactive {
+    color: #e74c3c !important;
+}
+
+.pointer-values-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.pointer-values-table th,
+.pointer-values-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pointer-values-table th {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    color: #f39c12;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pointer-values-table td {
+    font-size: 0.85em;
+    color: #ecf0f1;
+}
+
+.pointer-values-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.status-available {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.status-unavailable {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.service-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.service-item {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.service-name {
+    font-weight: 600;
+    color: #f39c12;
+    font-size: 0.9em;
+}
+
+.service-status {
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.service-details {
+    font-size: 0.8em;
+    color: #bdc3c7;
+    line-height: 1.3;
+}
+
+.memory-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.memory-item {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.memory-label {
+    font-weight: 600;
+    color: #bdc3c7;
+    font-size: 0.8em;
+}
+
+.memory-value {
+    font-weight: 700;
+    color: #3498db;
+    font-size: 1.1em;
+}
+
+.memory-details {
+    font-size: 0.75em;
+    color: #95a5a6;
+}
+
 /* Responsive design for debug panel */
 @media (max-width: 768px) {
     .outfit-debug-panel {

@@ -918,39 +918,235 @@ export class DebugPanel {
 
         let pointersHtml = '<div class="debug-pointers-list">';
 
-        pointersHtml += '<h4>Global References</h4>';
-        pointersHtml += '<div class="pointer-info">';
+        // Current Context Section
+        pointersHtml += '<h4>📍 Current Context</h4>';
+        pointersHtml += '<div class="pointer-context-section">';
 
-        // Show available references
+        const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
+        const currentCharId = state.currentCharacterId || 'None';
+
+        pointersHtml += '<div class="context-info-grid">';
+        pointersHtml += `<div class="context-item"><span class="context-label">Character:</span> <span class="context-value">${currentCharName}</span> <small>(${currentCharId})</small></div>`;
+        pointersHtml += `<div class="context-item"><span class="context-label">Chat ID:</span> <span class="context-value">${state.currentChatId || 'None'}</span></div>`;
+        pointersHtml += `<div class="context-item"><span class="context-label">Instance ID:</span> <span class="context-value">${state.currentOutfitInstanceId || 'None'}</span></div>`;
+        pointersHtml += `<div class="context-item"><span class="context-label">Bot Panel:</span> <span class="context-value ${state.panelVisibility.bot ? 'status-active' : 'status-inactive'}">${state.panelVisibility.bot ? 'Visible' : 'Hidden'}</span></div>`;
+        pointersHtml += `<div class="context-item"><span class="context-label">User Panel:</span> <span class="context-value ${state.panelVisibility.user ? 'status-active' : 'status-inactive'}">${state.panelVisibility.user ? 'Visible' : 'Hidden'}</span></div>`;
+        pointersHtml += '</div>';
+
+        pointersHtml += '</div>';
+
+        // Global References Section
+        pointersHtml += '<h4>🔗 Global References</h4>';
+        pointersHtml += '<div class="pointer-references-section">';
+
+        pointersHtml += '<table class="pointer-values-table">';
+        pointersHtml += '<thead><tr><th>Reference</th><th>Status</th><th>Details</th></tr></thead><tbody>';
+
+        // Show available references with more detail
         for (const [key, value] of Object.entries(references)) {
-            pointersHtml += `<div><strong>${key}:</strong> ${value ? 'Available' : 'Not Set'}</div>`;
+            const status = value ? '✅ Available' : '❌ Not Set';
+            const statusClass = value ? 'status-available' : 'status-unavailable';
+            const details = value ? this.getReferenceDetails(key, value) : 'N/A';
+            pointersHtml += `<tr><td>${key}</td><td class="${statusClass}">${status}</td><td>${details}</td></tr>`;
         }
 
-        // Show global API references
-        pointersHtml += '<h5>Extension API References:</h5>';
-        pointersHtml += '<table class="pointer-values-table">';
-        pointersHtml += '<tr><th>Reference</th><th>Status</th></tr>';
+        pointersHtml += '</tbody></table>';
+        pointersHtml += '</div>';
 
-        // Check various global references
+        // Extension API References Section
+        pointersHtml += '<h4>🛠️ Extension API References</h4>';
+        pointersHtml += '<div class="pointer-api-section">';
+
+        pointersHtml += '<table class="pointer-values-table">';
+        pointersHtml += '<thead><tr><th>API Reference</th><th>Status</th><th>Type</th><th>Details</th></tr></thead><tbody>';
+
+        // Check various global references with more detail
         const globalRefs = [
-            {name: 'window.botOutfitPanel', exists: Boolean((window as any).botOutfitPanel)},
-            {name: 'window.userOutfitPanel', exists: Boolean((window as any).userOutfitPanel)},
-            {name: 'window.outfitTracker', exists: Boolean((window as any).outfitTracker)},
-            {name: 'window.outfitTrackerInterceptor', exists: Boolean((window as any).outfitTrackerInterceptor)},
-            {name: 'window.getOutfitExtensionStatus', exists: Boolean((window as any).getOutfitExtensionStatus)},
-            {name: 'outfitStore', exists: Boolean(outfitStore)},
-            {name: 'customMacroSystem', exists: Boolean(customMacroSystem)},
+            {
+                name: 'window.botOutfitPanel',
+                exists: Boolean((window as any).botOutfitPanel),
+                type: 'Panel Instance',
+                details: (window as any).botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized'
+            },
+            {
+                name: 'window.userOutfitPanel',
+                exists: Boolean((window as any).userOutfitPanel),
+                type: 'Panel Instance',
+                details: (window as any).userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized'
+            },
+            {
+                name: 'window.outfitTracker',
+                exists: Boolean((window as any).outfitTracker),
+                type: 'Tracker Service',
+                details: (window as any).outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized'
+            },
+            {
+                name: 'window.outfitTrackerInterceptor',
+                exists: Boolean((window as any).outfitTrackerInterceptor),
+                type: 'Interceptor',
+                details: (window as any).outfitTrackerInterceptor ? 'Message interception handler' : 'Interceptor not active'
+            },
+            {
+                name: 'window.getOutfitExtensionStatus',
+                exists: Boolean((window as any).getOutfitExtensionStatus),
+                type: 'Status Function',
+                details: (window as any).getOutfitExtensionStatus ? 'Extension status checker' : 'Status function not available'
+            },
+            {
+                name: 'outfitStore',
+                exists: Boolean(outfitStore),
+                type: 'Store Instance',
+                details: outfitStore ? 'Main state management store' : 'Store not initialized'
+            },
+            {
+                name: 'customMacroSystem',
+                exists: Boolean(customMacroSystem),
+                type: 'Macro System',
+                details: customMacroSystem ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)` : 'Macro system not initialized'
+            },
+            {
+                name: 'debugLogger',
+                exists: Boolean(debugLogger),
+                type: 'Logger Instance',
+                details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized'
+            }
         ];
 
         for (const ref of globalRefs) {
-            pointersHtml += `<tr><td>${ref.name}</td><td>${ref.exists ? 'Available' : 'Not Available'}</td></tr>`;
+            const status = ref.exists ? '✅ Available' : '❌ Not Available';
+            const statusClass = ref.exists ? 'status-available' : 'status-unavailable';
+            pointersHtml += `<tr><td>${ref.name}</td><td class="${statusClass}">${status}</td><td>${ref.type}</td><td>${ref.details}</td></tr>`;
         }
 
-        pointersHtml += '</table>';
+        pointersHtml += '</tbody></table>';
+        pointersHtml += '</div>';
 
-        pointersHtml += '</div></div>';
+        // Service Status Section
+        pointersHtml += '<h4>⚙️ Service Status</h4>';
+        pointersHtml += '<div class="pointer-services-section">';
+
+        pointersHtml += '<div class="service-status-grid">';
+
+        // Character Service
+        const charService = (window as any).characterService || (window as any).CharacterService;
+        pointersHtml += `<div class="service-item">
+            <div class="service-name">Character Service</div>
+            <div class="service-status ${charService ? 'status-active' : 'status-inactive'}">
+                ${charService ? '✅ Active' : '❌ Inactive'}
+            </div>
+            <div class="service-details">${charService ? 'Character data management' : 'Service not available'}</div>
+        </div>`;
+
+        // LLM Service
+        const llmService = (window as any).llmService || (window as any).LLMService;
+        pointersHtml += `<div class="service-item">
+            <div class="service-name">LLM Service</div>
+            <div class="service-status ${llmService ? 'status-active' : 'status-inactive'}">
+                ${llmService ? '✅ Active' : '❌ Inactive'}
+            </div>
+            <div class="service-details">${llmService ? 'AI integration service' : 'Service not available'}</div>
+        </div>`;
+
+        // Event Service
+        const eventService = (window as any).eventService || (window as any).EventService;
+        pointersHtml += `<div class="service-item">
+            <div class="service-name">Event Service</div>
+            <div class="service-status ${eventService ? 'status-active' : 'status-inactive'}">
+                ${eventService ? '✅ Active' : '❌ Inactive'}
+            </div>
+            <div class="service-details">${eventService ? 'Event handling system' : 'Service not available'}</div>
+        </div>`;
+
+        // Storage Service
+        const storageService = (window as any).storageService || (window as any).StorageService;
+        pointersHtml += `<div class="service-item">
+            <div class="service-name">Storage Service</div>
+            <div class="service-status ${storageService ? 'status-active' : 'status-inactive'}">
+                ${storageService ? '✅ Active' : '❌ Inactive'}
+            </div>
+            <div class="service-details">${storageService ? 'Data persistence layer' : 'Service not available'}</div>
+        </div>`;
+
+        pointersHtml += '</div>';
+        pointersHtml += '</div>';
+
+        // Memory & Performance Section
+        pointersHtml += '<h4>💾 Memory & Objects</h4>';
+        pointersHtml += '<div class="pointer-memory-section">';
+
+        pointersHtml += '<div class="memory-info-grid">';
+
+        // Store state size
+        const stateSize = JSON.stringify(state).length;
+        const stateSizeKB = (stateSize / 1024).toFixed(2);
+        pointersHtml += `<div class="memory-item">
+            <span class="memory-label">Store State Size:</span>
+            <span class="memory-value">${stateSizeKB} KB</span>
+            <span class="memory-details">(${stateSize.toLocaleString()} chars)</span>
+        </div>`;
+
+        // Bot instances count
+        const botInstanceCount = Object.keys(state.botInstances).reduce((total, charId) => {
+            return total + Object.keys(state.botInstances[charId]).length;
+        }, 0);
+        pointersHtml += `<div class="memory-item">
+            <span class="memory-label">Bot Instances:</span>
+            <span class="memory-value">${botInstanceCount}</span>
+            <span class="memory-details">Active outfit instances</span>
+        </div>`;
+
+        // User instances count
+        const userInstanceCount = Object.keys(state.userInstances).length;
+        pointersHtml += `<div class="memory-item">
+            <span class="memory-label">User Instances:</span>
+            <span class="memory-value">${userInstanceCount}</span>
+            <span class="memory-details">User outfit instances</span>
+        </div>`;
+
+        // Macro cache size
+        const macroCacheSize = customMacroSystem.macroValueCache.size;
+        pointersHtml += `<div class="memory-item">
+            <span class="memory-label">Macro Cache:</span>
+            <span class="memory-value">${macroCacheSize}</span>
+            <span class="memory-details">Cached macro values</span>
+        </div>`;
+
+        pointersHtml += '</div>';
+        pointersHtml += '</div>';
+
+        pointersHtml += '</div>';
 
         container.innerHTML = pointersHtml;
+    }
+
+    /**
+     * Gets detailed information about a reference
+     */
+    private getReferenceDetails(key: string, value: any): string {
+        if (!value) return 'N/A';
+
+        try {
+            switch (key) {
+                case 'currentCharacterId':
+                    return `Character ID: ${value}`;
+                case 'currentChatId':
+                    return `Chat ID: ${value}`;
+                case 'currentOutfitInstanceId':
+                    return `Instance ID: ${value}`;
+                case 'debugMode':
+                    return `Debug mode: ${value ? 'Enabled' : 'Disabled'}`;
+                case 'autoSave':
+                    return `Auto-save: ${value ? 'Enabled' : 'Disabled'}`;
+                default:
+                    if (typeof value === 'object') {
+                        const keys = Object.keys(value);
+                        return `${keys.length} properties`;
+                    }
+                    return typeof value === 'string' ? `"${value}"` : String(value);
+            }
+        } catch (error) {
+            return 'Error getting details';
+        }
     }
 
     /**
@@ -1301,40 +1497,147 @@ export class DebugPanel {
         const contentArea = this.domElement?.querySelector('.outfit-debug-content');
         if (!contentArea || contentArea.getAttribute('data-tab') !== 'pointers') return;
 
-        // Check if content has been rendered
-        const pointerInfo = contentArea.querySelector('.pointer-info');
-        if (!pointerInfo) return;
-
         const state = outfitStore.getState();
-        const references = state.references;
 
-        // Update global references (without the header that's already there)
-        let refsHtml = '';
-        for (const [key, value] of Object.entries(references)) {
-            refsHtml += `<div><strong>${key}:</strong> ${value ? 'Available' : 'Not Set'}</div>`;
+        // Update context information
+        const contextGrid = contentArea.querySelector('.context-info-grid');
+        if (contextGrid) {
+            const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
+            const currentCharId = state.currentCharacterId || 'None';
+
+            const contextItems = contextGrid.querySelectorAll('.context-item');
+            if (contextItems.length >= 5) {
+                // Update character info
+                const charItem = contextItems[0] as HTMLElement;
+                charItem.innerHTML = `<span class="context-label">Character:</span> <span class="context-value">${currentCharName}</span> <small>(${currentCharId})</small>`;
+
+                // Update chat ID
+                const chatItem = contextItems[1] as HTMLElement;
+                chatItem.innerHTML = `<span class="context-label">Chat ID:</span> <span class="context-value">${state.currentChatId || 'None'}</span>`;
+
+                // Update instance ID
+                const instanceItem = contextItems[2] as HTMLElement;
+                instanceItem.innerHTML = `<span class="context-label">Instance ID:</span> <span class="context-value">${state.currentOutfitInstanceId || 'None'}</span>`;
+
+                // Update panel visibility
+                const botPanelItem = contextItems[3] as HTMLElement;
+                botPanelItem.innerHTML = `<span class="context-label">Bot Panel:</span> <span class="context-value ${state.panelVisibility.bot ? 'status-active' : 'status-inactive'}">${state.panelVisibility.bot ? 'Visible' : 'Hidden'}</span>`;
+
+                const userPanelItem = contextItems[4] as HTMLElement;
+                userPanelItem.innerHTML = `<span class="context-label">User Panel:</span> <span class="context-value ${state.panelVisibility.user ? 'status-active' : 'status-inactive'}">${state.panelVisibility.user ? 'Visible' : 'Hidden'}</span>`;
+            }
         }
 
-        // Update global API references
-        const globalRefs = [
-            {name: 'window.botOutfitPanel', exists: Boolean((window as any).botOutfitPanel)},
-            {name: 'window.userOutfitPanel', exists: Boolean((window as any).userOutfitPanel)},
-            {name: 'window.outfitTracker', exists: Boolean((window as any).outfitTracker)},
-            {name: 'window.outfitTrackerInterceptor', exists: Boolean((window as any).outfitTrackerInterceptor)},
-            {name: 'window.getOutfitExtensionStatus', exists: Boolean((window as any).getOutfitExtensionStatus)},
-            {name: 'outfitStore', exists: Boolean(outfitStore)},
-            {name: 'customMacroSystem', exists: Boolean(customMacroSystem)},
-        ];
+        // Update global references table
+        const referencesTable = contentArea.querySelector('.pointer-references-section table tbody');
+        if (referencesTable) {
+            const references = state.references;
+            let tbodyHtml = '';
 
-        refsHtml += '<h5>Extension API References:</h5>';
-        refsHtml += '<table class="pointer-values-table">';
-        refsHtml += '<tr><th>Reference</th><th>Status</th></tr>';
+            for (const [key, value] of Object.entries(references)) {
+                const status = value ? '✅ Available' : '❌ Not Set';
+                const statusClass = value ? 'status-available' : 'status-unavailable';
+                const details = value ? this.getReferenceDetails(key, value) : 'N/A';
+                tbodyHtml += `<tr><td>${key}</td><td class="${statusClass}">${status}</td><td>${details}</td></tr>`;
+            }
 
-        for (const ref of globalRefs) {
-            refsHtml += `<tr><td>${ref.name}</td><td>${ref.exists ? 'Available' : 'Not Available'}</td></tr>`;
+            referencesTable.innerHTML = tbodyHtml;
         }
 
-        refsHtml += '</table>';
-        pointerInfo.innerHTML = refsHtml;
+        // Update API references table
+        const apiTable = contentArea.querySelector('.pointer-api-section table tbody');
+        if (apiTable) {
+            const globalRefs = [
+                {
+                    name: 'window.botOutfitPanel',
+                    exists: Boolean((window as any).botOutfitPanel),
+                    type: 'Panel Instance',
+                    details: (window as any).botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized'
+                },
+                {
+                    name: 'window.userOutfitPanel',
+                    exists: Boolean((window as any).userOutfitPanel),
+                    type: 'Panel Instance',
+                    details: (window as any).userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized'
+                },
+                {
+                    name: 'window.outfitTracker',
+                    exists: Boolean((window as any).outfitTracker),
+                    type: 'Tracker Service',
+                    details: (window as any).outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized'
+                },
+                {
+                    name: 'window.outfitTrackerInterceptor',
+                    exists: Boolean((window as any).outfitTrackerInterceptor),
+                    type: 'Interceptor',
+                    details: (window as any).outfitTrackerInterceptor ? 'Message interception handler' : 'Interceptor not active'
+                },
+                {
+                    name: 'window.getOutfitExtensionStatus',
+                    exists: Boolean((window as any).getOutfitExtensionStatus),
+                    type: 'Status Function',
+                    details: (window as any).getOutfitExtensionStatus ? 'Extension status checker' : 'Status function not available'
+                },
+                {
+                    name: 'outfitStore',
+                    exists: Boolean(outfitStore),
+                    type: 'Store Instance',
+                    details: outfitStore ? 'Main state management store' : 'Store not initialized'
+                },
+                {
+                    name: 'customMacroSystem',
+                    exists: Boolean(customMacroSystem),
+                    type: 'Macro System',
+                    details: customMacroSystem ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)` : 'Macro system not initialized'
+                },
+                {
+                    name: 'debugLogger',
+                    exists: Boolean(debugLogger),
+                    type: 'Logger Instance',
+                    details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized'
+                }
+            ];
+
+            let tbodyHtml = '';
+            for (const ref of globalRefs) {
+                const status = ref.exists ? '✅ Available' : '❌ Not Available';
+                const statusClass = ref.exists ? 'status-available' : 'status-unavailable';
+                tbodyHtml += `<tr><td>${ref.name}</td><td class="${statusClass}">${status}</td><td>${ref.type}</td><td>${ref.details}</td></tr>`;
+            }
+
+            apiTable.innerHTML = tbodyHtml;
+        }
+
+        // Update memory information
+        const memoryGrid = contentArea.querySelector('.memory-info-grid');
+        if (memoryGrid) {
+            const memoryItems = memoryGrid.querySelectorAll('.memory-item');
+
+            if (memoryItems.length >= 4) {
+                // Update store state size
+                const stateSize = JSON.stringify(state).length;
+                const stateSizeKB = (stateSize / 1024).toFixed(2);
+                const stateItem = memoryItems[0] as HTMLElement;
+                stateItem.innerHTML = `<span class="memory-label">Store State Size:</span> <span class="memory-value">${stateSizeKB} KB</span> <span class="memory-details">(${stateSize.toLocaleString()} chars)</span>`;
+
+                // Update bot instances count
+                const botInstanceCount = Object.keys(state.botInstances).reduce((total, charId) => {
+                    return total + Object.keys(state.botInstances[charId]).length;
+                }, 0);
+                const botItem = memoryItems[1] as HTMLElement;
+                botItem.innerHTML = `<span class="memory-label">Bot Instances:</span> <span class="memory-value">${botInstanceCount}</span> <span class="memory-details">Active outfit instances</span>`;
+
+                // Update user instances count
+                const userInstanceCount = Object.keys(state.userInstances).length;
+                const userItem = memoryItems[2] as HTMLElement;
+                userItem.innerHTML = `<span class="memory-label">User Instances:</span> <span class="memory-value">${userInstanceCount}</span> <span class="memory-details">User outfit instances</span>`;
+
+                // Update macro cache size
+                const macroCacheSize = customMacroSystem.macroValueCache.size;
+                const macroItem = memoryItems[3] as HTMLElement;
+                macroItem.innerHTML = `<span class="memory-label">Macro Cache:</span> <span class="memory-value">${macroCacheSize}</span> <span class="memory-details">Cached macro values</span>`;
+            }
+        }
     }
 
     /**
