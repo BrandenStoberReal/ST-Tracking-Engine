@@ -70,12 +70,12 @@ export class UserOutfitPanel {
         `;
         document.body.appendChild(panel);
         const tabs = panel.querySelectorAll('.outfit-tab');
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             tab.addEventListener('click', (event) => {
                 const tabName = event.target.dataset.tab;
                 this.currentTab = tabName;
                 this.renderContent();
-                tabs.forEach(t => t.classList.remove('active'));
+                tabs.forEach((t) => t.classList.remove('active'));
                 event.target.classList.add('active');
             });
         });
@@ -88,7 +88,11 @@ export class UserOutfitPanel {
     getFirstMessageText() {
         var _a;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
                 const aiMessages = context.chat.filter((msg) => !msg.is_user && !msg.is_system);
@@ -187,7 +191,7 @@ export class UserOutfitPanel {
         else {
             // Show all presets including the default one
             presets.forEach((preset) => {
-                const isDefault = (defaultPresetName === preset);
+                const isDefault = defaultPresetName === preset;
                 const presetElement = document.createElement('div');
                 presetElement.className = `outfit-preset ${isDefault ? 'default-preset-highlight' : ''}`;
                 presetElement.innerHTML = `
@@ -270,7 +274,7 @@ export class UserOutfitPanel {
         if (areSystemMessagesEnabled()) {
             toastr.info(message, 'Outfit System', {
                 timeOut: 4000,
-                extendedTimeOut: 8000
+                extendedTimeOut: 8000,
             });
         }
     }
@@ -318,7 +322,7 @@ export class UserOutfitPanel {
             panelType: 'user',
             visible: true,
             characterId: 'user',
-            characterName: 'User'
+            characterName: 'User',
         });
         // Set up dynamic refresh when panel becomes visible
         this.setupDynamicRefresh();
@@ -330,7 +334,7 @@ export class UserOutfitPanel {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
-                    maxHeight: 800
+                    maxHeight: 800,
                 });
             }, 10); // Small delay to ensure panel is rendered first
             (_a = this.domElement.querySelector('#user-outfit-refresh')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
@@ -371,7 +375,7 @@ export class UserOutfitPanel {
             panelType: 'user',
             visible: false,
             characterId: 'user',
-            characterName: 'User'
+            characterName: 'User',
         });
         // Clean up dynamic refresh when panel is hidden
         this.cleanupDynamicRefresh();
@@ -427,7 +431,11 @@ export class UserOutfitPanel {
             });
         }
         // Get context to set up event listeners
-        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
         if (context && context.eventSource && context.event_types) {
             const { eventSource, event_types } = context;
             // Listen for chat-related events that might affect outfit data
@@ -473,7 +481,7 @@ export class UserOutfitPanel {
             this.outfitSubscription = null;
         }
         // Remove event listeners
-        this.eventListeners.forEach(unsubscribe => {
+        this.eventListeners.forEach((unsubscribe) => {
             if (typeof unsubscribe === 'function') {
                 unsubscribe();
             }
@@ -530,7 +538,7 @@ export class UserOutfitPanel {
         const str = text.substring(0, 100); // Only use first 100 chars to keep ID manageable
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
+            hash = (hash << 5) - hash + char;
             hash &= hash; // Convert to 32-bit integer
         }
         // Convert to positive and return 8-character string representation

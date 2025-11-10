@@ -17,7 +17,11 @@ import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
  */
 function getSTContext() {
     var _a;
-    return ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+    return ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+        ? window.SillyTavern.getContext()
+        : window.getContext
+            ? window.getContext()
+            : null;
 }
 /**
  * Gets the outfit data from a character card's extensions
@@ -307,7 +311,7 @@ export function migrateDefaultOutfitsToCharacterCards() {
             extensionEventBus.emit(EXTENSION_EVENTS.MIGRATION_COMPLETED, {
                 migrationType: 'default-outfits-to-cards',
                 charactersMigrated: migratedCount,
-                totalCharacters: context.characters.length
+                totalCharacters: context.characters.length,
             });
             return migratedCount;
         }

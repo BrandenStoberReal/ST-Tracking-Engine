@@ -22,9 +22,7 @@ export function generateShortId(id, maxLength = 8) {
     let cleanId = '';
     for (let i = 0; i < id.length; i++) {
         const char = id[i];
-        if ((char >= 'a' && char <= 'z') ||
-            (char >= 'A' && char <= 'Z') ||
-            (char >= '0' && char <= '9')) {
+        if ((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9')) {
             cleanId += char;
         }
     }
@@ -43,7 +41,7 @@ export function generateMessageHash(text) {
     const str = text.substring(0, 100);
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
         hash &= hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(36).substring(0, 8).padEnd(8, '0');
@@ -54,7 +52,7 @@ export function generateMessageHash(text) {
  * @returns {Promise} - Promise that resolves after ms milliseconds
  */
 export function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 /**
  * Validates if a slot name is valid
@@ -151,9 +149,9 @@ export function formatSlotName(slotName) {
         return 'Unknown';
     }
     const slotNameMap = {
-        'topunderwear': 'Top Underwear / Inner Top',
-        'bottomunderwear': 'Bottom Underwear / Inner Bottom',
-        'footunderwear': 'Foot Underwear / Socks',
+        topunderwear: 'Top Underwear / Inner Top',
+        bottomunderwear: 'Bottom Underwear / Inner Bottom',
+        footunderwear: 'Foot Underwear / Socks',
         'head-accessory': 'Head Accessory',
         'ears-accessory': 'Ears Accessory',
         'eyes-accessory': 'Eyes Accessory',
@@ -165,7 +163,7 @@ export function formatSlotName(slotName) {
         'waist-accessory': 'Waist Accessory',
         'bottom-accessory': 'Bottom Accessory',
         'legs-accessory': 'Legs Accessory',
-        'foot-accessory': 'Foot Accessory'
+        'foot-accessory': 'Foot Accessory',
     };
     if (slotNameMap[slotName]) {
         return slotNameMap[slotName];
@@ -185,7 +183,7 @@ function generateInstanceIdFromTextSimple(text) {
     let hash = 0;
     for (let i = 0; i < text.length; i++) {
         const char = text.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
         hash |= 0; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(36);
@@ -233,8 +231,8 @@ export function generateGUID() {
     }
     // Fallback implementation for environments without crypto.randomUUID
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
     });
 }
@@ -243,12 +241,12 @@ export function generateInstanceIdFromText(text_1) {
         let processedText = text;
         // If specific values to remove are provided, remove them from the text
         if (valuesToRemove && Array.isArray(valuesToRemove)) {
-            valuesToRemove.forEach(value => {
+            valuesToRemove.forEach((value) => {
                 if (value && typeof value === 'string') {
                     // Remove the value case-insensitively
-                    let tempText = processedText;
+                    const tempText = processedText;
                     let lowerTempText = tempText.toLowerCase();
-                    let lowerValue = value.toLowerCase();
+                    const lowerValue = value.toLowerCase();
                     let startIndex = 0;
                     while ((startIndex = lowerTempText.indexOf(lowerValue, startIndex)) !== -1) {
                         // Check if it's a complete word match to avoid partial replacements
@@ -256,9 +254,24 @@ export function generateInstanceIdFromText(text_1) {
                         // Check if it's surrounded by word boundaries
                         const beforeChar = startIndex > 0 ? lowerTempText.charAt(startIndex - 1) : ' ';
                         const afterChar = endIndex < lowerTempText.length ? lowerTempText.charAt(endIndex) : ' ';
-                        if ((beforeChar === ' ' || beforeChar === '.' || beforeChar === ',' || beforeChar === '"' || beforeChar === '\'' || beforeChar === '(' || beforeChar === '[') &&
-                            (afterChar === ' ' || afterChar === '.' || afterChar === ',' || afterChar === '"' || afterChar === '\'' || afterChar === ')' || afterChar === ']')) {
-                            processedText = processedText.substring(0, startIndex) + '[OUTFIT_REMOVED]' + processedText.substring(endIndex);
+                        if ((beforeChar === ' ' ||
+                            beforeChar === '.' ||
+                            beforeChar === ',' ||
+                            beforeChar === '"' ||
+                            beforeChar === "'" ||
+                            beforeChar === '(' ||
+                            beforeChar === '[') &&
+                            (afterChar === ' ' ||
+                                afterChar === '.' ||
+                                afterChar === ',' ||
+                                afterChar === '"' ||
+                                afterChar === "'" ||
+                                afterChar === ')' ||
+                                afterChar === ']')) {
+                            processedText =
+                                processedText.substring(0, startIndex) +
+                                    '[OUTFIT_REMOVED]' +
+                                    processedText.substring(endIndex);
                             lowerTempText = processedText.toLowerCase();
                         }
                         startIndex = endIndex;
@@ -273,7 +286,10 @@ export function generateInstanceIdFromText(text_1) {
                 const data = encoder.encode(normalizedText);
                 const hashBuffer = yield crypto.subtle.digest('SHA-256', data);
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
+                return hashArray
+                    .map((b) => b.toString(16).padStart(2, '0'))
+                    .join('')
+                    .substring(0, 16);
             }
             catch (err) {
                 debugLog('Crypto API failed, falling back to simple hash for instance ID generation', err, 'warn');

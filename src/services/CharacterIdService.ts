@@ -19,7 +19,7 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
 
         // Check if character has data and extensions
         if (character.data && character.data.extensions) {
-            let characterId = character.data.extensions.character_id;
+            const characterId = character.data.extensions.character_id;
 
             if (characterId && typeof characterId === 'string' && characterId.trim() !== '') {
                 debugLog(`[CharacterIdService] Found existing character ID: ${characterId}`, null, 'info');
@@ -32,7 +32,11 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
         debugLog(`[CharacterIdService] Generated new character ID: ${newCharacterId}`, null, 'info');
 
         // Get the context and use writeExtensionField to store the character ID
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.writeExtensionField) {
             // Find the character index in the characters array
@@ -43,9 +47,17 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
 
             if (characterIndex !== -1) {
                 await context.writeExtensionField(characterIndex, 'character_id', newCharacterId);
-                debugLog(`[CharacterIdService] Stored character ID using writeExtensionField for character at index ${characterIndex}`, null, 'info');
+                debugLog(
+                    `[CharacterIdService] Stored character ID using writeExtensionField for character at index ${characterIndex}`,
+                    null,
+                    'info'
+                );
             } else {
-                debugLog('[CharacterIdService] Could not find character index, falling back to direct assignment', null, 'warn');
+                debugLog(
+                    '[CharacterIdService] Could not find character index, falling back to direct assignment',
+                    null,
+                    'warn'
+                );
                 // Fallback to direct assignment if character index not found
                 if (!character.data) {
                     character.data = {};
@@ -56,7 +68,11 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
                 character.data.extensions.character_id = newCharacterId;
             }
         } else {
-            debugLog('[CharacterIdService] writeExtensionField not available, falling back to direct assignment', null, 'warn');
+            debugLog(
+                '[CharacterIdService] writeExtensionField not available, falling back to direct assignment',
+                null,
+                'warn'
+            );
             // Fallback to direct assignment if writeExtensionField not available
             if (!character.data) {
                 character.data = {};
@@ -107,7 +123,11 @@ export function getCharacterId(character: any): string | null {
  */
 export function findCharacterById(characterId: string): any | null {
     try {
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.characters) {
             for (const character of context.characters) {
@@ -131,7 +151,11 @@ export function findCharacterById(characterId: string): any | null {
  */
 export async function getCurrentCharacterId(): Promise<string | null> {
     try {
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.characterId !== undefined && context.characterId !== null) {
             const character = context.characters[context.characterId];
@@ -153,14 +177,22 @@ export async function getCurrentCharacterId(): Promise<string | null> {
  */
 export async function migrateAllCharacters(): Promise<number> {
     try {
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (!context || !context.characters) {
             debugLog('[CharacterIdService] No characters found for migration', null, 'warn');
             return 0;
         }
 
-        debugLog(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`, null, 'info');
+        debugLog(
+            `[CharacterIdService] Found ${context.characters.length} characters to check for migration`,
+            null,
+            'info'
+        );
         console.log(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`);
         let migratedCount = 0;
 
@@ -173,14 +205,28 @@ export async function migrateAllCharacters(): Promise<number> {
 
             if (!existingId) {
                 const newCharacterId = generateGUID();
-                debugLog(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`, null, 'info');
-                console.log(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`);
+                debugLog(
+                    `[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`,
+                    null,
+                    'info'
+                );
+                console.log(
+                    `[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`
+                );
 
                 if (context.writeExtensionField) {
                     await context.writeExtensionField(i, 'character_id', newCharacterId);
-                    debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using writeExtensionField`, null, 'info');
+                    debugLog(
+                        `[CharacterIdService] Successfully migrated character "${characterName}" using writeExtensionField`,
+                        null,
+                        'info'
+                    );
                 } else {
-                    debugLog('[CharacterIdService] writeExtensionField not available during migration, using fallback', null, 'warn');
+                    debugLog(
+                        '[CharacterIdService] writeExtensionField not available during migration, using fallback',
+                        null,
+                        'warn'
+                    );
                     // Fallback to direct assignment
                     if (!character.data) {
                         character.data = {};
@@ -189,17 +235,31 @@ export async function migrateAllCharacters(): Promise<number> {
                         character.data.extensions = {};
                     }
                     character.data.extensions.character_id = newCharacterId;
-                    debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using fallback method`, null, 'info');
+                    debugLog(
+                        `[CharacterIdService] Successfully migrated character "${characterName}" using fallback method`,
+                        null,
+                        'info'
+                    );
                 }
 
                 migratedCount++;
             } else {
-                debugLog(`[CharacterIdService] Character "${characterName}" already has ID: ${existingId}`, null, 'debug');
+                debugLog(
+                    `[CharacterIdService] Character "${characterName}" already has ID: ${existingId}`,
+                    null,
+                    'debug'
+                );
             }
         }
 
-        debugLog(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`, null, 'info');
-        console.log(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`);
+        debugLog(
+            `[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`,
+            null,
+            'info'
+        );
+        console.log(
+            `[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`
+        );
         return migratedCount;
     } catch (error) {
         debugLog('[CharacterIdService] Error during character migration:', error, 'error');

@@ -15,14 +15,14 @@ export function initSettings(autoOutfitSystem, AutoOutfitSystemClass, context) {
         settings[MODULE_NAME].botPanelColors = {
             primary: 'linear-gradient(135deg, #6a4fc1 0%, #5a49d0 50%, #4a43c0 100%)',
             border: '#8a7fdb',
-            shadow: 'rgba(106, 79, 193, 0.4)'
+            shadow: 'rgba(106, 79, 193, 0.4)',
         };
     }
     if (!settings[MODULE_NAME].userPanelColors) {
         settings[MODULE_NAME].userPanelColors = {
             primary: 'linear-gradient(135deg, #1a78d1 0%, #2a68c1 50%, #1a58b1 100%)',
             border: '#5da6f0',
-            shadow: 'rgba(26, 120, 209, 0.4)'
+            shadow: 'rgba(26, 120, 209, 0.4)',
         };
     }
     if (!settings[MODULE_NAME].defaultBotPresets) {

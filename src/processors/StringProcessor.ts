@@ -34,11 +34,15 @@ function _isValidSlotName(str: string): boolean {
     for (let i = 0; i < str.length; i++) {
         const char = str[i];
 
-        if (!((char >= 'a' && char <= 'z') ||
-            (char >= 'A' && char <= 'Z') ||
-            (char >= '0' && char <= '9') ||
-            char === '_' ||
-            char === '-')) {
+        if (
+            !(
+                (char >= 'a' && char <= 'z') ||
+                (char >= 'A' && char <= 'Z') ||
+                (char >= '0' && char <= '9') ||
+                char === '_' ||
+                char === '-'
+            )
+        ) {
             return false;
         }
     }
@@ -65,7 +69,7 @@ function findClosingQuote(text: string, startIndex: number): number {
     return text.length; // Return the end of the string if no closing quote is found
 }
 
-function findNextCommand(text: string, startIndex: number): { command: string | null, nextIndex: number } | null {
+function findNextCommand(text: string, startIndex: number): { command: string | null; nextIndex: number } | null {
     const pattern = 'outfit-system_';
     const patternIndex = text.indexOf(pattern, startIndex);
 
@@ -160,15 +164,19 @@ export function extractCommands(text: string): string[] {
 }
 
 // Function to extract multiple values from a text without using regex
-export function extractValues(text: string, startMarker: string, endMarker: string): {
-    fullMatch: string,
-    value: string
+export function extractValues(
+    text: string,
+    startMarker: string,
+    endMarker: string
+): {
+    fullMatch: string;
+    value: string;
 }[] {
     if (!text || typeof text !== 'string') {
         return [];
     }
 
-    const values: { fullMatch: string, value: string }[] = [];
+    const values: { fullMatch: string; value: string }[] = [];
     let startIndex = 0;
 
     while (startIndex < text.length) {
@@ -191,7 +199,7 @@ export function extractValues(text: string, startMarker: string, endMarker: stri
 
         values.push({
             fullMatch: text.substring(startIdx, endIdx + endMarker.length),
-            value
+            value,
         });
 
         startIndex = endIdx + endMarker.length;

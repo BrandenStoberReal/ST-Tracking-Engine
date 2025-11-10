@@ -18,7 +18,7 @@ export class OutfitManager {
         this.outfitInstanceId = null;
         this.character = 'Unknown';
         this.characterId = null;
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             this.currentValues[slot] = 'None';
         });
     }
@@ -71,7 +71,7 @@ export class OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!this.characterId || !actualInstanceId) {
             debugLog(`[${this.constructor.name}] Cannot load outfit - missing characterId or instanceId`, null, 'warn');
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
             return;
@@ -86,7 +86,7 @@ export class OutfitManager {
             return;
         }
         const outfitData = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             outfitData[slot] = this.currentValues[slot] || 'None';
         });
         this.saveOutfitToInstanceId(outfitData, actualInstanceId);
@@ -121,7 +121,7 @@ export class OutfitManager {
                     previousValue: previousValue,
                     newValue: value,
                     characterName: this.character,
-                    managerType: this.constructor.name.includes('Bot') ? 'bot' : 'user'
+                    managerType: this.constructor.name.includes('Bot') ? 'bot' : 'user',
                 });
             }
             if (previousValue === 'None' && value !== 'None') {
@@ -169,10 +169,10 @@ export class OutfitManager {
         });
     }
     getOutfitData(slots) {
-        return slots.map(slot => ({
+        return slots.map((slot) => ({
             name: slot,
             value: this.currentValues[slot],
-            varName: this.getVarName(slot)
+            varName: this.getVarName(slot),
         }));
     }
 }

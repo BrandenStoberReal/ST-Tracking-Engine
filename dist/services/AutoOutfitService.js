@@ -111,7 +111,11 @@ outfit-system_replace_topwear(\"T-shirt\")\
         var _a;
         this.removeEventListeners();
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (!context || !context.eventSource || !context.event_types) {
                 debugLog('[AutoOutfitSystem] Context not ready for event listeners', null, 'error');
                 return;
@@ -139,7 +143,11 @@ outfit-system_replace_topwear(\"T-shirt\")\
         var _a;
         try {
             if (this.eventHandler) {
-                const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
                 if (context && context.eventSource && context.event_types) {
                     context.eventSource.off(context.event_types.MESSAGE_RECEIVED, this.eventHandler);
                 }
@@ -467,13 +475,16 @@ outfit-system_replace_topwear(\"T-shirt\")\
             if (!chat || !Array.isArray(chat) || chat.length === 0) {
                 return '';
             }
-            return chat.slice(-count).map((msg) => {
+            return chat
+                .slice(-count)
+                .map((msg) => {
                 if (!msg || typeof msg.mes !== 'string') {
                     return '';
                 }
-                const prefix = msg.is_user ? 'User' : (msg.name || 'AI');
+                const prefix = msg.is_user ? 'User' : msg.name || 'AI';
                 return `${prefix}: ${msg.mes}`;
-            }).join('\n');
+            })
+                .join('\n');
         }
         catch (error) {
             debugLog('Error getting last messages:', error, 'error');
@@ -495,7 +506,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
         }
     }
     delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
     getStatus() {
         var _a;

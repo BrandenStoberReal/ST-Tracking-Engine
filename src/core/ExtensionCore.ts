@@ -19,7 +19,6 @@ import {OutfitDataService} from '../services/OutfitDataService';
 import {macroProcessor} from '../processors/MacroProcessor';
 import {debugLog} from '../logging/DebugLogger';
 
-
 declare const window: any;
 
 let AutoOutfitSystem: any;
@@ -52,16 +51,7 @@ async function loadAutoOutfitSystem(): Promise<void> {
  * @returns {boolean} True if the user agent indicates a mobile device, false otherwise
  */
 function isMobileUserAgent(userAgent: string): boolean {
-    const mobileIndicators = [
-        'android',
-        'webos',
-        'iphone',
-        'ipad',
-        'ipod',
-        'blackberry',
-        'iemobile',
-        'opera mini'
-    ];
+    const mobileIndicators = ['android', 'webos', 'iphone', 'ipad', 'ipod', 'blackberry', 'iemobile', 'opera mini'];
 
     const lowerUserAgent = userAgent.toLowerCase();
 
@@ -86,7 +76,17 @@ function isMobileUserAgent(userAgent: string): boolean {
  * @param {any} outfitDataService - The outfit data service instance
  * @returns {void}
  */
-function setupApi(botManager: any, userManager: any, botPanel: any, userPanel: any, autoOutfitSystem: any, outfitDataService: any, storageService?: any, dataManager?: any, eventService?: any): void {
+function setupApi(
+    botManager: any,
+    userManager: any,
+    botPanel: any,
+    userPanel: any,
+    autoOutfitSystem: any,
+    outfitDataService: any,
+    storageService?: any,
+    dataManager?: any,
+    eventService?: any
+): void {
     extension_api.botOutfitPanel = botPanel;
     extension_api.userOutfitPanel = userPanel;
     extension_api.autoOutfitSystem = autoOutfitSystem;
@@ -165,7 +165,12 @@ function updatePanelStyles(): void {
 function isMobileDevice(): boolean {
     const userAgent = navigator.userAgent.toLowerCase();
 
-    return isMobileUserAgent(userAgent) || window.innerWidth <= 768 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 1);
+    return (
+        isMobileUserAgent(userAgent) ||
+        window.innerWidth <= 768 ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 1
+    );
 }
 
 /**
@@ -183,10 +188,14 @@ function isMobileDevice(): boolean {
 
         if (!botPanel || !userPanel) {
             // If panels aren't available yet, store the reference and try later
-            debugLog('Panels not available for interceptor, deferring injection', {
-                botPanel: Boolean(botPanel),
-                userPanel: Boolean(userPanel)
-            }, 'warn');
+            debugLog(
+                'Panels not available for interceptor, deferring injection',
+                {
+                    botPanel: Boolean(botPanel),
+                    userPanel: Boolean(userPanel),
+                },
+                'warn'
+            );
             return;
         }
 
@@ -194,10 +203,14 @@ function isMobileDevice(): boolean {
         const userManager = userPanel.outfitManager;
 
         if (!botManager || !userManager) {
-            debugLog('Managers not available for interceptor', {
-                botManager: Boolean(botManager),
-                userManager: Boolean(userManager)
-            }, 'warn');
+            debugLog(
+                'Managers not available for interceptor',
+                {
+                    botManager: Boolean(botManager),
+                    userManager: Boolean(userManager),
+                },
+                'warn'
+            );
             return;
         }
 
@@ -224,7 +237,7 @@ function isMobileDevice(): boolean {
                 name: 'Outfit Info',
                 send_date: new Date().toISOString(),
                 mes: outfitInfoString,
-                extra: {outfit_injection: true}
+                extra: {outfit_injection: true},
             };
 
             debugLog('Injecting outfit information into chat', {outfitInfoString}, 'info');
@@ -273,7 +286,6 @@ export async function initializeExtension(): Promise<void> {
     outfitStore.loadState();
     debugLog('Data manager and outfit store initialized', null, 'info');
 
-
     const outfitDataService = new OutfitDataService(dataManager);
 
     const settings = dataManager.loadSettings();
@@ -285,8 +297,12 @@ export async function initializeExtension(): Promise<void> {
 
     debugLog('Outfit managers created', {botManager, userManager}, 'info');
 
-    const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) => STContext.saveSettingsDebounced({outfit_tracker: data}));
-    const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) => STContext.saveSettingsDebounced({outfit_tracker: data}));
+    const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) =>
+        STContext.saveSettingsDebounced({outfit_tracker: data})
+    );
+    const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) =>
+        STContext.saveSettingsDebounced({outfit_tracker: data})
+    );
 
     debugLog('Outfit panels created', {botPanel, userPanel}, 'info');
 
@@ -304,13 +320,27 @@ export async function initializeExtension(): Promise<void> {
     debugLog('Global references set', null, 'info');
 
     const eventService = setupEventListeners({
-        botManager, userManager, botPanel, userPanel, autoOutfitSystem,
+        botManager,
+        userManager,
+        botPanel,
+        userPanel,
+        autoOutfitSystem,
         updateForCurrentCharacter: () => updateForCurrentCharacter(botManager, userManager, botPanel, userPanel),
         processMacrosInFirstMessage: () => macroProcessor.processMacrosInFirstMessage(STContext),
-        context: STContext
+        context: STContext,
     });
 
-    setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem, outfitDataService, storageService, dataManager, eventService);
+    setupApi(
+        botManager,
+        userManager,
+        botPanel,
+        userPanel,
+        autoOutfitSystem,
+        outfitDataService,
+        storageService,
+        dataManager,
+        eventService
+    );
     initSettings(autoOutfitSystem, AutoOutfitSystem, STContext);
     await registerOutfitCommands(botManager, userManager, autoOutfitSystem);
     customMacroSystem.registerMacros(STContext);

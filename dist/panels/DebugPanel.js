@@ -62,14 +62,14 @@ export class DebugPanel {
         document.body.appendChild(panel);
         // Set up tab switching
         const tabs = panel.querySelectorAll('.outfit-debug-tab');
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             tab.addEventListener('click', (event) => {
                 const tabName = event.target.dataset.tab;
                 if (tabName == null)
                     return;
                 this.currentTab = tabName;
                 this.renderContent();
-                tabs.forEach(t => t.classList.remove('active'));
+                tabs.forEach((t) => t.classList.remove('active'));
                 event.target.classList.add('active');
             });
         });
@@ -188,7 +188,10 @@ export class DebugPanel {
         // Get current character's outfit data if available
         const currentCharacterId = state.currentCharacterId;
         const currentInstanceId = state.currentOutfitInstanceId;
-        if (currentCharacterId && currentInstanceId && botInstances[currentCharacterId] && botInstances[currentCharacterId][currentInstanceId]) {
+        if (currentCharacterId &&
+            currentInstanceId &&
+            botInstances[currentCharacterId] &&
+            botInstances[currentCharacterId][currentInstanceId]) {
             const botOutfitData = botInstances[currentCharacterId][currentInstanceId].bot;
             for (const [slot, value] of Object.entries(botOutfitData)) {
                 macrosHtml += `<tr><td>{{char_${slot}}}</td><td>${value}</td><td>Bot Outfit Data</td></tr>`;
@@ -278,7 +281,8 @@ export class DebugPanel {
             });
             // Group logs with the same message and data
             const groupedLogs = this.groupSimilarLogs(sortedLogs);
-            logsHtml += groupedLogs.map(group => {
+            logsHtml += groupedLogs
+                .map((group) => {
                 const log = group.logs[0]; // Use the first log for display
                 const hasData = log.data !== null && log.data !== undefined;
                 const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
@@ -309,7 +313,8 @@ export class DebugPanel {
                         </div>
                     `;
                 }
-            }).join('');
+            })
+                .join('');
         }
         logsHtml += '</div>';
         logsHtml += '</div>';
@@ -326,7 +331,7 @@ export class DebugPanel {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedLevel = levelFilter.value;
             const logItems = container.querySelectorAll('.log-item');
-            logItems.forEach(item => {
+            logItems.forEach((item) => {
                 const level = item.dataset.level;
                 const message = item.dataset.message;
                 const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
@@ -343,13 +348,13 @@ export class DebugPanel {
         levelFilter.addEventListener('change', filterLogs);
         expandAllBtn.addEventListener('click', () => {
             const detailsElements = container.querySelectorAll('.log-item details');
-            detailsElements.forEach(details => {
+            detailsElements.forEach((details) => {
                 details.open = true;
             });
         });
         collapseAllBtn.addEventListener('click', () => {
             const detailsElements = container.querySelectorAll('.log-item details');
-            detailsElements.forEach(details => {
+            detailsElements.forEach((details) => {
                 details.open = false;
             });
         });
@@ -399,7 +404,8 @@ export class DebugPanel {
             embeddedHtml += '<p class="no-characters">No characters available for embedded data inspection.</p>';
         }
         else {
-            embeddedHtml += '<div class="debug-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
+            embeddedHtml +=
+                '<div class="debug-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
             embeddedHtml += '<h5>Characters with Embedded Outfit Data:</h5>';
             let charactersWithEmbeddedData = 0;
             for (let i = 0; i < context.characters.length; i++) {
@@ -412,7 +418,9 @@ export class DebugPanel {
                     const hasDefaultOutfit = embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0;
                     const presetCount = embeddedData.presets ? Object.keys(embeddedData.presets).length : 0;
                     const hasPresets = presetCount > 0;
-                    const lastModified = embeddedData.lastModified ? new Date(embeddedData.lastModified).toLocaleString() : 'Unknown';
+                    const lastModified = embeddedData.lastModified
+                        ? new Date(embeddedData.lastModified).toLocaleString()
+                        : 'Unknown';
                     embeddedHtml += `
                         <div class="embedded-character-item" data-character-name="${characterName.toLowerCase()}" data-character-id="${characterId}">
                             <div class="embedded-character-header">
@@ -453,7 +461,8 @@ export class DebugPanel {
         // Add migration section
         embeddedHtml += '<h4>Migration Tools</h4>';
         embeddedHtml += '<div class="embedded-migration-tools">';
-        embeddedHtml += '<button id="migrate-default-outfits-btn" class="menu_button">Migrate Default Outfits to Cards</button>';
+        embeddedHtml +=
+            '<button id="migrate-default-outfits-btn" class="menu_button">Migrate Default Outfits to Cards</button>';
         embeddedHtml += '<button id="migrate-presets-btn" class="menu_button">Migrate Presets to Cards</button>';
         embeddedHtml += '<div id="migration-results"></div>';
         embeddedHtml += '</div>';
@@ -467,7 +476,7 @@ export class DebugPanel {
                 searchInput.addEventListener('input', (e) => {
                     const searchTerm = e.target.value.toLowerCase();
                     const characterItems = container.querySelectorAll('.embedded-character-item');
-                    characterItems.forEach(item => {
+                    characterItems.forEach((item) => {
                         var _a;
                         const characterName = item.dataset.characterName || '';
                         const characterId = item.dataset.characterId || '';
@@ -485,7 +494,7 @@ export class DebugPanel {
             }
             // Character item interactions
             const characterItems = container.querySelectorAll('.embedded-character-item');
-            characterItems.forEach(item => {
+            characterItems.forEach((item) => {
                 const viewBtn = item.querySelector('.view-embedded-btn');
                 const copyBtn = item.querySelector('.copy-embedded-btn');
                 const details = item.querySelector('.embedded-character-details');
@@ -545,7 +554,8 @@ export class DebugPanel {
                     try {
                         // Note: Preset migration is not implemented as we only embed default outfits
                         if (resultsDiv) {
-                            resultsDiv.innerHTML = '<p>ℹ️ Preset migration is not available. Only default outfits are embedded.</p>';
+                            resultsDiv.innerHTML =
+                                '<p>ℹ️ Preset migration is not available. Only default outfits are embedded.</p>';
                         }
                         (_a = window.toastr) === null || _a === void 0 ? void 0 : _a.info('Preset migration not available', 'Debug Panel');
                     }
@@ -589,7 +599,8 @@ export class DebugPanel {
         performanceHtml += '<div class="performance-indicators">';
         // Check for potentially large data
         if (botInstanceCount > 50) {
-            performanceHtml += '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
+            performanceHtml +=
+                '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
         }
         else if (botInstanceCount > 20) {
             performanceHtml += '<div class="info">ℹ️ Moderate number of bot instances</div>';
@@ -598,16 +609,19 @@ export class DebugPanel {
             performanceHtml += '<div class="good">✅ Low number of bot instances</div>';
         }
         if (userInstanceCount > 10) {
-            performanceHtml += '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
+            performanceHtml +=
+                '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
         }
         else {
             performanceHtml += '<div class="good">✅ Reasonable number of user instances</div>';
         }
         const storageKB = new Blob([stateStr]).size / 1024;
-        if (storageKB > 1000) { // More than 1MB
+        if (storageKB > 1000) {
+            // More than 1MB
             performanceHtml += '<div class="warning">⚠️ Large storage size detected - consider cleanup</div>';
         }
-        else if (storageKB > 500) { // More than 500KB
+        else if (storageKB > 500) {
+            // More than 500KB
             performanceHtml += '<div class="info">ℹ️ Moderate storage size</div>';
         }
         else {
@@ -664,7 +678,8 @@ export class DebugPanel {
         miscHtml += '<div class="quick-actions">';
         miscHtml += '<button id="reset-panel-positions" class="menu_button">Reset Panel Positions</button>';
         miscHtml += '<button id="clear-all-caches" class="menu_button">Clear All Caches</button>';
-        miscHtml += '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
+        miscHtml +=
+            '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
         miscHtml += '<button id="force-gc" class="menu_button">Force Garbage Collection</button>';
         miscHtml += '<button id="create-backup" class="menu_button">Create Emergency Backup</button>';
         miscHtml += '<button id="show-extension-info" class="menu_button">Show Extension Info</button>';
@@ -773,8 +788,7 @@ export class DebugPanel {
                 return `${used}MB / ${total}MB (Limit: ${limit}MB)`;
             }
         }
-        catch (_a) {
-        }
+        catch (_a) { }
         return 'Not available';
     }
     /**
@@ -783,7 +797,10 @@ export class DebugPanel {
     checkStoreHealth() {
         try {
             const state = outfitStore.getState();
-            return state && typeof state === 'object' && typeof state.botInstances === 'object' && typeof state.userInstances === 'object';
+            return (state &&
+                typeof state === 'object' &&
+                typeof state.botInstances === 'object' &&
+                typeof state.userInstances === 'object');
         }
         catch (_a) {
             return false;
@@ -831,12 +848,14 @@ export class DebugPanel {
             panels: this.checkPanelsHealth(),
             macros: this.checkMacrosHealth(),
             eventBus: this.checkEventBusHealth(),
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         };
-        const healthy = Object.values(results).filter(v => typeof v === 'boolean').every(v => v);
-        const message = healthy ?
-            `✅ All systems healthy! (${Object.values(results).filter(v => v === true).length}/${Object.keys(results).length - 1})` :
-            `❌ Issues detected. Check individual components.`;
+        const healthy = Object.values(results)
+            .filter((v) => typeof v === 'boolean')
+            .every((v) => v);
+        const message = healthy
+            ? `✅ All systems healthy! (${Object.values(results).filter((v) => v === true).length}/${Object.keys(results).length - 1})`
+            : `❌ Issues detected. Check individual components.`;
         toastr.info(message, 'Health Check Complete');
         console.log('Extension Health Check Results:', results);
     }
@@ -890,7 +909,7 @@ export class DebugPanel {
                     botPanelColors: { primary: '#6a4fc1', border: '#8a7fdb', shadow: '#6a4fc1' },
                     userPanelColors: { primary: '#1a78d1', border: '#5da6f0', shadow: '#1a78d1' },
                     defaultBotPresets: {},
-                    defaultUserPresets: {}
+                    defaultUserPresets: {},
                 };
                 outfitStore.setState({ settings: defaultSettings });
                 outfitStore.saveState();
@@ -928,7 +947,7 @@ export class DebugPanel {
             const backup = {
                 timestamp: new Date().toISOString(),
                 version: this.getExtensionVersion(),
-                data: state
+                data: state,
             };
             const dataStr = JSON.stringify(backup, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
@@ -952,7 +971,8 @@ export class DebugPanel {
         const userInstances = state.userInstances;
         let instancesHtml = '<div class="debug-tab-content">';
         // Add search input
-        instancesHtml += '<div class="debug-search-container"><input type="text" id="instance-search" placeholder="Search instances..."></div>';
+        instancesHtml +=
+            '<div class="debug-search-container"><input type="text" id="instance-search" placeholder="Search instances..."></div>';
         // Add bot instances
         instancesHtml += '<h4>Bot Instances</h4>';
         if (Object.keys(botInstances).length === 0) {
@@ -971,7 +991,7 @@ export class DebugPanel {
                         characterName: charName,
                         characterId: charId,
                         instanceId: instId,
-                        outfit: instData.bot
+                        outfit: instData.bot,
                     };
                     instancesHtml += `
                      <div class="instance-item ${isCurrent ? 'current-instance' : ''}" data-character="${charName}" data-instance="${instId}" data-type="bot">
@@ -1003,7 +1023,7 @@ export class DebugPanel {
                 const formattedUserData = {
                     timestamp: instData.timestamp || 'No timestamp',
                     instanceId: instId,
-                    outfit: instData
+                    outfit: instData,
                 };
                 instancesHtml += `
                      <div class="instance-item ${isCurrent ? 'current-instance' : ''}" data-character="user" data-instance="${instId}" data-type="user">
@@ -1028,12 +1048,14 @@ export class DebugPanel {
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const instanceItems = container.querySelectorAll('.instance-item');
-            instanceItems.forEach(item => {
+            instanceItems.forEach((item) => {
                 var _a, _b, _c, _d, _e, _f;
                 const instanceId = (_b = (_a = item.dataset.instance) === null || _a === void 0 ? void 0 : _a.toLowerCase()) !== null && _b !== void 0 ? _b : '';
                 const characterName = (_d = (_c = item.dataset.character) === null || _c === void 0 ? void 0 : _c.toLowerCase()) !== null && _d !== void 0 ? _d : '';
                 const instanceData = (_f = (_e = item.querySelector('.instance-data pre').textContent) === null || _e === void 0 ? void 0 : _e.toLowerCase()) !== null && _f !== void 0 ? _f : '';
-                if (instanceId.includes(searchTerm) || characterName.includes(searchTerm) || instanceData.includes(searchTerm)) {
+                if (instanceId.includes(searchTerm) ||
+                    characterName.includes(searchTerm) ||
+                    instanceData.includes(searchTerm)) {
                     item.style.display = '';
                 }
                 else {
@@ -1043,7 +1065,7 @@ export class DebugPanel {
         });
         // Add click handlers to instance items to show details
         const instanceItems = container.querySelectorAll('.instance-item');
-        instanceItems.forEach(item => {
+        instanceItems.forEach((item) => {
             const instanceIdElement = item.querySelector('.instance-id');
             if (instanceIdElement) {
                 instanceIdElement.addEventListener('click', (e) => {
@@ -1100,7 +1122,9 @@ export class DebugPanel {
         // Current Context Section
         pointersHtml += '<h4>📍 Current Context</h4>';
         pointersHtml += '<div class="pointer-context-section">';
-        const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
+        const currentCharName = state.currentCharacterId
+            ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+            : 'None';
         const currentCharId = state.currentCharacterId || 'None';
         pointersHtml += '<div class="context-info-grid">';
         pointersHtml += `<div class="context-item"><span class="context-label">Character:</span> <span class="context-value">${currentCharName}</span> <small>(${currentCharId})</small></div>`;
@@ -1128,57 +1152,64 @@ export class DebugPanel {
         pointersHtml += '<h4>🛠️ Extension API References</h4>';
         pointersHtml += '<div class="pointer-api-section">';
         pointersHtml += '<table class="pointer-values-table">';
-        pointersHtml += '<thead><tr><th>API Reference</th><th>Status</th><th>Type</th><th>Details</th></tr></thead><tbody>';
+        pointersHtml +=
+            '<thead><tr><th>API Reference</th><th>Status</th><th>Type</th><th>Details</th></tr></thead><tbody>';
         // Check various global references with more detail
         const globalRefs = [
             {
                 name: 'window.botOutfitPanel',
                 exists: Boolean(window.botOutfitPanel),
                 type: 'Panel Instance',
-                details: window.botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized'
+                details: window.botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized',
             },
             {
                 name: 'window.userOutfitPanel',
                 exists: Boolean(window.userOutfitPanel),
                 type: 'Panel Instance',
-                details: window.userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized'
+                details: window.userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized',
             },
             {
                 name: 'window.outfitTracker',
                 exists: Boolean(window.outfitTracker),
                 type: 'Tracker Service',
-                details: window.outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized'
+                details: window.outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized',
             },
             {
                 name: 'window.outfitTrackerInterceptor',
                 exists: Boolean(window.outfitTrackerInterceptor),
                 type: 'Interceptor',
-                details: window.outfitTrackerInterceptor ? 'Message interception handler' : 'Interceptor not active'
+                details: window.outfitTrackerInterceptor
+                    ? 'Message interception handler'
+                    : 'Interceptor not active',
             },
             {
                 name: 'window.getOutfitExtensionStatus',
                 exists: Boolean(window.getOutfitExtensionStatus),
                 type: 'Status Function',
-                details: window.getOutfitExtensionStatus ? 'Extension status checker' : 'Status function not available'
+                details: window.getOutfitExtensionStatus
+                    ? 'Extension status checker'
+                    : 'Status function not available',
             },
             {
                 name: 'outfitStore',
                 exists: Boolean(outfitStore),
                 type: 'Store Instance',
-                details: outfitStore ? 'Main state management store' : 'Store not initialized'
+                details: outfitStore ? 'Main state management store' : 'Store not initialized',
             },
             {
                 name: 'customMacroSystem',
                 exists: Boolean(customMacroSystem),
                 type: 'Macro System',
-                details: customMacroSystem ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)` : 'Macro system not initialized'
+                details: customMacroSystem
+                    ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)`
+                    : 'Macro system not initialized',
             },
             {
                 name: 'debugLogger',
                 exists: Boolean(debugLogger),
                 type: 'Logger Instance',
-                details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized'
-            }
+                details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized',
+            },
         ];
         for (const ref of globalRefs) {
             const status = ref.exists ? '✅ Available' : '❌ Not Available';
@@ -1368,19 +1399,19 @@ export class DebugPanel {
                 panels: !!(window.botOutfitPanel && window.userOutfitPanel),
                 macroSystem: !!customMacroSystem,
                 eventBus: !!extensionEventBus,
-                debugPanel: !!this
+                debugPanel: !!this,
             },
             globalAPIs: {
                 outfitTracker: !!window.outfitTracker,
                 wipeAllOutfits: !!window.wipeAllOutfits,
-                refreshOutfitMacros: !!window.refreshOutfitMacros
+                refreshOutfitMacros: !!window.refreshOutfitMacros,
             },
             services: {
                 characterService: !!window.characterService,
                 llmService: !!window.llmService,
                 eventService: !!window.eventService,
-                storageService: !!window.storageService
-            }
+                storageService: !!window.storageService,
+            },
         };
         console.log('Extension Information:', info);
         toastr.info('Extension info logged to console!', 'Debug Panel');
@@ -1480,9 +1511,9 @@ export class DebugPanel {
             groups.get(key).push(log);
         }
         // Convert to array of groups, keeping only the most recent log for each group
-        return Array.from(groups.values()).map(logsInGroup => ({
+        return Array.from(groups.values()).map((logsInGroup) => ({
             logs: [logsInGroup[0]], // Keep only the first (most recent) log
-            count: logsInGroup.length
+            count: logsInGroup.length,
         }));
     }
     /**
@@ -1503,7 +1534,7 @@ export class DebugPanel {
         // Group similar logs
         const groupedLogs = this.groupSimilarLogs(sortedLogs);
         // Format grouped logs for export
-        const logLines = groupedLogs.map(group => {
+        const logLines = groupedLogs.map((group) => {
             const log = group.logs[0]; // Use the first (most recent) log for display
             const timestamp = new Date(log.timestamp).toISOString();
             const level = log.level.toUpperCase().padEnd(5);
@@ -1514,7 +1545,12 @@ export class DebugPanel {
             if (log.data !== null && log.data !== undefined) {
                 try {
                     const dataStr = JSON.stringify(log.data, null, 2);
-                    logLine += '\n' + dataStr.split('\n').map(line => `    ${line}`).join('\n');
+                    logLine +=
+                        '\n' +
+                            dataStr
+                                .split('\n')
+                                .map((line) => `    ${line}`)
+                                .join('\n');
                 }
                 catch (error) {
                     logLine += `\n    [Error serializing data: ${error}]`;
@@ -1567,7 +1603,9 @@ export class DebugPanel {
         // Update context information
         const contextGrid = contentArea.querySelector('.context-info-grid');
         if (contextGrid) {
-            const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
+            const currentCharName = state.currentCharacterId
+                ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+                : 'None';
             const currentCharId = state.currentCharacterId || 'None';
             const contextItems = contextGrid.querySelectorAll('.context-item');
             if (contextItems.length >= 5) {
@@ -1608,50 +1646,58 @@ export class DebugPanel {
                     name: 'window.botOutfitPanel',
                     exists: Boolean(window.botOutfitPanel),
                     type: 'Panel Instance',
-                    details: window.botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized'
+                    details: window.botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized',
                 },
                 {
                     name: 'window.userOutfitPanel',
                     exists: Boolean(window.userOutfitPanel),
                     type: 'Panel Instance',
-                    details: window.userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized'
+                    details: window.userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized',
                 },
                 {
                     name: 'window.outfitTracker',
                     exists: Boolean(window.outfitTracker),
                     type: 'Tracker Service',
-                    details: window.outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized'
+                    details: window.outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized',
                 },
                 {
                     name: 'window.outfitTrackerInterceptor',
                     exists: Boolean(window.outfitTrackerInterceptor),
                     type: 'Interceptor',
-                    details: window.outfitTrackerInterceptor ? 'Message interception handler' : 'Interceptor not active'
+                    details: window.outfitTrackerInterceptor
+                        ? 'Message interception handler'
+                        : 'Interceptor not active',
                 },
                 {
                     name: 'window.getOutfitExtensionStatus',
                     exists: Boolean(window.getOutfitExtensionStatus),
                     type: 'Status Function',
-                    details: window.getOutfitExtensionStatus ? 'Extension status checker' : 'Status function not available'
+                    details: window.getOutfitExtensionStatus
+                        ? 'Extension status checker'
+                        : 'Status function not available',
                 },
                 {
                     name: 'outfitStore',
                     exists: Boolean(outfitStore),
                     type: 'Store Instance',
-                    details: outfitStore ? 'Main state management store' : 'Store not initialized'
+                    details: outfitStore ? 'Main state management store' : 'Store not initialized',
                 },
                 {
                     name: 'customMacroSystem',
                     exists: Boolean(customMacroSystem),
                     type: 'Macro System',
-                    details: customMacroSystem ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)` : 'Macro system not initialized'
+                    details: customMacroSystem
+                        ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)`
+                        : 'Macro system not initialized',
                 },
                 {
                     name: 'debugLogger',
                     exists: Boolean(debugLogger),
                     type: 'Logger Instance',
-                    details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized'
-                }
+                    details: debugLogger
+                        ? `Debug logger (${debugLogger.getLogs().length} logs)`
+                        : 'Logger not initialized',
+                },
             ];
             let tbodyHtml = '';
             for (const ref of globalRefs) {
@@ -1746,7 +1792,8 @@ export class DebugPanel {
         // Only recalculate storage size every 30 seconds to reduce performance impact
         let estimatedStorageSize;
         const now = Date.now();
-        if (now - this.lastStateStringifyTime > 30000) { // 30 seconds
+        if (now - this.lastStateStringifyTime > 30000) {
+            // 30 seconds
             const stateStr = JSON.stringify(state);
             this.lastStorageSize = new Blob([stateStr]).size / 1024;
             this.lastStateStringifyTime = now;
@@ -1913,7 +1960,9 @@ export class DebugPanel {
                 for (let i = 0; i < context.characters.length; i++) {
                     const character = context.characters[i];
                     const embeddedData = getCharacterOutfitData(character);
-                    if (embeddedData && embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0) {
+                    if (embeddedData &&
+                        embeddedData.defaultOutfit &&
+                        Object.keys(embeddedData.defaultOutfit).length > 0) {
                         totalDefaultOutfits++;
                     }
                 }
@@ -1922,7 +1971,7 @@ export class DebugPanel {
         }
         // Update timestamp displays
         const lastModifiedElements = contentArea.querySelectorAll('.embedded-last-modified');
-        lastModifiedElements.forEach(element => {
+        lastModifiedElements.forEach((element) => {
             var _a;
             // Update "Modified: X" text with current time indicator
             const currentTime = new Date().toLocaleTimeString();

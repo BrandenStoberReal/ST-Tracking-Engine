@@ -12,6 +12,6 @@ export const SILLY_TAVERN_PATHS = {
     SLASH_COMMANDS: {
         PARSER: ROOTDIR + 'slash-commands/SlashCommandParser.js',
         COMMAND: ROOTDIR + 'slash-commands/SlashCommand.js',
-        ARGUMENT: ROOTDIR + 'slash-commands/SlashCommandArgument.js'
-    }
+        ARGUMENT: ROOTDIR + 'slash-commands/SlashCommandArgument.js',
+    },
 };

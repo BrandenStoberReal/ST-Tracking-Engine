@@ -27,7 +27,7 @@ export function getOrCreateCharacterId(character) {
             }
             // Check if character has data and extensions
             if (character.data && character.data.extensions) {
-                let characterId = character.data.extensions.character_id;
+                const characterId = character.data.extensions.character_id;
                 if (characterId && typeof characterId === 'string' && characterId.trim() !== '') {
                     debugLog(`[CharacterIdService] Found existing character ID: ${characterId}`, null, 'info');
                     return characterId;
@@ -37,7 +37,11 @@ export function getOrCreateCharacterId(character) {
             const newCharacterId = generateGUID();
             debugLog(`[CharacterIdService] Generated new character ID: ${newCharacterId}`, null, 'info');
             // Get the context and use writeExtensionField to store the character ID
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.writeExtensionField) {
                 // Find the character index in the characters array
                 let characterIndex = -1;
@@ -110,7 +114,11 @@ export function getCharacterId(character) {
 export function findCharacterById(characterId) {
     var _a;
     try {
-        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
         if (context && context.characters) {
             for (const character of context.characters) {
                 const id = getCharacterId(character);
@@ -134,7 +142,11 @@ export function getCurrentCharacterId() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.characterId !== undefined && context.characterId !== null) {
                 const character = context.characters[context.characterId];
                 if (character) {
@@ -157,7 +169,11 @@ export function migrateAllCharacters() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (!context || !context.characters) {
                 debugLog('[CharacterIdService] No characters found for migration', null, 'warn');
                 return 0;

@@ -63,7 +63,9 @@ export class UserOutfitPanel {
         panel.className = 'outfit-panel';
 
         // Get the first message hash for display in the header (instance ID)
-        const messageHash = this.generateMessageHash(this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || '');
+        const messageHash = this.generateMessageHash(
+            this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || ''
+        );
         const hashDisplay = messageHash ? ` (${messageHash})` : '';
 
         panel.innerHTML = `
@@ -86,14 +88,14 @@ export class UserOutfitPanel {
 
         const tabs = panel.querySelectorAll('.outfit-tab');
 
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             tab.addEventListener('click', (event) => {
                 const tabName = (event.target as HTMLElement).dataset.tab;
 
                 this.currentTab = tabName!;
                 this.renderContent();
 
-                tabs.forEach(t => t.classList.remove('active'));
+                tabs.forEach((t) => t.classList.remove('active'));
                 (event.target as HTMLElement).classList.add('active');
             });
         });
@@ -107,12 +109,15 @@ export class UserOutfitPanel {
      */
     getFirstMessageText(): string {
         try {
-            const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
 
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
-                const aiMessages = context.chat.filter((msg: any) =>
-                    !msg.is_user && !msg.is_system);
+                const aiMessages = context.chat.filter((msg: any) => !msg.is_user && !msg.is_system);
 
                 if (aiMessages.length > 0) {
                     const firstMessage = aiMessages[0];
@@ -230,7 +235,7 @@ export class UserOutfitPanel {
         } else {
             // Show all presets including the default one
             presets.forEach((preset: string) => {
-                const isDefault = (defaultPresetName === preset);
+                const isDefault = defaultPresetName === preset;
                 const presetElement = document.createElement('div');
 
                 presetElement.className = `outfit-preset ${isDefault ? 'default-preset-highlight' : ''}`;
@@ -311,7 +316,9 @@ export class UserOutfitPanel {
                 this.saveSettingsDebounced();
                 this.renderContent();
             } else if (presetName && presetName.toLowerCase() === 'default') {
-                alert('Please save this outfit with a different name, then use the "Set Default" button on that outfit.');
+                alert(
+                    'Please save this outfit with a different name, then use the "Set Default" button on that outfit.'
+                );
             }
         });
 
@@ -328,11 +335,10 @@ export class UserOutfitPanel {
         if (areSystemMessagesEnabled()) {
             toastr.info(message, 'Outfit System', {
                 timeOut: 4000,
-                extendedTimeOut: 8000
+                extendedTimeOut: 8000,
             });
         }
     }
-
 
     /**
      * Renders the button to fill the outfit with LLM-generated items
@@ -367,7 +373,6 @@ export class UserOutfitPanel {
         }
     }
 
-
     show(): void {
         if (!this.domElement) {
             this.domElement = this.createPanel();
@@ -386,7 +391,7 @@ export class UserOutfitPanel {
             panelType: 'user',
             visible: true,
             characterId: 'user',
-            characterName: 'User'
+            characterName: 'User',
         });
 
         // Set up dynamic refresh when panel becomes visible
@@ -400,7 +405,7 @@ export class UserOutfitPanel {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
-                    maxHeight: 800
+                    maxHeight: 800,
                 });
             }, 10); // Small delay to ensure panel is rendered first
 
@@ -447,7 +452,7 @@ export class UserOutfitPanel {
             panelType: 'user',
             visible: false,
             characterId: 'user',
-            characterName: 'User'
+            characterName: 'User',
         });
 
         // Clean up dynamic refresh when panel is hidden
@@ -469,7 +474,9 @@ export class UserOutfitPanel {
 
             if (header) {
                 // Get the first message hash for display in the header (instance ID)
-                const messageHash = this.generateMessageHash(this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || '');
+                const messageHash = this.generateMessageHash(
+                    this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || ''
+                );
                 const hashDisplay = messageHash ? ` (${messageHash})` : '';
 
                 header.textContent = `Your Outfit${hashDisplay}`;
@@ -513,47 +520,59 @@ export class UserOutfitPanel {
         }
 
         // Get context to set up event listeners
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.eventSource && context.event_types) {
             const {eventSource, event_types} = context;
 
             // Listen for chat-related events that might affect outfit data
-            this.eventListeners.push(() => eventSource.on(event_types.CHAT_CHANGED, () => {
-                if (this.isVisible) {
-                    const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.CHAT_CHANGED, () => {
+                    if (this.isVisible) {
+                        const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
 
-                    this.outfitManager.loadOutfit(outfitInstanceId);
-                    this.updateHeader();
-                    this.renderContent();
-                }
-            }));
+                        this.outfitManager.loadOutfit(outfitInstanceId);
+                        this.updateHeader();
+                        this.renderContent();
+                    }
+                })
+            );
 
-            this.eventListeners.push(() => eventSource.on(event_types.CHAT_ID_CHANGED, () => {
-                if (this.isVisible) {
-                    const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.CHAT_ID_CHANGED, () => {
+                    if (this.isVisible) {
+                        const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
 
-                    this.outfitManager.loadOutfit(outfitInstanceId);
-                    this.updateHeader();
-                    this.renderContent();
-                }
-            }));
+                        this.outfitManager.loadOutfit(outfitInstanceId);
+                        this.updateHeader();
+                        this.renderContent();
+                    }
+                })
+            );
 
-            this.eventListeners.push(() => eventSource.on(event_types.CHAT_CREATED, () => {
-                if (this.isVisible) {
-                    const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.CHAT_CREATED, () => {
+                    if (this.isVisible) {
+                        const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
 
-                    this.outfitManager.loadOutfit(outfitInstanceId);
-                    this.updateHeader();
-                    this.renderContent();
-                }
-            }));
+                        this.outfitManager.loadOutfit(outfitInstanceId);
+                        this.updateHeader();
+                        this.renderContent();
+                    }
+                })
+            );
 
-            this.eventListeners.push(() => eventSource.on(event_types.MESSAGE_RECEIVED, () => {
-                if (this.isVisible) {
-                    this.renderContent();
-                }
-            }));
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.MESSAGE_RECEIVED, () => {
+                    if (this.isVisible) {
+                        this.renderContent();
+                    }
+                })
+            );
         }
     }
 
@@ -569,7 +588,7 @@ export class UserOutfitPanel {
         }
 
         // Remove event listeners
-        this.eventListeners.forEach(unsubscribe => {
+        this.eventListeners.forEach((unsubscribe) => {
             if (typeof unsubscribe === 'function') {
                 unsubscribe();
             }
@@ -613,7 +632,6 @@ export class UserOutfitPanel {
             // Check if character is lowercase letter a-z
             if (code >= 97 && code <= 122) {
                 cleanId += char;
-
             }
             // Otherwise, skip non-alphanumeric characters
         }
@@ -637,7 +655,7 @@ export class UserOutfitPanel {
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
 
-            hash = ((hash << 5) - hash) + char;
+            hash = (hash << 5) - hash + char;
             hash &= hash; // Convert to 32-bit integer
         }
 

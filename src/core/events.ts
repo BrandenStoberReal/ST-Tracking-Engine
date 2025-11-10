@@ -18,7 +18,7 @@ export const EXTENSION_EVENTS = {
     MIGRATION_COMPLETED: 'outfit-tracker-migration-completed',
     INSTANCE_CREATED: 'outfit-tracker-instance-created',
     INSTANCE_DELETED: 'outfit-tracker-instance-deleted',
-    CHARACTER_OUTFIT_SYNCED: 'outfit-tracker-character-outfit-synced'
+    CHARACTER_OUTFIT_SYNCED: 'outfit-tracker-character-outfit-synced',
 };
 
 // Simple event bus implementation
@@ -38,13 +38,13 @@ class ExtensionEventBus {
 
     off(event: string, callback: (data?: any) => void) {
         if (this.listeners[event]) {
-            this.listeners[event] = this.listeners[event].filter(listener => listener !== callback);
+            this.listeners[event] = this.listeners[event].filter((listener) => listener !== callback);
         }
     }
 
     emit(event: string, data?: any) {
         if (this.listeners[event]) {
-            this.listeners[event].forEach(callback => {
+            this.listeners[event].forEach((callback) => {
                 try {
                     callback(data);
                 } catch (error) {

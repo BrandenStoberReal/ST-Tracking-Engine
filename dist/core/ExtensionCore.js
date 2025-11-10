@@ -57,16 +57,7 @@ function loadAutoOutfitSystem() {
  * @returns {boolean} True if the user agent indicates a mobile device, false otherwise
  */
 function isMobileUserAgent(userAgent) {
-    const mobileIndicators = [
-        'android',
-        'webos',
-        'iphone',
-        'ipad',
-        'ipod',
-        'blackberry',
-        'iemobile',
-        'opera mini'
-    ];
+    const mobileIndicators = ['android', 'webos', 'iphone', 'ipad', 'ipod', 'blackberry', 'iemobile', 'opera mini'];
     const lowerUserAgent = userAgent.toLowerCase();
     for (let i = 0; i < mobileIndicators.length; i++) {
         if (lowerUserAgent.includes(mobileIndicators[i])) {
@@ -159,7 +150,10 @@ function updatePanelStyles() {
  */
 function isMobileDevice() {
     const userAgent = navigator.userAgent.toLowerCase();
-    return isMobileUserAgent(userAgent) || window.innerWidth <= 768 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 1);
+    return (isMobileUserAgent(userAgent) ||
+        window.innerWidth <= 768 ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 1);
 }
 /**
  * The interceptor function to inject outfit information into the conversation context.
@@ -178,7 +172,7 @@ globalThis.outfitTrackerInterceptor = function (chat) {
                 // If panels aren't available yet, store the reference and try later
                 debugLog('Panels not available for interceptor, deferring injection', {
                     botPanel: Boolean(botPanel),
-                    userPanel: Boolean(userPanel)
+                    userPanel: Boolean(userPanel),
                 }, 'warn');
                 return;
             }
@@ -187,7 +181,7 @@ globalThis.outfitTrackerInterceptor = function (chat) {
             if (!botManager || !userManager) {
                 debugLog('Managers not available for interceptor', {
                     botManager: Boolean(botManager),
-                    userManager: Boolean(userManager)
+                    userManager: Boolean(userManager),
                 }, 'warn');
                 return;
             }
@@ -211,7 +205,7 @@ globalThis.outfitTrackerInterceptor = function (chat) {
                     name: 'Outfit Info',
                     send_date: new Date().toISOString(),
                     mes: outfitInfoString,
-                    extra: { outfit_injection: true }
+                    extra: { outfit_injection: true },
                 };
                 debugLog('Injecting outfit information into chat', { outfitInfoString }, 'info');
                 // Insert the outfit information before the last message in the chat
@@ -271,10 +265,14 @@ export function initializeExtension() {
         outfitStore.setAutoOutfitSystem(autoOutfitSystem);
         debugLog('Global references set', null, 'info');
         const eventService = setupEventListeners({
-            botManager, userManager, botPanel, userPanel, autoOutfitSystem,
+            botManager,
+            userManager,
+            botPanel,
+            userPanel,
+            autoOutfitSystem,
             updateForCurrentCharacter: () => updateForCurrentCharacter(botManager, userManager, botPanel, userPanel),
             processMacrosInFirstMessage: () => macroProcessor.processMacrosInFirstMessage(STContext),
-            context: STContext
+            context: STContext,
         });
         setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem, outfitDataService, storageService, dataManager, eventService);
         initSettings(autoOutfitSystem, AutoOutfitSystem, STContext);

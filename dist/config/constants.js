@@ -4,17 +4,30 @@
  * @type {string[]}
  */
 export const CLOTHING_SLOTS = [
-    'headwear', 'topwear', 'topunderwear', 'bottomwear',
-    'footwear', 'footunderwear'
+    'headwear',
+    'topwear',
+    'topunderwear',
+    'bottomwear',
+    'footwear',
+    'footunderwear',
 ];
 /**
  * Array of accessory slot names used in the outfit system
  * @type {string[]}
  */
 export const ACCESSORY_SLOTS = [
-    'head-accessory', 'ears-accessory', 'eyes-accessory', 'mouth-accessory',
-    'neck-accessory', 'body-accessory', 'arms-accessory', 'hands-accessory',
-    'waist-accessory', 'bottom-accessory', 'legs-accessory', 'foot-accessory'
+    'head-accessory',
+    'ears-accessory',
+    'eyes-accessory',
+    'mouth-accessory',
+    'neck-accessory',
+    'body-accessory',
+    'arms-accessory',
+    'hands-accessory',
+    'waist-accessory',
+    'bottom-accessory',
+    'legs-accessory',
+    'foot-accessory',
 ];
 /**
  * Combined array of all outfit slot names
@@ -53,15 +66,15 @@ export const DEFAULT_SETTINGS = Object.freeze({
     botPanelColors: {
         primary: 'linear-gradient(135deg, #6a4fc1 0%, #5a49d0 50%, #4a43c0 100%)',
         border: '#8a7fdb',
-        shadow: 'rgba(106, 79, 193, 0.4)'
+        shadow: 'rgba(106, 79, 193, 0.4)',
     },
     userPanelColors: {
         primary: 'linear-gradient(135deg, #1a78d1 0%, #2a68c1 50%, #1a58b1 100%)',
         border: '#5da6f0',
-        shadow: 'rgba(26, 120, 209, 0.4)'
+        shadow: 'rgba(26, 120, 209, 0.4)',
     },
     defaultBotPresets: {},
-    defaultUserPresets: {}
+    defaultUserPresets: {},
 });
 /**
  * Constants for outfit command types
@@ -73,5 +86,5 @@ export const DEFAULT_SETTINGS = Object.freeze({
 export const OUTFIT_COMMANDS = {
     WEAR: 'wear',
     REMOVE: 'remove',
-    CHANGE: 'change'
+    CHANGE: 'change',
 };

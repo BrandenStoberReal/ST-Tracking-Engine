@@ -18,7 +18,7 @@ class CustomMacroService {
         if (ctx && ctx.registerMacro) {
             // Don't register {{char}} and {{user}} macros globally as they should be handled manually in prompt injection only
             // Only register slot-specific macros
-            this.allSlots.forEach(slot => {
+            this.allSlots.forEach((slot) => {
                 const charMacro = `char_${slot}`;
                 const userMacro = `user_${slot}`;
                 if (!this.registeredMacros.has(charMacro)) {
@@ -37,7 +37,7 @@ class CustomMacroService {
         const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext());
         if (ctx && ctx.unregisterMacro) {
             // Don't deregister {{char}} and {{user}} macros as they weren't registered globally
-            this.allSlots.forEach(slot => {
+            this.allSlots.forEach((slot) => {
                 const charMacro = `char_${slot}`;
                 const userMacro = `user_${slot}`;
                 if (this.registeredMacros.has(charMacro)) {
@@ -63,7 +63,7 @@ class CustomMacroService {
                         ctx.registerMacro(characterName, () => characterName);
                         this.registeredMacros.add(characterName);
                     }
-                    this.allSlots.forEach(slot => {
+                    this.allSlots.forEach((slot) => {
                         const macroName = `${characterName}_${slot}`;
                         if (!this.registeredMacros.has(macroName)) {
                             ctx.registerMacro(macroName, () => this.getCurrentSlotValue(characterName, slot, characterName));
@@ -86,7 +86,7 @@ class CustomMacroService {
                         ctx.unregisterMacro(characterName);
                         this.registeredMacros.delete(characterName);
                     }
-                    this.allSlots.forEach(slot => {
+                    this.allSlots.forEach((slot) => {
                         const macroName = `${characterName}_${slot}`;
                         if (this.registeredMacros.has(macroName)) {
                             ctx.unregisterMacro(macroName);
@@ -100,7 +100,11 @@ class CustomMacroService {
     getCurrentCharName() {
         var _a;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.chat) {
                 for (let i = context.chat.length - 1; i >= 0; i--) {
                     const message = context.chat[i];
@@ -129,7 +133,11 @@ class CustomMacroService {
             return cachedValue.value;
         }
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             const characters = getCharacters();
             let charId = null;
             if (charNameParam) {
@@ -185,7 +193,11 @@ class CustomMacroService {
             }
             // Wait to ensure outfit data is loaded before accessing it
             // Check if the outfit managers are available and initialized
-            if (charId !== null && (macroType === 'char' || macroType === 'bot' || charNameParam || (this.isValidCharacterName(macroType) && !['user'].includes(macroType)))) {
+            if (charId !== null &&
+                (macroType === 'char' ||
+                    macroType === 'bot' ||
+                    charNameParam ||
+                    (this.isValidCharacterName(macroType) && !['user'].includes(macroType)))) {
                 // Check if outfit managers are available
                 const botOutfitManager = (_e = (_d = window.outfitTracker) === null || _d === void 0 ? void 0 : _d.botOutfitPanel) === null || _e === void 0 ? void 0 : _e.outfitManager;
                 if (!botOutfitManager) {
@@ -251,7 +263,11 @@ class CustomMacroService {
     getCurrentUserName() {
         var _a;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.chat) {
                 for (let i = context.chat.length - 1; i >= 0; i--) {
                     const message = context.chat[i];
@@ -260,8 +276,10 @@ class CustomMacroService {
                     }
                 }
             }
-            if (typeof window.power_user !== 'undefined' && window.power_user &&
-                typeof window.user_avatar !== 'undefined' && window.user_avatar) {
+            if (typeof window.power_user !== 'undefined' &&
+                window.power_user &&
+                typeof window.user_avatar !== 'undefined' &&
+                window.user_avatar) {
                 const personaName = window.power_user.personas[window.user_avatar];
                 return personaName || 'User';
             }
@@ -307,7 +325,7 @@ class CustomMacroService {
             }
             else {
                 const potentialCharacterName = parts[0];
-                let potentialSlot = parts.slice(1).join('_');
+                const potentialSlot = parts.slice(1).join('_');
                 if (this.allSlots.includes(potentialSlot)) {
                     macroType = potentialCharacterName;
                     slot = potentialSlot;
@@ -334,7 +352,7 @@ class CustomMacroService {
                     fullMatch: fullMatch,
                     type: macroType,
                     slot: slot,
-                    startIndex: openIdx
+                    startIndex: openIdx,
                 });
             }
             index = closeIdx + 2;
@@ -368,9 +386,10 @@ class CustomMacroService {
             if (macro.slot) {
                 // Handle slot-based macros like {{char_topwear}}, {{user_headwear}}, etc.
                 const replacement = this.getCurrentSlotValue(macro.type, macro.slot, ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type);
-                result = result.substring(0, macro.startIndex) +
-                    replacement +
-                    result.substring(macro.startIndex + macro.fullMatch.length);
+                result =
+                    result.substring(0, macro.startIndex) +
+                        replacement +
+                        result.substring(macro.startIndex + macro.fullMatch.length);
             }
             // Skip non-slot macros like {{char}} and {{user}} as they should be handled manually in prompt injection only
         }
@@ -378,7 +397,11 @@ class CustomMacroService {
     }
     _generateCacheKey(macroType, slotName, characterName) {
         var _a;
-        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
         const currentCharacterId = (context === null || context === void 0 ? void 0 : context.characterId) || 'unknown';
         const currentInstanceId = outfitStore.getCurrentInstanceId() || 'unknown';
         return `${macroType}_${slotName}_${characterName || 'null'}_${currentCharacterId}_${currentInstanceId}`;
@@ -386,7 +409,7 @@ class CustomMacroService {
     _setCache(cacheKey, value) {
         this.macroValueCache.set(cacheKey, {
             value: value,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
     }
     _cleanupExpiredCache() {
@@ -397,14 +420,14 @@ class CustomMacroService {
         }
     }
     _formatOutfitSection(entity, sectionTitle, slots, outfitData, macroPrefix) {
-        const hasItems = outfitData.some(data => slots.includes(data.name) && data.value !== 'None' && data.value !== '');
+        const hasItems = outfitData.some((data) => slots.includes(data.name) && data.value !== 'None' && data.value !== '');
         if (!hasItems) {
             return '';
         }
         let section = `
 **${entity}'s Current ${sectionTitle}**
 `;
-        slots.forEach(slot => {
+        slots.forEach((slot) => {
             const slotData = outfitData.find((data) => data.name === slot);
             if (slotData && slotData.value !== 'None' && slotData.value !== '') {
                 const formattedSlotName = this._formatSlotName(slot);

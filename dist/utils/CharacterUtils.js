@@ -42,7 +42,11 @@ export const CharacterInfoType = {
 export function getCharacterInfoById(charId, infoType) {
     var _a;
     try {
-        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
         if (context && context.characters) {
             const character = context.characters[charId];
             if (character) {
@@ -136,7 +140,11 @@ export function getCharacterInfoById(charId, infoType) {
  */
 export function getCharacters() {
     var _a;
-    const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+    const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+        ? window.SillyTavern.getContext()
+        : window.getContext
+            ? window.getContext()
+            : null;
     if (context && context.characters) {
         debugLog('Character array fetched successfully.', null, 'info');
         return context.characters;
@@ -167,7 +175,11 @@ export function getCharacterUniqueIdByIndex(charId) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.characters) {
                 const character = context.characters[charId];
                 if (character) {
@@ -197,7 +209,11 @@ export function getCurrentCharacterUniqueId() {
                 return botOutfitManager.characterId;
             }
             // Fallback to old system
-            const context = ((_c = window.SillyTavern) === null || _c === void 0 ? void 0 : _c.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_c = window.SillyTavern) === null || _c === void 0 ? void 0 : _c.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.characterId !== undefined && context.characterId !== null) {
                 return yield getCharacterUniqueIdByIndex(context.characterId.toString());
             }

@@ -7,7 +7,6 @@ import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
 import {AutoOutfitService} from './AutoOutfitService';
 import {debugLog} from '../logging/DebugLogger';
 
-
 interface EventServiceContext {
     botManager: NewBotOutfitManager;
     userManager: NewUserOutfitManager;
@@ -44,10 +43,17 @@ class EventService {
     }
 
     initialize(): void {
-        this.context = this.context || (window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext()) || null;
+        this.context =
+            this.context ||
+            (window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext()) ||
+            null;
 
         if (!this.context || !this.context.eventSource || !this.context.event_types) {
-            debugLog('[OutfitTracker] Context not fully available for event listeners yet, trying again later', null, 'warn');
+            debugLog(
+                '[OutfitTracker] Context not fully available for event listeners yet, trying again later',
+                null,
+                'warn'
+            );
             setTimeout(() => this.initialize(), 1000);
             return;
         }
@@ -75,7 +81,9 @@ class EventService {
 
     setupExtensionEventListeners(): void {
         extensionEventBus.on(EXTENSION_EVENTS.OUTFIT_DATA_LOADED, () => this.handleOutfitDataLoaded());
-        extensionEventBus.on(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, (data: any) => this.handlePanelVisibilityChanged(data));
+        extensionEventBus.on(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, (data: any) =>
+            this.handlePanelVisibilityChanged(data)
+        );
     }
 
     handleAppReady(): void {
@@ -94,13 +102,15 @@ class EventService {
             return;
         }
         if (this.context.chat?.length > 0) {
-            const firstBotMessage = this.context.chat.find(msg => !msg.is_user && !msg.is_system);
+            const firstBotMessage = this.context.chat.find((msg) => !msg.is_user && !msg.is_system);
 
             if (firstBotMessage) {
                 const firstMessageHash = this.generateMessageHash(firstBotMessage.mes);
 
                 if (this.currentFirstMessageHash !== firstMessageHash) {
-                    debugLog('[OutfitTracker] CHAT_CHANGED event fired and first message has changed - updating for new conversation context');
+                    debugLog(
+                        '[OutfitTracker] CHAT_CHANGED event fired and first message has changed - updating for new conversation context'
+                    );
                     this.currentFirstMessageHash = firstMessageHash;
                     this.updateForCurrentCharacter();
                     customMacroSystem.clearCache();
@@ -111,7 +121,9 @@ class EventService {
                 }
             } else {
                 this.currentFirstMessageHash = null;
-                debugLog('[OutfitTracker] CHAT_CHANGED event fired with no first bot message - updating for character switch');
+                debugLog(
+                    '[OutfitTracker] CHAT_CHANGED event fired with no first bot message - updating for character switch'
+                );
                 this.updateForCurrentCharacter();
                 customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                 customMacroSystem.registerCharacterSpecificMacros(this.context);
@@ -124,7 +136,7 @@ class EventService {
             return;
         }
         const chat = this.context.chat;
-        const aiMessages = chat.filter(msg => !msg.is_user && !msg.is_system);
+        const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length === 1 && !data.is_user) {
             debugLog('[OutfitTracker] First AI message received, updating outfit instance.');
@@ -159,7 +171,7 @@ class EventService {
             return;
         }
 
-        const aiMessages = chat.filter(msg => !msg.is_user && !msg.is_system);
+        const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
             debugLog('[OutfitTracker] First message was swiped, updating outfit instance.');
@@ -237,7 +249,9 @@ class EventService {
 
     handlePanelVisibilityChanged(data: any): void {
         if (data && data.panelType && typeof data.visible === 'boolean') {
-            debugLog(`[OutfitTracker] Panel visibility changed: ${data.panelType} panel is now ${data.visible ? 'visible' : 'hidden'}`);
+            debugLog(
+                `[OutfitTracker] Panel visibility changed: ${data.panelType} panel is now ${data.visible ? 'visible' : 'hidden'}`
+            );
             outfitStore.setPanelVisibility(data.panelType, data.visible);
         }
     }
@@ -289,7 +303,10 @@ class EventService {
                 if (!appliedDefault) {
                     this.botManager.loadOutfit();
                 }
-                if ((window as any).botOutfitPanel && typeof (window as any).botOutfitPanel.renderContent === 'function') {
+                if (
+                    (window as any).botOutfitPanel &&
+                    typeof (window as any).botOutfitPanel.renderContent === 'function'
+                ) {
                     (window as any).botOutfitPanel.renderContent();
                 }
             }
@@ -298,7 +315,10 @@ class EventService {
                 if (!appliedDefault) {
                     this.userManager.loadOutfit();
                 }
-                if ((window as any).userOutfitPanel && typeof (window as any).userOutfitPanel.renderContent === 'function') {
+                if (
+                    (window as any).userOutfitPanel &&
+                    typeof (window as any).userOutfitPanel.renderContent === 'function'
+                ) {
                     (window as any).userOutfitPanel.renderContent();
                 }
             }
@@ -356,7 +376,10 @@ class EventService {
                 if (!appliedDefault) {
                     this.botManager.loadOutfit();
                 }
-                if ((window as any).botOutfitPanel && typeof (window as any).botOutfitPanel.renderContent === 'function') {
+                if (
+                    (window as any).botOutfitPanel &&
+                    typeof (window as any).botOutfitPanel.renderContent === 'function'
+                ) {
                     (window as any).botOutfitPanel.renderContent();
                 }
             }
@@ -365,7 +388,10 @@ class EventService {
                 if (!appliedDefault) {
                     this.userManager.loadOutfit();
                 }
-                if ((window as any).userOutfitPanel && typeof (window as any).userOutfitPanel.renderContent === 'function') {
+                if (
+                    (window as any).userOutfitPanel &&
+                    typeof (window as any).userOutfitPanel.renderContent === 'function'
+                ) {
                     (window as any).userOutfitPanel.renderContent();
                 }
             }

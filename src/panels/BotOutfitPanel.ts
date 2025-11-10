@@ -67,7 +67,9 @@ export class BotOutfitPanel {
         panel.className = 'outfit-panel';
 
         // Get the first message hash for display in the header (instance ID)
-        const messageHash = this.generateMessageHash(this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || '');
+        const messageHash = this.generateMessageHash(
+            this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || ''
+        );
         const hashDisplay = messageHash ? ` (${messageHash})` : '';
 
         // Replace placeholder "{{char}}" with the actual character name
@@ -93,14 +95,14 @@ export class BotOutfitPanel {
 
         const tabs = panel.querySelectorAll('.outfit-tab');
 
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             tab.addEventListener('click', (event) => {
                 const tabName = (event.target as HTMLElement).dataset.tab;
 
                 this.currentTab = tabName!;
                 this.renderContent();
 
-                tabs.forEach(t => t.classList.remove('active'));
+                tabs.forEach((t) => t.classList.remove('active'));
                 (event.target as HTMLElement).classList.add('active');
             });
         });
@@ -114,7 +116,11 @@ export class BotOutfitPanel {
      */
     getFirstMessageText(): string {
         try {
-            const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             let characterName = null;
 
             // Try to get character name using the new character ID system first
@@ -132,9 +138,12 @@ export class BotOutfitPanel {
 
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
-                const aiMessages = context.chat.filter((msg: any) =>
-                    !msg.is_user && !msg.is_system &&
-                    (msg.name === this.outfitManager.character || (characterName && msg.name === characterName)));
+                const aiMessages = context.chat.filter(
+                    (msg: any) =>
+                        !msg.is_user &&
+                        !msg.is_system &&
+                        (msg.name === this.outfitManager.character || (characterName && msg.name === characterName))
+                );
 
                 if (aiMessages.length > 0) {
                     const firstMessage = aiMessages[0];
@@ -267,7 +276,7 @@ export class BotOutfitPanel {
         } else {
             // Show all presets including the default one
             presets.forEach((preset: string) => {
-                const isDefault = (defaultPresetName === preset);
+                const isDefault = defaultPresetName === preset;
                 const presetElement = document.createElement('div');
 
                 presetElement.className = `outfit-preset ${isDefault ? 'default-preset-highlight' : ''}`;
@@ -348,7 +357,9 @@ export class BotOutfitPanel {
                 this.saveSettingsDebounced();
                 this.renderContent();
             } else if (presetName && presetName.toLowerCase() === 'default') {
-                alert('Please save this outfit with a different name, then use the "Set Default" button on that outfit.');
+                alert(
+                    'Please save this outfit with a different name, then use the "Set Default" button on that outfit.'
+                );
             }
         });
 
@@ -426,18 +437,21 @@ export class BotOutfitPanel {
         if (areSystemMessagesEnabled()) {
             toastr.info(message, 'Outfit System', {
                 timeOut: 4000,
-                extendedTimeOut: 8000
+                extendedTimeOut: 8000,
             });
         }
     }
-
 
     /**
      * Gets character data from the current context
      * @returns {Promise<any>} An object containing character information or an error
      */
     async getCharacterData(): Promise<any> {
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         // Try to get character using the new character ID system first
         let character = null;
@@ -452,7 +466,7 @@ export class BotOutfitPanel {
 
         if (!character) {
             return {
-                error: 'No character selected or context not ready'
+                error: 'No character selected or context not ready',
             };
         }
 
@@ -506,8 +520,12 @@ export class BotOutfitPanel {
             // Use the unified LLM utility with profile if available
             return await LLMUtility.generateWithProfile(
                 prompt,
-                'You are an outfit generation system. Based on the character information provided, output outfit commands to set the character\'s clothing and accessories.',
-                window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null),
+                "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.",
+                window.SillyTavern?.getContext
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null,
                 connectionProfile
             );
         } catch (error) {
@@ -578,7 +596,8 @@ export class BotOutfitPanel {
             const valueStart = slotEnd + 1;
             let value = '';
 
-            if (command.charAt(valueStart) === '"') { // If value is quoted
+            if (command.charAt(valueStart) === '"') {
+                // If value is quoted
                 const quoteStart = valueStart + 1;
                 let i = quoteStart;
                 let escaped = false;
@@ -619,7 +638,6 @@ export class BotOutfitPanel {
             if (message && areSystemMessagesEnabled()) {
                 this.sendSystemMessage(message);
             }
-
         } catch (error) {
             debugLog('Error processing single command:', error, 'error');
             throw error;
@@ -657,7 +675,7 @@ export class BotOutfitPanel {
             panelType: 'bot',
             visible: true,
             characterId: this.outfitManager.characterId,
-            characterName: this.outfitManager.character
+            characterName: this.outfitManager.character,
         });
 
         // Set up dynamic refresh when panel becomes visible
@@ -671,7 +689,7 @@ export class BotOutfitPanel {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
-                    maxHeight: 800
+                    maxHeight: 800,
                 });
             }, 10); // Small delay to ensure panel is rendered first
 
@@ -729,7 +747,7 @@ export class BotOutfitPanel {
             panelType: 'bot',
             visible: false,
             characterId: this.outfitManager.characterId,
-            characterName: this.outfitManager.character
+            characterName: this.outfitManager.character,
         });
 
         // Clean up dynamic refresh when panel is hidden
@@ -748,7 +766,9 @@ export class BotOutfitPanel {
 
             if (header) {
                 // Get the first message hash for display in the header (instance ID)
-                const messageHash = this.generateMessageHash(this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || '');
+                const messageHash = this.generateMessageHash(
+                    this.getFirstMessageText() || this.outfitManager.getOutfitInstanceId() || ''
+                );
                 const hashDisplay = messageHash ? ` (${messageHash})` : '';
 
                 // Use the name parameter or the manager's character property
@@ -771,7 +791,8 @@ export class BotOutfitPanel {
             this.outfitSubscription = window.outfitStore.subscribe((state: any) => {
                 // Check if this panel's character/outfit instance has changed
                 if (this.outfitManager.characterId && this.outfitManager.outfitInstanceId) {
-                    const currentOutfit = state.botInstances[this.outfitManager.characterId]?.[this.outfitManager.outfitInstanceId]?.bot;
+                    const currentOutfit =
+                        state.botInstances[this.outfitManager.characterId]?.[this.outfitManager.outfitInstanceId]?.bot;
 
                     if (currentOutfit) {
                         // Only refresh if the outfit data has actually changed
@@ -793,47 +814,59 @@ export class BotOutfitPanel {
         }
 
         // Get context to set up event listeners
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.eventSource && context.event_types) {
             const {eventSource, event_types} = context;
 
             // Listen for chat-related events that might affect outfit data
-            this.eventListeners.push(() => eventSource.on(event_types.CHAT_CHANGED, () => {
-                if (this.isVisible) {
-                    this.updateCharacter(this.outfitManager.character);
-                    const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.CHAT_CHANGED, () => {
+                    if (this.isVisible) {
+                        this.updateCharacter(this.outfitManager.character);
+                        const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
 
-                    this.outfitManager.loadOutfit(outfitInstanceId);
-                    this.renderContent();
-                }
-            }));
+                        this.outfitManager.loadOutfit(outfitInstanceId);
+                        this.renderContent();
+                    }
+                })
+            );
 
-            this.eventListeners.push(() => eventSource.on(event_types.CHAT_ID_CHANGED, () => {
-                if (this.isVisible) {
-                    this.updateCharacter(this.outfitManager.character);
-                    const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.CHAT_ID_CHANGED, () => {
+                    if (this.isVisible) {
+                        this.updateCharacter(this.outfitManager.character);
+                        const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
 
-                    this.outfitManager.loadOutfit(outfitInstanceId);
-                    this.renderContent();
-                }
-            }));
+                        this.outfitManager.loadOutfit(outfitInstanceId);
+                        this.renderContent();
+                    }
+                })
+            );
 
-            this.eventListeners.push(() => eventSource.on(event_types.CHAT_CREATED, () => {
-                if (this.isVisible) {
-                    this.updateCharacter(this.outfitManager.character);
-                    const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.CHAT_CREATED, () => {
+                    if (this.isVisible) {
+                        this.updateCharacter(this.outfitManager.character);
+                        const outfitInstanceId = this.outfitManager.getOutfitInstanceId();
 
-                    this.outfitManager.loadOutfit(outfitInstanceId);
-                    this.renderContent();
-                }
-            }));
+                        this.outfitManager.loadOutfit(outfitInstanceId);
+                        this.renderContent();
+                    }
+                })
+            );
 
-            this.eventListeners.push(() => eventSource.on(event_types.MESSAGE_RECEIVED, () => {
-                if (this.isVisible) {
-                    this.renderContent();
-                }
-            }));
+            this.eventListeners.push(() =>
+                eventSource.on(event_types.MESSAGE_RECEIVED, () => {
+                    if (this.isVisible) {
+                        this.renderContent();
+                    }
+                })
+            );
         }
     }
 
@@ -846,7 +879,7 @@ export class BotOutfitPanel {
         }
 
         // Remove event listeners
-        this.eventListeners.forEach(unsubscribe => {
+        this.eventListeners.forEach((unsubscribe) => {
             if (typeof unsubscribe === 'function') {
                 unsubscribe();
             }
@@ -886,7 +919,6 @@ export class BotOutfitPanel {
             // Check if character is lowercase letter a-z
             if (code >= 97 && code <= 122) {
                 cleanId += char;
-
             }
             // Otherwise, skip non-alphanumeric characters
         }
@@ -906,7 +938,7 @@ export class BotOutfitPanel {
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
 
-            hash = ((hash << 5) - hash) + char;
+            hash = (hash << 5) - hash + char;
             hash &= hash; // Convert to 32-bit integer
         }
 

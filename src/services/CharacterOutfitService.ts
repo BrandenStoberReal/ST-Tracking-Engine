@@ -24,7 +24,11 @@ interface CharacterCardExtensions {
  * Gets the SillyTavern context
  */
 function getSTContext(): any {
-    return window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+    return window.SillyTavern?.getContext
+        ? window.SillyTavern.getContext()
+        : window.getContext
+            ? window.getContext()
+            : null;
 }
 
 /**
@@ -86,13 +90,21 @@ export async function setCharacterOutfitData(character: any, outfitData: Charact
 
             if (characterIndex !== -1) {
                 await context.writeExtensionField(characterIndex, 'st-outfits', outfitData);
-                debugLog(`[CharacterOutfitService] Saved outfit data to character card using writeExtensionField`, null, 'info');
+                debugLog(
+                    `[CharacterOutfitService] Saved outfit data to character card using writeExtensionField`,
+                    null,
+                    'info'
+                );
                 return true;
             }
         }
 
         // Fallback: direct assignment (data will be saved when character is saved)
-        debugLog('[CharacterOutfitService] Using direct assignment for outfit data (will be saved with character)', null, 'info');
+        debugLog(
+            '[CharacterOutfitService] Using direct assignment for outfit data (will be saved with character)',
+            null,
+            'info'
+        );
         return true;
     } catch (error) {
         debugLog('[CharacterOutfitService] Error setting character outfit data:', error, 'error');
@@ -116,9 +128,12 @@ export function getCharacterDefaultOutfit(character: any): { [slot: string]: str
  * @param defaultOutfit - The default outfit data
  * @returns Promise<boolean> - Success status
  */
-export async function setCharacterDefaultOutfit(character: any, defaultOutfit: {
-    [slot: string]: string
-}): Promise<boolean> {
+export async function setCharacterDefaultOutfit(
+    character: any,
+    defaultOutfit: {
+        [slot: string]: string;
+    }
+): Promise<boolean> {
     try {
         const outfitData = getCharacterOutfitData(character) || {};
 
@@ -154,9 +169,13 @@ export function getCharacterPresets(character: any): { [presetName: string]: { [
  * @param presetData - The preset outfit data
  * @returns Promise<boolean> - Success status
  */
-export async function setCharacterPreset(character: any, presetName: string, presetData: {
-    [slot: string]: string
-}): Promise<boolean> {
+export async function setCharacterPreset(
+    character: any,
+    presetName: string,
+    presetData: {
+        [slot: string]: string;
+    }
+): Promise<boolean> {
     try {
         const outfitData = getCharacterOutfitData(character) || {};
         if (!outfitData.presets) {
@@ -216,7 +235,10 @@ export function getCharacterOutfitDataById(characterId: string): CharacterOutfit
  * @param outfitData - The outfit data to set
  * @returns Promise<boolean> - Success status
  */
-export async function setCharacterOutfitDataById(characterId: string, outfitData: CharacterOutfitData): Promise<boolean> {
+export async function setCharacterOutfitDataById(
+    characterId: string,
+    outfitData: CharacterOutfitData
+): Promise<boolean> {
     const character = findCharacterById(characterId);
     return character ? await setCharacterOutfitData(character, outfitData) : false;
 }
@@ -237,9 +259,12 @@ export function getCharacterDefaultOutfitById(characterId: string): { [slot: str
  * @param defaultOutfit - The default outfit data
  * @returns Promise<boolean> - Success status
  */
-export async function setCharacterDefaultOutfitById(characterId: string, defaultOutfit: {
-    [slot: string]: string
-}): Promise<boolean> {
+export async function setCharacterDefaultOutfitById(
+    characterId: string,
+    defaultOutfit: {
+        [slot: string]: string;
+    }
+): Promise<boolean> {
     const character = findCharacterById(characterId);
     return character ? await setCharacterDefaultOutfit(character, defaultOutfit) : false;
 }
@@ -261,9 +286,13 @@ export function getCharacterPresetsById(characterId: string): { [presetName: str
  * @param presetData - The preset outfit data
  * @returns Promise<boolean> - Success status
  */
-export async function setCharacterPresetById(characterId: string, presetName: string, presetData: {
-    [slot: string]: string
-}): Promise<boolean> {
+export async function setCharacterPresetById(
+    characterId: string,
+    presetName: string,
+    presetData: {
+        [slot: string]: string;
+    }
+): Promise<boolean> {
     const character = findCharacterById(characterId);
     return character ? await setCharacterPreset(character, presetName, presetData) : false;
 }
@@ -315,17 +344,29 @@ export async function migrateDefaultOutfitsToCharacterCards(): Promise<number> {
                 // Get the preset data from extension storage
                 const {bot: presets} = outfitStore.getPresets(characterId, instanceId);
                 if (!presets || !presets[presetName]) {
-                    debugLog(`[CharacterOutfitService] Preset "${presetName}" not found for character ${characterId}, instance ${instanceId}`, null, 'warn');
+                    debugLog(
+                        `[CharacterOutfitService] Preset "${presetName}" not found for character ${characterId}, instance ${instanceId}`,
+                        null,
+                        'warn'
+                    );
                     continue;
                 }
 
                 // Embed the default outfit in the character card
                 const success = await setCharacterDefaultOutfit(character, presets[presetName]);
                 if (success) {
-                    debugLog(`[CharacterOutfitService] Migrated default outfit "${presetName}" for character ${characterId}, instance ${instanceId}`, null, 'info');
+                    debugLog(
+                        `[CharacterOutfitService] Migrated default outfit "${presetName}" for character ${characterId}, instance ${instanceId}`,
+                        null,
+                        'info'
+                    );
                     hasEmbeddedDefault = true;
                 } else {
-                    debugLog(`[CharacterOutfitService] Failed to migrate default outfit for character ${characterId}, instance ${instanceId}`, null, 'error');
+                    debugLog(
+                        `[CharacterOutfitService] Failed to migrate default outfit for character ${characterId}, instance ${instanceId}`,
+                        null,
+                        'error'
+                    );
                 }
             }
 
@@ -334,13 +375,17 @@ export async function migrateDefaultOutfitsToCharacterCards(): Promise<number> {
             }
         }
 
-        debugLog(`[CharacterOutfitService] Migration complete. ${migratedCount} characters had default outfits migrated.`, null, 'info');
+        debugLog(
+            `[CharacterOutfitService] Migration complete. ${migratedCount} characters had default outfits migrated.`,
+            null,
+            'info'
+        );
 
         // Emit migration completed event
         extensionEventBus.emit(EXTENSION_EVENTS.MIGRATION_COMPLETED, {
             migrationType: 'default-outfits-to-cards',
             charactersMigrated: migratedCount,
-            totalCharacters: context.characters.length
+            totalCharacters: context.characters.length,
         });
 
         return migratedCount;
@@ -349,4 +394,3 @@ export async function migrateDefaultOutfitsToCharacterCards(): Promise<number> {
         return 0;
     }
 }
-

@@ -12,7 +12,11 @@ declare global {
 }
 
 class ConnectionProfileHelper {
-    static async withConnectionProfile(profileId: string, generationFunc: (context: SillyTavernContext) => Promise<any>, context: SillyTavernContext | null = null): Promise<any> {
+    static async withConnectionProfile(
+        profileId: string,
+        generationFunc: (context: SillyTavernContext) => Promise<any>,
+        context: SillyTavernContext | null = null
+    ): Promise<any> {
         if (!profileId) {
             if (context) {
                 return generationFunc(context);
@@ -48,7 +52,11 @@ class ConnectionProfileHelper {
                 if (profile) {
                     await window.connectionManager.applyProfile(profile);
                 } else {
-                    debugLog(`[LLMUtility] Profile with ID ${profileId} not found. Falling back to slash command.`, null, 'warn');
+                    debugLog(
+                        `[LLMUtility] Profile with ID ${profileId} not found. Falling back to slash command.`,
+                        null,
+                        'warn'
+                    );
                     if (window.SlashCommandParser?.commands?.profile) {
                         await window.SlashCommandParser.commands['profile'].callback({}, profileId);
                     }
@@ -126,9 +134,18 @@ class ConnectionProfileHelper {
 }
 
 export class LLMUtility {
-    static async generateWithRetry(prompt: string, systemPrompt: string = 'You are an AI assistant.', context: SillyTavernContext | null = null, maxRetries: number = 3): Promise<string> {
+    static async generateWithRetry(
+        prompt: string,
+        systemPrompt: string = 'You are an AI assistant.',
+        context: SillyTavernContext | null = null,
+        maxRetries: number = 3
+    ): Promise<string> {
         if (!context) {
-            context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
         }
 
         let attempt = 0;
@@ -146,7 +163,11 @@ export class LLMUtility {
                 }
 
                 if (!result || result.trim() === '') {
-                    debugLog(`[LLMUtility] Empty response from LLM (attempt ${attempt + 1}/${maxRetries})`, null, 'warn');
+                    debugLog(
+                        `[LLMUtility] Empty response from LLM (attempt ${attempt + 1}/${maxRetries})`,
+                        null,
+                        'warn'
+                    );
                     attempt++;
                     if (attempt >= maxRetries) {
                         throw new Error('Empty response from LLM after retries');
@@ -167,9 +188,19 @@ export class LLMUtility {
         throw new Error(`Generation failed after ${maxRetries} attempts`);
     }
 
-    static async generateWithProfile(prompt: string, systemPrompt: string = 'You are an AI assistant.', context: SillyTavernContext | null = null, profile: string | null = null, maxRetries: number = 3): Promise<string> {
+    static async generateWithProfile(
+        prompt: string,
+        systemPrompt: string = 'You are an AI assistant.',
+        context: SillyTavernContext | null = null,
+        profile: string | null = null,
+        maxRetries: number = 3
+    ): Promise<string> {
         if (!context) {
-            context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
         }
 
         // If no profile specified, use the default generation method
@@ -190,11 +221,15 @@ export class LLMUtility {
                         fullPrompt,
                         maxTokens,
                         {}, // custom parameters (use defaults)
-                        {}  // override payload
+                        {} // override payload
                     );
 
                     if (!result || result.trim() === '') {
-                        debugLog(`[LLMUtility] Empty response from profile ${profile} (attempt ${attempt + 1}/${maxRetries})`, null, 'warn');
+                        debugLog(
+                            `[LLMUtility] Empty response from profile ${profile} (attempt ${attempt + 1}/${maxRetries})`,
+                            null,
+                            'warn'
+                        );
                         attempt++;
                         if (attempt >= maxRetries) {
                             throw new Error('Empty response from LLM after retries');
@@ -204,7 +239,11 @@ export class LLMUtility {
 
                     return result;
                 } catch (error: any) {
-                    debugLog(`[LLMUtility] Profile generation attempt ${attempt + 1}/${maxRetries} with profile ${profile} failed:`, error, 'error');
+                    debugLog(
+                        `[LLMUtility] Profile generation attempt ${attempt + 1}/${maxRetries} with profile ${profile} failed:`,
+                        error,
+                        'error'
+                    );
                     attempt++;
                     if (attempt >= maxRetries) {
                         throw new Error(`Profile generation failed after ${maxRetries} attempts: ${error.message}`);
@@ -214,7 +253,11 @@ export class LLMUtility {
         }
 
         // Fallback to the old method if the new API is not available
-        debugLog('[LLMUtility] ConnectionManagerRequestService.sendRequest not available, falling back to legacy method', null, 'warn');
+        debugLog(
+            '[LLMUtility] ConnectionManagerRequestService.sendRequest not available, falling back to legacy method',
+            null,
+            'warn'
+        );
         const generationFunc = async (genContext: SillyTavernContext): Promise<string> => {
             if (genContext && genContext.generateRaw) {
                 return genContext.generateRaw(prompt, systemPrompt);

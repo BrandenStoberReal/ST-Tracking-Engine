@@ -341,7 +341,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                                 const message = `Prompt preview: ${preview}\n                    \nFull length: ${status.promptLength} chars`;
                                 toastr.info(message, 'Current System Prompt', {
                                     timeOut: 10000,
-                                    extendedTimeOut: 20000
+                                    extendedTimeOut: 20000,
                                 });
                                 return message;
                             }
@@ -442,7 +442,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             if (areSystemMessagesEnabled() && userMessage && !userMessage.includes('not found')) {
                                 window.userOutfitPanel.sendSystemMessage(userMessage);
                             }
-                            if (message.includes('not found') && (userMessage && userMessage.includes('not found'))) {
+                            if (message.includes('not found') && userMessage && userMessage.includes('not found')) {
                                 const error = `Outfit "${outfitName}" not found for either character or user.`;
                                 if (!isQuiet) {
                                     toastr.error(error, 'Outfit System');
@@ -1506,6 +1506,6 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
         `,
             }));
         }
-        // Close the main function 
+        // Close the main function
     });
 }

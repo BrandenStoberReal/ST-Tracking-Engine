@@ -32,8 +32,12 @@ interface DefaultSettings {
  * @type {string[]}
  */
 export const CLOTHING_SLOTS: string[] = [
-    'headwear', 'topwear', 'topunderwear', 'bottomwear',
-    'footwear', 'footunderwear'
+    'headwear',
+    'topwear',
+    'topunderwear',
+    'bottomwear',
+    'footwear',
+    'footunderwear',
 ];
 
 /**
@@ -41,9 +45,18 @@ export const CLOTHING_SLOTS: string[] = [
  * @type {string[]}
  */
 export const ACCESSORY_SLOTS: string[] = [
-    'head-accessory', 'ears-accessory', 'eyes-accessory', 'mouth-accessory',
-    'neck-accessory', 'body-accessory', 'arms-accessory', 'hands-accessory',
-    'waist-accessory', 'bottom-accessory', 'legs-accessory', 'foot-accessory'
+    'head-accessory',
+    'ears-accessory',
+    'eyes-accessory',
+    'mouth-accessory',
+    'neck-accessory',
+    'body-accessory',
+    'arms-accessory',
+    'hands-accessory',
+    'waist-accessory',
+    'bottom-accessory',
+    'legs-accessory',
+    'foot-accessory',
 ];
 
 /**
@@ -51,7 +64,6 @@ export const ACCESSORY_SLOTS: string[] = [
  * @type {string[]}
  */
 export const ALL_SLOTS: string[] = [...CLOTHING_SLOTS, ...ACCESSORY_SLOTS];
-
 
 /**
  * Default settings for the outfit tracker extension
@@ -80,20 +92,21 @@ export const DEFAULT_SETTINGS: DefaultSettings = Object.freeze({
     enableSysMessages: true,
     autoOutfitSystem: false,
     debugMode: false,
-    autoOutfitPrompt: 'After each character response, analyze the conversation to identify any outfit changes (items worn, removed, or changed). Provide updates in the format: "/outfit-wear slotName item", "/outfit-remove slotName", or "/outfit-change slotName newItem". Only output the commands, no additional text.',
+    autoOutfitPrompt:
+        'After each character response, analyze the conversation to identify any outfit changes (items worn, removed, or changed). Provide updates in the format: "/outfit-wear slotName item", "/outfit-remove slotName", or "/outfit-change slotName newItem". Only output the commands, no additional text.',
     autoOutfitConnectionProfile: null,
     botPanelColors: {
         primary: 'linear-gradient(135deg, #6a4fc1 0%, #5a49d0 50%, #4a43c0 100%)',
         border: '#8a7fdb',
-        shadow: 'rgba(106, 79, 193, 0.4)'
+        shadow: 'rgba(106, 79, 193, 0.4)',
     },
     userPanelColors: {
         primary: 'linear-gradient(135deg, #1a78d1 0%, #2a68c1 50%, #1a58b1 100%)',
         border: '#5da6f0',
-        shadow: 'rgba(26, 120, 209, 0.4)'
+        shadow: 'rgba(26, 120, 209, 0.4)',
     },
     defaultBotPresets: {},
-    defaultUserPresets: {}
+    defaultUserPresets: {},
 });
 
 /**
@@ -106,5 +119,5 @@ export const DEFAULT_SETTINGS: DefaultSettings = Object.freeze({
 export const OUTFIT_COMMANDS: { [key: string]: string } = {
     WEAR: 'wear',
     REMOVE: 'remove',
-    CHANGE: 'change'
+    CHANGE: 'change',
 };

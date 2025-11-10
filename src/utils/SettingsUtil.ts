@@ -18,9 +18,11 @@ export function getSettingValue(key: string, defaultValue: any = undefined): any
         }
 
         // Fallback to the extension settings through context
-        const context = (window as any).SillyTavern?.getContext ? (window as any).SillyTavern.getContext() :
-            (window as any).getContext ? (window as any).getContext() :
-                null;
+        const context = (window as any).SillyTavern?.getContext
+            ? (window as any).SillyTavern.getContext()
+            : (window as any).getContext
+                ? (window as any).getContext()
+                : null;
 
         if (context && typeof context === 'function') {
             const settings = context().extensionSettings;

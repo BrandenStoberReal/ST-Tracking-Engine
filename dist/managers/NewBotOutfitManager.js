@@ -29,7 +29,7 @@ export class NewBotOutfitManager extends OutfitManager {
             outfitStore.state.botInstances[this.characterId][actualInstanceId] = {
                 bot: {},
                 user: {},
-                promptInjectionEnabled: true
+                promptInjectionEnabled: true,
             };
         }
         const updatedInstanceData = Object.assign(Object.assign({}, outfitStore.state.botInstances[this.characterId][actualInstanceId]), { promptInjectionEnabled: Boolean(enabled) });
@@ -45,8 +45,7 @@ export class NewBotOutfitManager extends OutfitManager {
             return true;
         }
         const instanceData = (_a = outfitStore.state.botInstances[this.characterId]) === null || _a === void 0 ? void 0 : _a[actualInstanceId];
-        return (instanceData === null || instanceData === void 0 ? void 0 : instanceData.promptInjectionEnabled) !== undefined ?
-            instanceData.promptInjectionEnabled : true;
+        return (instanceData === null || instanceData === void 0 ? void 0 : instanceData.promptInjectionEnabled) !== undefined ? instanceData.promptInjectionEnabled : true;
     }
     getVarName(slot) {
         if (!this.characterId || !this.outfitInstanceId) {
@@ -57,13 +56,13 @@ export class NewBotOutfitManager extends OutfitManager {
     loadOutfit() {
         if (!this.characterId || !this.outfitInstanceId) {
             debugLog('[NewBotOutfitManager] Cannot load outfit - missing characterId or outfitInstanceId', null, 'debug');
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
             return;
         }
         const instanceOutfits = outfitStore.getBotOutfit(this.characterId, this.outfitInstanceId);
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             const value = instanceOutfits[slot] !== undefined ? instanceOutfits[slot] : 'None';
             this.currentValues[slot] = value;
         });
@@ -74,7 +73,7 @@ export class NewBotOutfitManager extends OutfitManager {
             return;
         }
         const botOutfit = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             botOutfit[slot] = this.currentValues[slot] || 'None';
         });
         outfitStore.setBotOutfit(this.characterId, this.outfitInstanceId, botOutfit);
@@ -87,7 +86,7 @@ export class NewBotOutfitManager extends OutfitManager {
         }
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         const presetData = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             presetData[slot] = this.currentValues[slot];
         });
         if (!this.characterId) {
@@ -102,7 +101,7 @@ export class NewBotOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: this.character,
             managerType: 'bot',
-            presetData: presetData
+            presetData: presetData,
         });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Saved "${presetName}" outfit for ${this.character} (instance: ${actualInstanceId}).`;
@@ -139,7 +138,7 @@ export class NewBotOutfitManager extends OutfitManager {
                     instanceId: actualInstanceId,
                     presetName: presetName,
                     characterName: this.character,
-                    changed: true
+                    changed: true,
                 });
                 return `${this.character} changed into the "${presetName}" outfit (instance: ${actualInstanceId}).`;
             }
@@ -168,7 +167,7 @@ export class NewBotOutfitManager extends OutfitManager {
             instanceId: actualInstanceId,
             presetName: presetName,
             characterName: this.character,
-            managerType: 'bot'
+            managerType: 'bot',
         });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Deleted "${presetName}" outfit for instance ${actualInstanceId}.`;
@@ -209,7 +208,8 @@ export class NewBotOutfitManager extends OutfitManager {
                     }
                 }
                 for (const slot of this.slots) {
-                    if (!Object.prototype.hasOwnProperty.call(embeddedDefaultOutfit, slot) && this.currentValues[slot] !== 'None') {
+                    if (!Object.prototype.hasOwnProperty.call(embeddedDefaultOutfit, slot) &&
+                        this.currentValues[slot] !== 'None') {
                         yield this.setOutfitItem(slot, 'None');
                         changed = true;
                     }
@@ -222,7 +222,7 @@ export class NewBotOutfitManager extends OutfitManager {
                         characterName: this.character,
                         managerType: 'bot',
                         source: 'embedded',
-                        changed: true
+                        changed: true,
                     });
                     return `${this.character} changed into the default outfit (instance: ${actualInstanceId}).`;
                 }
@@ -261,7 +261,7 @@ export class NewBotOutfitManager extends OutfitManager {
                     characterName: this.character,
                     managerType: 'bot',
                     source: 'legacy',
-                    changed: true
+                    changed: true,
                 });
                 return `${this.character} changed into the default outfit (instance: ${actualInstanceId}).`;
             }
@@ -283,7 +283,7 @@ export class NewBotOutfitManager extends OutfitManager {
             return `[Outfit System] Preset "${presetName}" does not exist for instance ${actualInstanceId}. Cannot overwrite.`;
         }
         const presetData = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             presetData[slot] = this.currentValues[slot];
         });
         outfitStore.savePreset(this.characterId, actualInstanceId, presetName, presetData, 'bot');
@@ -294,7 +294,7 @@ export class NewBotOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: this.character,
             managerType: 'bot',
-            presetData: presetData
+            presetData: presetData,
         });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Overwrote "${presetName}" outfit for ${this.character} (instance: ${actualInstanceId}).`;
@@ -380,7 +380,7 @@ export class NewBotOutfitManager extends OutfitManager {
                 presetName: presetName,
                 characterName: this.character,
                 managerType: 'bot',
-                embedded: success
+                embedded: success,
             });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Set "${presetName}" as the default outfit for ${this.character} (instance: ${actualInstanceId}).`;
@@ -419,7 +419,7 @@ export class NewBotOutfitManager extends OutfitManager {
                 characterId: this.characterId,
                 instanceId: actualInstanceId,
                 characterName: this.character,
-                managerType: 'bot'
+                managerType: 'bot',
             });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Default outfit cleared for ${this.character} (instance: ${actualInstanceId}).`;
@@ -431,7 +431,7 @@ export class NewBotOutfitManager extends OutfitManager {
         if (!this.characterId || !instanceId) {
             debugLog('[NewBotOutfitManager] Cannot load outfit - missing characterId or instanceId', null, 'warn');
             const defaultOutfit = {};
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 defaultOutfit[slot] = 'None';
             });
             return defaultOutfit;

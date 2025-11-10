@@ -22,11 +22,16 @@ import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 function refreshMacroProcessing() {
     var _a;
     try {
-        if (window.customMacroSystem && typeof window.customMacroSystem.replaceMacrosInText === 'function') {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        if (window.customMacroSystem &&
+            typeof window.customMacroSystem.replaceMacrosInText === 'function') {
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context && context.chat) {
                 const visibleMessages = Array.from(document.querySelectorAll('#chat .mes'));
-                visibleMessages.forEach(messageElement => {
+                visibleMessages.forEach((messageElement) => {
                     // Add null check for parentElement
                     if (!messageElement.parentElement)
                         return;
@@ -79,7 +84,7 @@ function syncEmbeddedOutfitData(characterId) {
                 characterId: characterId,
                 hasDefaultOutfit: !!embeddedData.defaultOutfit,
                 presetCount: embeddedData.presets ? Object.keys(embeddedData.presets).length : 0,
-                lastModified: embeddedData.lastModified
+                lastModified: embeddedData.lastModified,
             });
         }
         catch (error) {
@@ -118,7 +123,11 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
                 outfitStore.setUserOutfit(oldUserInstanceId, oldUserOutfitData);
             }
             // Update the bot manager with the current character info
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             const charIndex = context.characterId;
             let characterUniqueId = null;
             let characterName = null;
@@ -141,7 +150,7 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             if (botPanel) {
                 botPanel.updateCharacter(botManager.character);
             }
-            // Update the user manager and panel 
+            // Update the user manager and panel
             // (User manager uses a standard instance ID and doesn't change based on character)
             userManager.setCharacter('User');
             const userOutfitInstanceId = userManager.getOutfitInstanceId();
@@ -162,7 +171,7 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             extensionEventBus.emit(EXTENSION_EVENTS.CONTEXT_UPDATED, {
                 characterId: characterUniqueId,
                 characterName: characterName,
-                chatId: (context === null || context === void 0 ? void 0 : context.chatId) || null
+                chatId: (context === null || context === void 0 ? void 0 : context.chatId) || null,
             });
             debugLog('[OutfitTracker] Updated outfit managers for current character');
         }

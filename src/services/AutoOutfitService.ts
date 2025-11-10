@@ -138,7 +138,11 @@ outfit-system_replace_topwear(\"T-shirt\")\
         this.removeEventListeners();
 
         try {
-            const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
 
             if (!context || !context.eventSource || !context.event_types) {
                 debugLog('[AutoOutfitSystem] Context not ready for event listeners', null, 'error');
@@ -170,7 +174,11 @@ outfit-system_replace_topwear(\"T-shirt\")\
     removeEventListeners(): void {
         try {
             if (this.eventHandler) {
-                const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                const context = window.SillyTavern?.getContext
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
 
                 if (context && context.eventSource && context.event_types) {
                     context.eventSource.off(context.event_types.MESSAGE_RECEIVED, this.eventHandler);
@@ -225,7 +233,10 @@ outfit-system_replace_topwear(\"T-shirt\")\
     async processWithRetry(): Promise<void> {
         while (this.currentRetryCount < this.maxRetries) {
             try {
-                this.showPopup(`Checking for outfit changes... (Attempt ${this.currentRetryCount + 1}/${this.maxRetries})`, 'info');
+                this.showPopup(
+                    `Checking for outfit changes... (Attempt ${this.currentRetryCount + 1}/${this.maxRetries})`,
+                    'info'
+                );
                 await this.executeGenCommand();
                 this.consecutiveFailures = 0;
                 this.showPopup('Outfit check completed.', 'success');
@@ -233,7 +244,10 @@ outfit-system_replace_topwear(\"T-shirt\")\
             } catch (error) {
                 this.currentRetryCount++;
                 if (this.currentRetryCount < this.maxRetries) {
-                    debugLog(`[AutoOutfitSystem] Attempt ${this.currentRetryCount} failed, retrying in ${this.retryDelay}ms...`, error);
+                    debugLog(
+                        `[AutoOutfitSystem] Attempt ${this.currentRetryCount} failed, retrying in ${this.retryDelay}ms...`,
+                        error
+                    );
                     await this.delay(this.retryDelay);
                 } else {
                     throw error;
@@ -250,7 +264,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
         }
 
         const processedSystemPrompt = this.replaceMacrosInPrompt(this.systemPrompt);
-        const promptText = `${processedSystemPrompt}\n\nRecent Messages:\n${recentMessages}\n\nOutput:`
+        const promptText = `${processedSystemPrompt}\n\nRecent Messages:\n${recentMessages}\n\nOutput:`;
 
         debugLog('[AutoOutfitSystem] Generating outfit commands with LLMService...');
 
@@ -341,9 +355,10 @@ outfit-system_replace_topwear(\"T-shirt\")\
 
             if (enableSysMessages) {
                 const activeCharName = this.getActiveCharacterName();
-                const message = successfulCommands.length === 1
-                    ? `[b]${activeCharName}[/b] made an outfit change.`
-                    : `[b]${activeCharName}[/b] made multiple outfit changes.`;
+                const message =
+                    successfulCommands.length === 1
+                        ? `[b]${activeCharName}[/b] made an outfit change.`
+                        : `[b]${activeCharName}[/b] made multiple outfit changes.`;
 
                 this.showPopup(message, 'info');
                 await this.delay(1000);
@@ -357,10 +372,16 @@ outfit-system_replace_topwear(\"T-shirt\")\
         }
 
         if (lowConfidenceCommands.length > 0) {
-            debugLog(`[AutoOutfitSystem] ${lowConfidenceCommands.length} commands with low confidence were ignored:`, lowConfidenceCommands, 'warn');
+            debugLog(
+                `[AutoOutfitSystem] ${lowConfidenceCommands.length} commands with low confidence were ignored:`,
+                lowConfidenceCommands,
+                'warn'
+            );
         }
 
-        debugLog(`[AutoOutfitSystem] Batch completed: ${successfulCommands.length} successful, ${failedCommands.length} failed, ${lowConfidenceCommands.length} low confidence`);
+        debugLog(
+            `[AutoOutfitSystem] Batch completed: ${successfulCommands.length} successful, ${failedCommands.length} failed, ${lowConfidenceCommands.length} low confidence`
+        );
     }
 
     calculateConfidenceScore(command: string): number {
@@ -411,7 +432,8 @@ outfit-system_replace_topwear(\"T-shirt\")\
             return null;
         }
 
-        const commandRegex = /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\((?:\"([^\"]*)\"|)\)$/;
+        const commandRegex =
+            /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\((?:\"([^\"]*)\"|)\)$/;
         const match = command.match(commandRegex);
 
         if (!match) {
@@ -435,11 +457,15 @@ outfit-system_replace_topwear(\"T-shirt\")\
         for (let i = 0; i < str.length; i++) {
             const char = str[i];
 
-            if (!((char >= 'a' && char <= 'z') ||
-                (char >= 'A' && char <= 'Z') ||
-                (char >= '0' && char <= '9') ||
-                char === '_' ||
-                char === '-')) {
+            if (
+                !(
+                    (char >= 'a' && char <= 'z') ||
+                    (char >= 'A' && char <= 'Z') ||
+                    (char >= '0' && char <= '9') ||
+                    char === '_' ||
+                    char === '-'
+                )
+            ) {
                 return false;
             }
         }
@@ -474,7 +500,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
         action?: string;
         slot?: string;
         value?: string;
-        error?: string
+        error?: string;
     }> {
         try {
             const parsedCommand = this.parseCommand(command);
@@ -556,14 +582,17 @@ outfit-system_replace_topwear(\"T-shirt\")\
                 return '';
             }
 
-            return chat.slice(-count).map((msg: any) => {
-                if (!msg || typeof msg.mes !== 'string') {
-                    return '';
-                }
-                const prefix = msg.is_user ? 'User' : (msg.name || 'AI');
+            return chat
+                .slice(-count)
+                .map((msg: any) => {
+                    if (!msg || typeof msg.mes !== 'string') {
+                        return '';
+                    }
+                    const prefix = msg.is_user ? 'User' : msg.name || 'AI';
 
-                return `${prefix}: ${msg.mes}`;
-            }).join('\n');
+                    return `${prefix}: ${msg.mes}`;
+                })
+                .join('\n');
         } catch (error) {
             debugLog('Error getting last messages:', error, 'error');
             return '';
@@ -586,7 +615,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
     }
 
     delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     getStatus(): IAutoOutfitSystemStatus {

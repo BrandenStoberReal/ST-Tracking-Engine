@@ -45,7 +45,6 @@ export class DebugPanel {
     constructor() {
     }
 
-
     /**
      * Creates the debug panel DOM element and sets up its basic functionality
      * @returns {HTMLElement} The created panel element
@@ -85,7 +84,7 @@ export class DebugPanel {
         // Set up tab switching
         const tabs = panel.querySelectorAll('.outfit-debug-tab');
 
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             tab.addEventListener('click', (event) => {
                 const tabName = (event.target as HTMLElement).dataset.tab;
 
@@ -94,14 +93,13 @@ export class DebugPanel {
                 this.currentTab = tabName;
                 this.renderContent();
 
-                tabs.forEach(t => t.classList.remove('active'));
+                tabs.forEach((t) => t.classList.remove('active'));
                 (event.target as HTMLElement).classList.add('active');
             });
         });
 
         return panel;
     }
-
 
     /**
      * Shows the debug panel UI
@@ -176,7 +174,6 @@ export class DebugPanel {
         this.stopRealTimeUpdates();
     }
 
-
     /**
      * Renders the content of the currently selected tab
      */
@@ -243,7 +240,12 @@ export class DebugPanel {
         const currentCharacterId = state.currentCharacterId;
         const currentInstanceId = state.currentOutfitInstanceId;
 
-        if (currentCharacterId && currentInstanceId && botInstances[currentCharacterId] && botInstances[currentCharacterId][currentInstanceId]) {
+        if (
+            currentCharacterId &&
+            currentInstanceId &&
+            botInstances[currentCharacterId] &&
+            botInstances[currentCharacterId][currentInstanceId]
+        ) {
             const botOutfitData = botInstances[currentCharacterId][currentInstanceId].bot;
 
             for (const [slot, value] of Object.entries(botOutfitData)) {
@@ -351,15 +353,16 @@ export class DebugPanel {
             // Group logs with the same message and data
             const groupedLogs = this.groupSimilarLogs(sortedLogs);
 
-            logsHtml += groupedLogs.map(group => {
-                const log = group.logs[0]; // Use the first log for display
-                const hasData = log.data !== null && log.data !== undefined;
-                const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
-                const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
-                const countDisplay = group.count > 1 ? ` <span class="log-count">(${group.count}x)</span>` : '';
+            logsHtml += groupedLogs
+                .map((group) => {
+                    const log = group.logs[0]; // Use the first log for display
+                    const hasData = log.data !== null && log.data !== undefined;
+                    const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
+                    const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
+                    const countDisplay = group.count > 1 ? ` <span class="log-count">(${group.count}x)</span>` : '';
 
-                if (hasData) {
-                    return `
+                    if (hasData) {
+                        return `
                         <div class="${logItemClasses}" ${logItemAttributes}>
                             <details>
                                 <summary>
@@ -373,16 +376,17 @@ export class DebugPanel {
                             </details>
                         </div>
                     `;
-                } else {
-                    return `
+                    } else {
+                        return `
                         <div class="${logItemClasses}" ${logItemAttributes}>
                             <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                             <span class="log-level">[${log.level}]</span>
                             <span class="log-message">${log.message}${countDisplay}</span>
                         </div>
                     `;
-                }
-            }).join('');
+                    }
+                })
+                .join('');
         }
 
         logsHtml += '</div>';
@@ -404,7 +408,7 @@ export class DebugPanel {
             const selectedLevel = levelFilter.value;
             const logItems = container.querySelectorAll('.log-item');
 
-            logItems.forEach(item => {
+            logItems.forEach((item) => {
                 const level = (item as HTMLElement).dataset.level;
                 const message = (item as HTMLElement).dataset.message;
                 const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
@@ -423,14 +427,14 @@ export class DebugPanel {
 
         expandAllBtn.addEventListener('click', () => {
             const detailsElements = container.querySelectorAll('.log-item details');
-            detailsElements.forEach(details => {
+            detailsElements.forEach((details) => {
                 (details as HTMLDetailsElement).open = true;
             });
         });
 
         collapseAllBtn.addEventListener('click', () => {
             const detailsElements = container.querySelectorAll('.log-item details');
-            detailsElements.forEach(details => {
+            detailsElements.forEach((details) => {
                 (details as HTMLDetailsElement).open = false;
             });
         });
@@ -489,7 +493,8 @@ export class DebugPanel {
         if (!context || !context.characters) {
             embeddedHtml += '<p class="no-characters">No characters available for embedded data inspection.</p>';
         } else {
-            embeddedHtml += '<div class="debug-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
+            embeddedHtml +=
+                '<div class="debug-search-container"><input type="text" id="embedded-search" placeholder="Search characters..."></div>';
 
             embeddedHtml += '<h5>Characters with Embedded Outfit Data:</h5>';
             let charactersWithEmbeddedData = 0;
@@ -503,10 +508,13 @@ export class DebugPanel {
 
                 if (embeddedData) {
                     charactersWithEmbeddedData++;
-                    const hasDefaultOutfit = embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0;
+                    const hasDefaultOutfit =
+                        embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0;
                     const presetCount = embeddedData.presets ? Object.keys(embeddedData.presets).length : 0;
                     const hasPresets = presetCount > 0;
-                    const lastModified = embeddedData.lastModified ? new Date(embeddedData.lastModified).toLocaleString() : 'Unknown';
+                    const lastModified = embeddedData.lastModified
+                        ? new Date(embeddedData.lastModified).toLocaleString()
+                        : 'Unknown';
 
                     embeddedHtml += `
                         <div class="embedded-character-item" data-character-name="${characterName.toLowerCase()}" data-character-id="${characterId}">
@@ -552,7 +560,8 @@ export class DebugPanel {
         // Add migration section
         embeddedHtml += '<h4>Migration Tools</h4>';
         embeddedHtml += '<div class="embedded-migration-tools">';
-        embeddedHtml += '<button id="migrate-default-outfits-btn" class="menu_button">Migrate Default Outfits to Cards</button>';
+        embeddedHtml +=
+            '<button id="migrate-default-outfits-btn" class="menu_button">Migrate Default Outfits to Cards</button>';
         embeddedHtml += '<button id="migrate-presets-btn" class="menu_button">Migrate Presets to Cards</button>';
         embeddedHtml += '<div id="migration-results"></div>';
         embeddedHtml += '</div>';
@@ -570,14 +579,16 @@ export class DebugPanel {
                     const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
                     const characterItems = container.querySelectorAll('.embedded-character-item');
 
-                    characterItems.forEach(item => {
+                    characterItems.forEach((item) => {
                         const characterName = (item as HTMLElement).dataset.characterName || '';
                         const characterId = (item as HTMLElement).dataset.characterId || '';
                         const itemText = item.textContent?.toLowerCase() || '';
 
-                        if (characterName.includes(searchTerm) ||
+                        if (
+                            characterName.includes(searchTerm) ||
                             characterId.includes(searchTerm) ||
-                            itemText.includes(searchTerm)) {
+                            itemText.includes(searchTerm)
+                        ) {
                             (item as HTMLElement).style.display = '';
                         } else {
                             (item as HTMLElement).style.display = 'none';
@@ -588,7 +599,7 @@ export class DebugPanel {
 
             // Character item interactions
             const characterItems = container.querySelectorAll('.embedded-character-item');
-            characterItems.forEach(item => {
+            characterItems.forEach((item) => {
                 const viewBtn = item.querySelector('.view-embedded-btn');
                 const copyBtn = item.querySelector('.copy-embedded-btn');
                 const details = item.querySelector('.embedded-character-details');
@@ -651,7 +662,8 @@ export class DebugPanel {
                     try {
                         // Note: Preset migration is not implemented as we only embed default outfits
                         if (resultsDiv) {
-                            resultsDiv.innerHTML = '<p>ℹ️ Preset migration is not available. Only default outfits are embedded.</p>';
+                            resultsDiv.innerHTML =
+                                '<p>ℹ️ Preset migration is not available. Only default outfits are embedded.</p>';
                         }
                         (window as any).toastr?.info('Preset migration not available', 'Debug Panel');
                     } catch (error) {
@@ -704,7 +716,8 @@ export class DebugPanel {
 
         // Check for potentially large data
         if (botInstanceCount > 50) {
-            performanceHtml += '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
+            performanceHtml +=
+                '<div class="warning">⚠️ High number of bot instances detected - may impact performance</div>';
         } else if (botInstanceCount > 20) {
             performanceHtml += '<div class="info">ℹ️ Moderate number of bot instances</div>';
         } else {
@@ -712,16 +725,19 @@ export class DebugPanel {
         }
 
         if (userInstanceCount > 10) {
-            performanceHtml += '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
+            performanceHtml +=
+                '<div class="warning">⚠️ High number of user instances detected - may impact performance</div>';
         } else {
             performanceHtml += '<div class="good">✅ Reasonable number of user instances</div>';
         }
 
         const storageKB = new Blob([stateStr]).size / 1024;
 
-        if (storageKB > 1000) { // More than 1MB
+        if (storageKB > 1000) {
+            // More than 1MB
             performanceHtml += '<div class="warning">⚠️ Large storage size detected - consider cleanup</div>';
-        } else if (storageKB > 500) { // More than 500KB
+        } else if (storageKB > 500) {
+            // More than 500KB
             performanceHtml += '<div class="info">ℹ️ Moderate storage size</div>';
         } else {
             performanceHtml += '<div class="good">✅ Reasonable storage size</div>';
@@ -787,7 +803,8 @@ export class DebugPanel {
         miscHtml += '<div class="quick-actions">';
         miscHtml += '<button id="reset-panel-positions" class="menu_button">Reset Panel Positions</button>';
         miscHtml += '<button id="clear-all-caches" class="menu_button">Clear All Caches</button>';
-        miscHtml += '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
+        miscHtml +=
+            '<button id="reset-settings" class="menu_button warning-button">Reset Settings to Defaults</button>';
         miscHtml += '<button id="force-gc" class="menu_button">Force Garbage Collection</button>';
         miscHtml += '<button id="create-backup" class="menu_button">Create Emergency Backup</button>';
         miscHtml += '<button id="show-extension-info" class="menu_button">Show Extension Info</button>';
@@ -918,7 +935,12 @@ export class DebugPanel {
     private checkStoreHealth(): boolean {
         try {
             const state = outfitStore.getState();
-            return state && typeof state === 'object' && typeof state.botInstances === 'object' && typeof state.userInstances === 'object';
+            return (
+                state &&
+                typeof state === 'object' &&
+                typeof state.botInstances === 'object' &&
+                typeof state.userInstances === 'object'
+            );
         } catch {
             return false;
         }
@@ -966,13 +988,15 @@ export class DebugPanel {
             panels: this.checkPanelsHealth(),
             macros: this.checkMacrosHealth(),
             eventBus: this.checkEventBusHealth(),
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         };
 
-        const healthy = Object.values(results).filter(v => typeof v === 'boolean').every(v => v);
-        const message = healthy ?
-            `✅ All systems healthy! (${Object.values(results).filter(v => v === true).length}/${Object.keys(results).length - 1})` :
-            `❌ Issues detected. Check individual components.`;
+        const healthy = Object.values(results)
+            .filter((v) => typeof v === 'boolean')
+            .every((v) => v);
+        const message = healthy
+            ? `✅ All systems healthy! (${Object.values(results).filter((v) => v === true).length}/${Object.keys(results).length - 1})`
+            : `❌ Issues detected. Check individual components.`;
 
         toastr.info(message, 'Health Check Complete');
         console.log('Extension Health Check Results:', results);
@@ -1014,7 +1038,9 @@ export class DebugPanel {
      * Resets settings to defaults
      */
     private resetSettingsToDefaults(): void {
-        if (confirm('Are you sure you want to reset all settings to defaults? This will not affect your outfit data.')) {
+        if (
+            confirm('Are you sure you want to reset all settings to defaults? This will not affect your outfit data.')
+        ) {
             try {
                 const defaultSettings = {
                     autoOpenBot: false,
@@ -1028,7 +1054,7 @@ export class DebugPanel {
                     botPanelColors: {primary: '#6a4fc1', border: '#8a7fdb', shadow: '#6a4fc1'},
                     userPanelColors: {primary: '#1a78d1', border: '#5da6f0', shadow: '#1a78d1'},
                     defaultBotPresets: {},
-                    defaultUserPresets: {}
+                    defaultUserPresets: {},
                 };
 
                 outfitStore.setState({settings: defaultSettings});
@@ -1067,7 +1093,7 @@ export class DebugPanel {
             const backup = {
                 timestamp: new Date().toISOString(),
                 version: this.getExtensionVersion(),
-                data: state
+                data: state,
             };
 
             const dataStr = JSON.stringify(backup, null, 2);
@@ -1096,7 +1122,8 @@ export class DebugPanel {
         let instancesHtml = '<div class="debug-tab-content">';
 
         // Add search input
-        instancesHtml += '<div class="debug-search-container"><input type="text" id="instance-search" placeholder="Search instances..."></div>';
+        instancesHtml +=
+            '<div class="debug-search-container"><input type="text" id="instance-search" placeholder="Search instances..."></div>';
 
         // Add bot instances
         instancesHtml += '<h4>Bot Instances</h4>';
@@ -1117,7 +1144,7 @@ export class DebugPanel {
                         characterName: charName,
                         characterId: charId,
                         instanceId: instId,
-                        outfit: (instData as any).bot
+                        outfit: (instData as any).bot,
                     };
 
                     instancesHtml += `
@@ -1151,7 +1178,7 @@ export class DebugPanel {
                 const formattedUserData: UserOutfit = {
                     timestamp: (instData as any).timestamp || 'No timestamp',
                     instanceId: instId,
-                    outfit: instData as any
+                    outfit: instData as any,
                 };
 
                 instancesHtml += `
@@ -1182,12 +1209,17 @@ export class DebugPanel {
             const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
             const instanceItems = container.querySelectorAll('.instance-item');
 
-            instanceItems.forEach(item => {
+            instanceItems.forEach((item) => {
                 const instanceId = (item as HTMLElement).dataset.instance?.toLowerCase() ?? '';
                 const characterName = (item as HTMLElement).dataset.character?.toLowerCase() ?? '';
-                const instanceData = (item.querySelector('.instance-data pre') as HTMLElement).textContent?.toLowerCase() ?? '';
+                const instanceData =
+                    (item.querySelector('.instance-data pre') as HTMLElement).textContent?.toLowerCase() ?? '';
 
-                if (instanceId.includes(searchTerm) || characterName.includes(searchTerm) || instanceData.includes(searchTerm)) {
+                if (
+                    instanceId.includes(searchTerm) ||
+                    characterName.includes(searchTerm) ||
+                    instanceData.includes(searchTerm)
+                ) {
                     (item as HTMLElement).style.display = '';
                 } else {
                     (item as HTMLElement).style.display = 'none';
@@ -1198,7 +1230,7 @@ export class DebugPanel {
         // Add click handlers to instance items to show details
         const instanceItems = container.querySelectorAll('.instance-item');
 
-        instanceItems.forEach(item => {
+        instanceItems.forEach((item) => {
             const instanceIdElement = item.querySelector('.instance-id');
             if (instanceIdElement) {
                 instanceIdElement.addEventListener('click', (e) => {
@@ -1223,7 +1255,7 @@ export class DebugPanel {
             if (copyBtn) {
                 copyBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const dataElement = (item.querySelector('.instance-data pre') as HTMLElement);
+                    const dataElement = item.querySelector('.instance-data pre') as HTMLElement;
                     navigator.clipboard.writeText(dataElement.innerText);
                     toastr.success('Instance data copied to clipboard!', 'Debug Panel');
                 });
@@ -1240,7 +1272,11 @@ export class DebugPanel {
 
                     if (instanceId && instanceType) {
                         if (confirm(`Are you sure you want to delete instance ${instanceId}?`)) {
-                            outfitStore.deleteInstance(instanceId, instanceType as 'bot' | 'user', characterId !== 'user' ? characterId : undefined);
+                            outfitStore.deleteInstance(
+                                instanceId,
+                                instanceType as 'bot' | 'user',
+                                characterId !== 'user' ? characterId : undefined
+                            );
                             this.renderContent();
                             toastr.success(`Instance ${instanceId} deleted!`, 'Debug Panel');
                         }
@@ -1263,7 +1299,9 @@ export class DebugPanel {
         pointersHtml += '<h4>📍 Current Context</h4>';
         pointersHtml += '<div class="pointer-context-section">';
 
-        const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
+        const currentCharName = state.currentCharacterId
+            ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+            : 'None';
         const currentCharId = state.currentCharacterId || 'None';
 
         pointersHtml += '<div class="context-info-grid">';
@@ -1299,7 +1337,8 @@ export class DebugPanel {
         pointersHtml += '<div class="pointer-api-section">';
 
         pointersHtml += '<table class="pointer-values-table">';
-        pointersHtml += '<thead><tr><th>API Reference</th><th>Status</th><th>Type</th><th>Details</th></tr></thead><tbody>';
+        pointersHtml +=
+            '<thead><tr><th>API Reference</th><th>Status</th><th>Type</th><th>Details</th></tr></thead><tbody>';
 
         // Check various global references with more detail
         const globalRefs = [
@@ -1307,50 +1346,56 @@ export class DebugPanel {
                 name: 'window.botOutfitPanel',
                 exists: Boolean((window as any).botOutfitPanel),
                 type: 'Panel Instance',
-                details: (window as any).botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized'
+                details: (window as any).botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized',
             },
             {
                 name: 'window.userOutfitPanel',
                 exists: Boolean((window as any).userOutfitPanel),
                 type: 'Panel Instance',
-                details: (window as any).userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized'
+                details: (window as any).userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized',
             },
             {
                 name: 'window.outfitTracker',
                 exists: Boolean((window as any).outfitTracker),
                 type: 'Tracker Service',
-                details: (window as any).outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized'
+                details: (window as any).outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized',
             },
             {
                 name: 'window.outfitTrackerInterceptor',
                 exists: Boolean((window as any).outfitTrackerInterceptor),
                 type: 'Interceptor',
-                details: (window as any).outfitTrackerInterceptor ? 'Message interception handler' : 'Interceptor not active'
+                details: (window as any).outfitTrackerInterceptor
+                    ? 'Message interception handler'
+                    : 'Interceptor not active',
             },
             {
                 name: 'window.getOutfitExtensionStatus',
                 exists: Boolean((window as any).getOutfitExtensionStatus),
                 type: 'Status Function',
-                details: (window as any).getOutfitExtensionStatus ? 'Extension status checker' : 'Status function not available'
+                details: (window as any).getOutfitExtensionStatus
+                    ? 'Extension status checker'
+                    : 'Status function not available',
             },
             {
                 name: 'outfitStore',
                 exists: Boolean(outfitStore),
                 type: 'Store Instance',
-                details: outfitStore ? 'Main state management store' : 'Store not initialized'
+                details: outfitStore ? 'Main state management store' : 'Store not initialized',
             },
             {
                 name: 'customMacroSystem',
                 exists: Boolean(customMacroSystem),
                 type: 'Macro System',
-                details: customMacroSystem ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)` : 'Macro system not initialized'
+                details: customMacroSystem
+                    ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)`
+                    : 'Macro system not initialized',
             },
             {
                 name: 'debugLogger',
                 exists: Boolean(debugLogger),
                 type: 'Logger Instance',
-                details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized'
-            }
+                details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized',
+            },
         ];
 
         for (const ref of globalRefs) {
@@ -1571,19 +1616,19 @@ export class DebugPanel {
                 panels: !!(window.botOutfitPanel && window.userOutfitPanel),
                 macroSystem: !!customMacroSystem,
                 eventBus: !!extensionEventBus,
-                debugPanel: !!this
+                debugPanel: !!this,
             },
             globalAPIs: {
                 outfitTracker: !!(window as any).outfitTracker,
                 wipeAllOutfits: !!(window as any).wipeAllOutfits,
-                refreshOutfitMacros: !!(window as any).refreshOutfitMacros
+                refreshOutfitMacros: !!(window as any).refreshOutfitMacros,
             },
             services: {
                 characterService: !!(window as any).characterService,
                 llmService: !!(window as any).llmService,
                 eventService: !!(window as any).eventService,
-                storageService: !!(window as any).storageService
-            }
+                storageService: !!(window as any).storageService,
+            },
         };
 
         console.log('Extension Information:', info);
@@ -1681,7 +1726,7 @@ export class DebugPanel {
     /**
      * Groups logs with the same message and data together
      */
-    private groupSimilarLogs(logs: any[]): Array<{ logs: any[], count: number }> {
+    private groupSimilarLogs(logs: any[]): Array<{ logs: any[]; count: number }> {
         const groups: Map<string, any[]> = new Map();
 
         for (const log of logs) {
@@ -1696,9 +1741,9 @@ export class DebugPanel {
         }
 
         // Convert to array of groups, keeping only the most recent log for each group
-        return Array.from(groups.values()).map(logsInGroup => ({
+        return Array.from(groups.values()).map((logsInGroup) => ({
             logs: [logsInGroup[0]], // Keep only the first (most recent) log
-            count: logsInGroup.length
+            count: logsInGroup.length,
         }));
     }
 
@@ -1724,7 +1769,7 @@ export class DebugPanel {
         const groupedLogs = this.groupSimilarLogs(sortedLogs);
 
         // Format grouped logs for export
-        const logLines = groupedLogs.map(group => {
+        const logLines = groupedLogs.map((group) => {
             const log = group.logs[0]; // Use the first (most recent) log for display
             const timestamp = new Date(log.timestamp).toISOString();
             const level = log.level.toUpperCase().padEnd(5);
@@ -1737,7 +1782,12 @@ export class DebugPanel {
             if (log.data !== null && log.data !== undefined) {
                 try {
                     const dataStr = JSON.stringify(log.data, null, 2);
-                    logLine += '\n' + dataStr.split('\n').map(line => `    ${line}`).join('\n');
+                    logLine +=
+                        '\n' +
+                        dataStr
+                            .split('\n')
+                            .map((line) => `    ${line}`)
+                            .join('\n');
                 } catch (error) {
                     logLine += `\n    [Error serializing data: ${error}]`;
                 }
@@ -1798,7 +1848,9 @@ export class DebugPanel {
         // Update context information
         const contextGrid = contentArea.querySelector('.context-info-grid');
         if (contextGrid) {
-            const currentCharName = state.currentCharacterId ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name) : 'None';
+            const currentCharName = state.currentCharacterId
+                ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+                : 'None';
             const currentCharId = state.currentCharacterId || 'None';
 
             const contextItems = contextGrid.querySelectorAll('.context-item');
@@ -1848,50 +1900,58 @@ export class DebugPanel {
                     name: 'window.botOutfitPanel',
                     exists: Boolean((window as any).botOutfitPanel),
                     type: 'Panel Instance',
-                    details: (window as any).botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized'
+                    details: (window as any).botOutfitPanel ? 'Bot outfit panel controller' : 'Panel not initialized',
                 },
                 {
                     name: 'window.userOutfitPanel',
                     exists: Boolean((window as any).userOutfitPanel),
                     type: 'Panel Instance',
-                    details: (window as any).userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized'
+                    details: (window as any).userOutfitPanel ? 'User outfit panel controller' : 'Panel not initialized',
                 },
                 {
                     name: 'window.outfitTracker',
                     exists: Boolean((window as any).outfitTracker),
                     type: 'Tracker Service',
-                    details: (window as any).outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized'
+                    details: (window as any).outfitTracker ? 'Outfit change tracker' : 'Tracker not initialized',
                 },
                 {
                     name: 'window.outfitTrackerInterceptor',
                     exists: Boolean((window as any).outfitTrackerInterceptor),
                     type: 'Interceptor',
-                    details: (window as any).outfitTrackerInterceptor ? 'Message interception handler' : 'Interceptor not active'
+                    details: (window as any).outfitTrackerInterceptor
+                        ? 'Message interception handler'
+                        : 'Interceptor not active',
                 },
                 {
                     name: 'window.getOutfitExtensionStatus',
                     exists: Boolean((window as any).getOutfitExtensionStatus),
                     type: 'Status Function',
-                    details: (window as any).getOutfitExtensionStatus ? 'Extension status checker' : 'Status function not available'
+                    details: (window as any).getOutfitExtensionStatus
+                        ? 'Extension status checker'
+                        : 'Status function not available',
                 },
                 {
                     name: 'outfitStore',
                     exists: Boolean(outfitStore),
                     type: 'Store Instance',
-                    details: outfitStore ? 'Main state management store' : 'Store not initialized'
+                    details: outfitStore ? 'Main state management store' : 'Store not initialized',
                 },
                 {
                     name: 'customMacroSystem',
                     exists: Boolean(customMacroSystem),
                     type: 'Macro System',
-                    details: customMacroSystem ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)` : 'Macro system not initialized'
+                    details: customMacroSystem
+                        ? `Macro processor (${customMacroSystem.macroValueCache.size} cached)`
+                        : 'Macro system not initialized',
                 },
                 {
                     name: 'debugLogger',
                     exists: Boolean(debugLogger),
                     type: 'Logger Instance',
-                    details: debugLogger ? `Debug logger (${debugLogger.getLogs().length} logs)` : 'Logger not initialized'
-                }
+                    details: debugLogger
+                        ? `Debug logger (${debugLogger.getLogs().length} logs)`
+                        : 'Logger not initialized',
+                },
             ];
 
             let tbodyHtml = '';
@@ -1954,7 +2014,8 @@ export class DebugPanel {
         if (currentCacheSize === this.lastMacroCacheSize) {
             // Just update the timestamp
             const updateTime = new Date().toLocaleTimeString();
-            const sizeText = cacheInfo.innerHTML.match(/Cached entries: \d+/)?.[0] || `Cached entries: ${currentCacheSize}`;
+            const sizeText =
+                cacheInfo.innerHTML.match(/Cached entries: \d+/)?.[0] || `Cached entries: ${currentCacheSize}`;
             cacheInfo.innerHTML = `${sizeText} <small>(Updated: ${updateTime})</small>`;
             return;
         }
@@ -1999,7 +2060,8 @@ export class DebugPanel {
         // Only recalculate storage size every 30 seconds to reduce performance impact
         let estimatedStorageSize: string;
         const now = Date.now();
-        if (now - this.lastStateStringifyTime > 30000) { // 30 seconds
+        if (now - this.lastStateStringifyTime > 30000) {
+            // 30 seconds
             const stateStr = JSON.stringify(state);
             this.lastStorageSize = new Blob([stateStr]).size / 1024;
             this.lastStateStringifyTime = now;
@@ -2177,7 +2239,11 @@ export class DebugPanel {
                 for (let i = 0; i < context.characters.length; i++) {
                     const character = context.characters[i];
                     const embeddedData = getCharacterOutfitData(character);
-                    if (embeddedData && embeddedData.defaultOutfit && Object.keys(embeddedData.defaultOutfit).length > 0) {
+                    if (
+                        embeddedData &&
+                        embeddedData.defaultOutfit &&
+                        Object.keys(embeddedData.defaultOutfit).length > 0
+                    ) {
                         totalDefaultOutfits++;
                     }
                 }
@@ -2188,12 +2254,15 @@ export class DebugPanel {
 
         // Update timestamp displays
         const lastModifiedElements = contentArea.querySelectorAll('.embedded-last-modified');
-        lastModifiedElements.forEach(element => {
+        lastModifiedElements.forEach((element) => {
             // Update "Modified: X" text with current time indicator
             const currentTime = new Date().toLocaleTimeString();
             if (element.textContent?.includes('Modified:')) {
                 // Keep original timestamp but add a visual indicator that we're live
-                element.innerHTML = element.innerHTML.replace(/Modified: ([^<]*)/, `Modified: $1 <small>(Live: ${currentTime})</small>`);
+                element.innerHTML = element.innerHTML.replace(
+                    /Modified: ([^<]*)/,
+                    `Modified: $1 <small>(Live: ${currentTime})</small>`
+                );
             }
         });
     }

@@ -4,7 +4,6 @@ import {debugLog} from '../logging/DebugLogger';
 import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 export class NewUserOutfitManager extends OutfitManager {
-
     constructor(slots: string[]) {
         super(slots);
         this.character = 'User';
@@ -20,7 +19,7 @@ export class NewUserOutfitManager extends OutfitManager {
     loadOutfit(): void {
         if (!this.outfitInstanceId) {
             debugLog('[NewUserOutfitManager] Cannot load outfit - missing outfitInstanceId', null, 'debug');
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
             return;
@@ -28,7 +27,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         const userOutfit = outfitStore.getUserOutfit(this.outfitInstanceId);
 
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             const value = userOutfit[slot] !== undefined ? userOutfit[slot] : 'None';
             this.currentValues[slot] = value;
         });
@@ -42,7 +41,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         const userOutfit: { [key: string]: string } = {};
 
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             userOutfit[slot] = this.currentValues[slot] || 'None';
         });
 
@@ -67,7 +66,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         const presetData: { [key: string]: string } = {};
 
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             presetData[slot] = this.currentValues[slot];
         });
 
@@ -80,7 +79,7 @@ export class NewUserOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: 'User',
             managerType: 'user',
-            presetData: presetData
+            presetData: presetData,
         });
 
         if (outfitStore.getSetting('enableSysMessages')) {
@@ -125,7 +124,7 @@ export class NewUserOutfitManager extends OutfitManager {
                 instanceId: actualInstanceId,
                 presetName: presetName,
                 characterName: 'User',
-                changed: true
+                changed: true,
             });
             return `You changed into the "${presetName}" outfit (instance: ${actualInstanceId}).`;
         }
@@ -159,7 +158,7 @@ export class NewUserOutfitManager extends OutfitManager {
             instanceId: actualInstanceId,
             presetName: presetName,
             characterName: 'User',
-            managerType: 'user'
+            managerType: 'user',
         });
 
         if (outfitStore.getSetting('enableSysMessages')) {
@@ -174,7 +173,11 @@ export class NewUserOutfitManager extends OutfitManager {
 
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewUserOutfitManager] getPresets called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(
+                `[NewUserOutfitManager] getPresets called with invalid parameters: instanceId=${actualInstanceId}`,
+                null,
+                'warn'
+            );
             return [];
         }
 
@@ -234,7 +237,7 @@ export class NewUserOutfitManager extends OutfitManager {
                 characterName: 'User',
                 managerType: 'user',
                 source: 'legacy',
-                changed: true
+                changed: true,
             });
             return `You changed into your default outfit (instance: ${actualInstanceId}).`;
         }
@@ -263,7 +266,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         const presetData: { [key: string]: string } = {};
 
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             presetData[slot] = this.currentValues[slot];
         });
 
@@ -276,7 +279,7 @@ export class NewUserOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: 'User',
             managerType: 'user',
-            presetData: presetData
+            presetData: presetData,
         });
 
         if (outfitStore.getSetting('enableSysMessages')) {
@@ -286,7 +289,7 @@ export class NewUserOutfitManager extends OutfitManager {
         return '';
     }
 
-    getAllPresets(instanceId: string | null = null): { [key: string]: { [key: string]: string; }; } {
+    getAllPresets(instanceId: string | null = null): { [key: string]: { [key: string]: string } } {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         return outfitStore.getAllPresets('user', actualInstanceId, 'user');
     }
@@ -305,7 +308,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         const updatedInstanceData = {
             ...outfitStore.state.userInstances[actualInstanceId],
-            promptInjectionEnabled: Boolean(enabled)
+            promptInjectionEnabled: Boolean(enabled),
         };
 
         outfitStore.state.userInstances[actualInstanceId] = updatedInstanceData;
@@ -324,8 +327,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         const instanceData = outfitStore.state.userInstances[actualInstanceId];
 
-        return instanceData?.promptInjectionEnabled !== undefined ?
-            instanceData.promptInjectionEnabled : true;
+        return instanceData?.promptInjectionEnabled !== undefined ? instanceData.promptInjectionEnabled : true;
     }
 
     hasDefaultOutfit(instanceId: string | null = null): boolean {
@@ -333,7 +335,11 @@ export class NewUserOutfitManager extends OutfitManager {
 
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewUserOutfitManager] hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(
+                `[NewUserOutfitManager] hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`,
+                null,
+                'warn'
+            );
             return false;
         }
 
@@ -348,7 +354,11 @@ export class NewUserOutfitManager extends OutfitManager {
 
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewUserOutfitManager] getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(
+                `[NewUserOutfitManager] getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`,
+                null,
+                'warn'
+            );
             return null;
         }
 
@@ -385,7 +395,7 @@ export class NewUserOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: 'User',
             managerType: 'user',
-            embedded: false
+            embedded: false,
         });
 
         if (outfitStore.getSetting('enableSysMessages')) {
@@ -420,7 +430,7 @@ export class NewUserOutfitManager extends OutfitManager {
             characterId: 'user',
             instanceId: actualInstanceId,
             characterName: 'User',
-            managerType: 'user'
+            managerType: 'user',
         });
 
         if (outfitStore.getSetting('enableSysMessages')) {
@@ -433,7 +443,7 @@ export class NewUserOutfitManager extends OutfitManager {
         if (!instanceId) {
             debugLog('[NewUserOutfitManager] Cannot load outfit - missing instanceId', null, 'debug');
             const defaultOutfit: { [key: string]: string } = {};
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 defaultOutfit[slot] = 'None';
             });
             return defaultOutfit;

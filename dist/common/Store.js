@@ -40,11 +40,11 @@ class OutfitStore {
     subscribe(listener) {
         this.state.listeners.push(listener);
         return () => {
-            this.state.listeners = this.state.listeners.filter(l => l !== listener);
+            this.state.listeners = this.state.listeners.filter((l) => l !== listener);
         };
     }
     notifyListeners() {
-        this.state.listeners.forEach(listener => {
+        this.state.listeners.forEach((listener) => {
             try {
                 listener(this.state);
             }
@@ -82,7 +82,7 @@ class OutfitStore {
             extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
                 instanceId: instanceId,
                 instanceType: 'bot',
-                characterId: characterId
+                characterId: characterId,
             });
         }
         // Preserve any existing promptInjectionEnabled value
@@ -91,7 +91,7 @@ class OutfitStore {
         this.state.botInstances[characterId][instanceId] = {
             bot: Object.assign({}, outfitData),
             user: this.state.botInstances[characterId][instanceId].user || {},
-            promptInjectionEnabled
+            promptInjectionEnabled,
         };
         this.notifyListeners();
     }
@@ -105,7 +105,9 @@ class OutfitStore {
         // Preserve any existing promptInjectionEnabled value
         const existingInstanceData = this.state.userInstances[instanceId];
         let promptInjectionEnabled;
-        if (existingInstanceData && typeof existingInstanceData === 'object' && 'promptInjectionEnabled' in existingInstanceData) {
+        if (existingInstanceData &&
+            typeof existingInstanceData === 'object' &&
+            'promptInjectionEnabled' in existingInstanceData) {
             promptInjectionEnabled = existingInstanceData.promptInjectionEnabled;
         }
         // Create the new instance data with both outfit data and settings
@@ -119,7 +121,7 @@ class OutfitStore {
             extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
                 instanceId: instanceId,
                 instanceType: 'user',
-                characterId: 'user'
+                characterId: 'user',
             });
         }
         this.notifyListeners();
@@ -131,7 +133,7 @@ class OutfitStore {
             debugLog(`[OutfitStore] getPresets called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
             return {
                 bot: {},
-                user: deepClone(this.state.presets.user[instanceId || 'default'] || {})
+                user: deepClone(this.state.presets.user[instanceId || 'default'] || {}),
             };
         }
         const botPresetKey = this._generateBotPresetKey(characterId, instanceId);
@@ -263,7 +265,7 @@ class OutfitStore {
         extensionEventBus.emit(EXTENSION_EVENTS.SETTINGS_CHANGED, {
             key: key,
             oldValue: oldValue,
-            newValue: value
+            newValue: value,
         });
     }
     getCurrentInstanceId() {
@@ -330,9 +332,11 @@ class OutfitStore {
         const settings = this.dataManager.loadSettings();
         this.setState({ botInstances, userInstances, presets, settings });
         // Emit an event when outfit data is loaded to allow UI refresh
-        import('../core/events.js').then(({ extensionEventBus, EXTENSION_EVENTS }) => {
+        import('../core/events.js')
+            .then(({ extensionEventBus, EXTENSION_EVENTS }) => {
             extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
-        }).catch(error => debugLog('Error in store operation', error, 'error'));
+        })
+            .catch((error) => debugLog('Error in store operation', error, 'error'));
     }
     flush() {
         if (!this.dataManager) {
@@ -388,7 +392,7 @@ class OutfitStore {
                 extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_DELETED, {
                     instanceId: instanceId,
                     instanceType: instanceType,
-                    characterId: characterId
+                    characterId: characterId,
                 });
             }
         }
@@ -399,7 +403,7 @@ class OutfitStore {
                 extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_DELETED, {
                     instanceId: instanceId,
                     instanceType: instanceType,
-                    characterId: 'user'
+                    characterId: 'user',
                 });
             }
         }
@@ -416,7 +420,7 @@ class OutfitStore {
         // Clear all presets
         this.state.presets = {
             bot: {},
-            user: {}
+            user: {},
         };
         this.notifyListeners();
     }

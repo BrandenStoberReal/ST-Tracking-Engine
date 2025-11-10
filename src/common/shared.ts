@@ -7,9 +7,14 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
     if (!$element || $element.length === 0) {
         return;
     }
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    let initialX = 0, initialY = 0;  // Track initial position when drag starts
-    let currentX = 0, currentY = 0;  // Track current transform position
+    let pos1 = 0,
+        pos2 = 0,
+        pos3 = 0,
+        pos4 = 0;
+    let initialX = 0,
+        initialY = 0; // Track initial position when drag starts
+    let currentX = 0,
+        currentY = 0; // Track current transform position
     let animationFrameId: number | null = null;
 
     // Define functions before using them
@@ -18,8 +23,8 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
         e.preventDefault();
 
         // Calculate the mouse movement since the last drag event
-        const deltaX = e.clientX - pos3;  // How much the mouse has moved since last event
-        const deltaY = e.clientY - pos4;  // How much the mouse has moved since last event
+        const deltaX = e.clientX - pos3; // How much the mouse has moved since last event
+        const deltaY = e.clientY - pos4; // How much the mouse has moved since last event
 
         // Update positions
         pos3 = e.clientX;
@@ -38,7 +43,7 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
         animationFrameId = requestAnimationFrame(() => {
             // Use CSS transform instead of top/left for better performance
             $element.css({
-                transform: `translate(${currentX}px, ${currentY}px)`
+                transform: `translate(${currentX}px, ${currentY}px)`,
             });
         });
     }
@@ -62,7 +67,7 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
         $element.css({
             top: finalTop + 'px',
             left: finalLeft + 'px',
-            transform: 'none'
+            transform: 'none',
         });
 
         // Remove dragging class to re-enable transitions
@@ -71,7 +76,7 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
         // Save the position to localStorage
         const position = {
             top: finalTop || 0,
-            left: finalLeft || 0
+            left: finalLeft || 0,
         };
 
         localStorage.setItem(`outfitPanel_${storageKey}_position`, JSON.stringify(position));
@@ -111,24 +116,26 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
 
         $element.css({
             top: position.top + 'px',
-            left: position.left + 'px'
+            left: position.left + 'px',
         });
     } else {
         // Default position if no saved position
         $element.css({
             top: '10px',
-            left: '10px'
+            left: '10px',
         });
     }
 
     // Set the element's style
     $element.css({
         position: 'fixed',
-        cursor: 'move'
+        cursor: 'move',
     });
 
     // Get the element that will be used for moving (header)
-    const $header = $element.find('.panel-header, .dialogHeader, .title, .outfit-header, .outfit-debug-header, h2, h3').first();
+    const $header = $element
+        .find('.panel-header, .dialogHeader, .title, .outfit-header, .outfit-debug-header, h2, h3')
+        .first();
 
     if ($header.length) {
         // When the header is clicked, assign the event handlers
@@ -140,12 +147,16 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
 }
 
 // Function to make an element resizable with size saving
-export function resizeElement(element: HTMLElement, storageKey: string, options?: {
-    minWidth?: number,
-    maxWidth?: number,
-    minHeight?: number,
-    maxHeight?: number
-}): void {
+export function resizeElement(
+    element: HTMLElement,
+    storageKey: string,
+    options?: {
+        minWidth?: number;
+        maxWidth?: number;
+        minHeight?: number;
+        maxHeight?: number;
+    }
+): void {
     if (!element) {
         return;
     }
@@ -164,8 +175,8 @@ export function resizeElement(element: HTMLElement, storageKey: string, options?
 
         // Calculate the maximum width and height based on current position to stay within viewport
         const elementRect = $element[0].getBoundingClientRect();
-        const maxWidth = options?.maxWidth ?? (window.innerWidth - elementRect.left - 10); // 10px margin from right edge
-        const maxHeight = options?.maxHeight ?? (window.innerHeight - elementRect.top - 10); // 10px margin from bottom edge
+        const maxWidth = options?.maxWidth ?? window.innerWidth - elementRect.left - 10; // 10px margin from right edge
+        const maxHeight = options?.maxHeight ?? window.innerHeight - elementRect.top - 10; // 10px margin from bottom edge
 
         // Set minimum and maximum sizes to prevent the element from becoming too small or too large
         const newWidth = Math.max(options?.minWidth ?? 200, Math.min(width, maxWidth));
@@ -173,7 +184,7 @@ export function resizeElement(element: HTMLElement, storageKey: string, options?
 
         $element.css({
             width: newWidth + 'px',
-            height: newHeight + 'px'
+            height: newHeight + 'px',
         });
     }
 
@@ -182,13 +193,17 @@ export function resizeElement(element: HTMLElement, storageKey: string, options?
         $(document).off('mouseup.resizer');
 
         // Save the size to localStorage
-        if (typeof $ !== 'undefined' && typeof $.fn.outerWidth === 'function' && typeof $.fn.outerHeight === 'function') {
+        if (
+            typeof $ !== 'undefined' &&
+            typeof $.fn.outerWidth === 'function' &&
+            typeof $.fn.outerHeight === 'function'
+        ) {
             const width = $element.outerWidth();
             const height = $element.outerHeight();
             if (width !== undefined && height !== undefined) {
                 const size = {
                     width: parseFloat(width.toString()),
-                    height: parseFloat(height.toString())
+                    height: parseFloat(height.toString()),
                 };
                 localStorage.setItem(`outfitPanel_${storageKey}_size`, JSON.stringify(size));
             }
@@ -203,7 +218,7 @@ export function resizeElement(element: HTMLElement, storageKey: string, options?
 
         $element.css({
             width: size.width + 'px',
-            height: size.height + 'px'
+            height: size.height + 'px',
         });
     }
 
@@ -211,7 +226,9 @@ export function resizeElement(element: HTMLElement, storageKey: string, options?
     let $resizeHandle = $element.find('.resize-handle');
 
     if (!$resizeHandle.length) {
-        $resizeHandle = $('<div class="resize-handle" style="position: absolute; right: 0; bottom: 0; width: 10px; height: 10px; cursor: se-resize; background: rgba(0,0,0,0.2);"></div>');
+        $resizeHandle = $(
+            '<div class="resize-handle" style="position: absolute; right: 0; bottom: 0; width: 10px; height: 10px; cursor: se-resize; background: rgba(0,0,0,0.2);"></div>'
+        );
         $element.append($resizeHandle);
     }
 

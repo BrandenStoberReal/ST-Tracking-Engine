@@ -19,7 +19,7 @@ function addLogToStorage(message: string, data: any, level: string = 'log'): voi
         message,
         data,
         level,
-        formattedMessage: `[OutfitTracker Debug - ${timestamp}] ${message}`
+        formattedMessage: `[OutfitTracker Debug - ${timestamp}] ${message}`,
     });
 
     if (logs.length > MAX_LOGS) {
@@ -79,5 +79,5 @@ export const debugLogger = {
     log: debugLog,
     forceLog: forceDebugLog,
     getLogs: getLogs,
-    clearLogs: clearLogs
+    clearLogs: clearLogs,
 };

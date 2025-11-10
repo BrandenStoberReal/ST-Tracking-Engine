@@ -58,8 +58,12 @@ export function generateOutfitFromLLM(options) {
                 throw new Error('Prompt is required for LLM generation');
             }
             // Use LLMUtility to generate with retry logic
-            const response = yield LLMUtility.generateWithRetry(prompt, 'You are an outfit generation system. Based on the character information provided, output outfit commands to set the character\'s clothing and accessories.', // Corrected escaping for \'
-            ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null));
+            const response = yield LLMUtility.generateWithRetry(prompt, "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.", // Corrected escaping for \'
+            ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null);
             return response;
         }
         catch (error) {
@@ -76,7 +80,11 @@ export function importOutfitFromCharacterCard() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
         try {
-            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             // Try to get character using the new character ID system first
             let character = null;
             const botOutfitManager = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager;
@@ -149,7 +157,7 @@ export function importOutfitFromCharacterCard() {
             return {
                 message: `Imported outfit information from ${characterName || 'the character'}. Found and applied ${commands.length} outfit items.`, // Corrected escaping for \'
                 commands: commands,
-                characterName: characterName
+                characterName: characterName,
             };
         }
         catch (error) {
@@ -157,7 +165,7 @@ export function importOutfitFromCharacterCard() {
             return {
                 message: `Error importing outfit: ${error.message}`, // Corrected escaping for \'
                 commands: [],
-                error: error.message
+                error: error.message,
             };
         }
     });

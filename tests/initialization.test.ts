@@ -13,7 +13,7 @@
 };
 
 // Mock context
-const mockContext = {
+const testMockContext = {
     extensionSettings: {},
     saveSettingsDebounced: jest.fn(),
     characters: [],
@@ -24,7 +24,7 @@ const mockContext = {
     }
 };
 
-(global as any).window.SillyTavern.getContext.mockReturnValue(mockContext);
+(global as any).window.SillyTavern.getContext.mockReturnValue(testMockContext);
 
 // Mock modules that will be imported
 jest.mock('../src/common/Store.ts', () => ({
@@ -109,7 +109,7 @@ describe('Extension Initialization', () => {
         expect((global as any).window.SillyTavern.getContext).toBeDefined();
 
         // Check that the mock context has all required methods
-        expect(mockContext.extensionSettings).toBeDefined();
-        expect(typeof mockContext.saveSettingsDebounced).toBe('function');
+        expect(testMockContext.extensionSettings).toBeDefined();
+        expect(typeof testMockContext.saveSettingsDebounced).toBe('function');
     });
 });

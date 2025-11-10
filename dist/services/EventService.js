@@ -27,7 +27,10 @@ class EventService {
     }
     initialize() {
         var _a;
-        this.context = this.context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext()) || null;
+        this.context =
+            this.context ||
+                (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext()) ||
+                null;
         if (!this.context || !this.context.eventSource || !this.context.event_types) {
             debugLog('[OutfitTracker] Context not fully available for event listeners yet, trying again later', null, 'warn');
             setTimeout(() => this.initialize(), 1000);
@@ -70,7 +73,7 @@ class EventService {
             return;
         }
         if (((_b = this.context.chat) === null || _b === void 0 ? void 0 : _b.length) > 0) {
-            const firstBotMessage = this.context.chat.find(msg => !msg.is_user && !msg.is_system);
+            const firstBotMessage = this.context.chat.find((msg) => !msg.is_user && !msg.is_system);
             if (firstBotMessage) {
                 const firstMessageHash = this.generateMessageHash(firstBotMessage.mes);
                 if (this.currentFirstMessageHash !== firstMessageHash) {
@@ -100,7 +103,7 @@ class EventService {
                 return;
             }
             const chat = this.context.chat;
-            const aiMessages = chat.filter(msg => !msg.is_user && !msg.is_system);
+            const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
             if (aiMessages.length === 1 && !data.is_user) {
                 debugLog('[OutfitTracker] First AI message received, updating outfit instance.');
                 const firstBotMessage = aiMessages[0];
@@ -130,7 +133,7 @@ class EventService {
             if (!chat || index < 0 || index >= chat.length) {
                 return;
             }
-            const aiMessages = chat.filter(msg => !msg.is_user && !msg.is_system);
+            const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
             if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
                 debugLog('[OutfitTracker] First message was swiped, updating outfit instance.');
                 const firstBotMessage = aiMessages[0];
@@ -239,7 +242,8 @@ class EventService {
                 if (!appliedDefault) {
                     this.botManager.loadOutfit();
                 }
-                if (window.botOutfitPanel && typeof window.botOutfitPanel.renderContent === 'function') {
+                if (window.botOutfitPanel &&
+                    typeof window.botOutfitPanel.renderContent === 'function') {
                     window.botOutfitPanel.renderContent();
                 }
             }
@@ -248,7 +252,8 @@ class EventService {
                 if (!appliedDefault) {
                     this.userManager.loadOutfit();
                 }
-                if (window.userOutfitPanel && typeof window.userOutfitPanel.renderContent === 'function') {
+                if (window.userOutfitPanel &&
+                    typeof window.userOutfitPanel.renderContent === 'function') {
                     window.userOutfitPanel.renderContent();
                 }
             }
@@ -293,7 +298,8 @@ class EventService {
                 if (!appliedDefault) {
                     this.botManager.loadOutfit();
                 }
-                if (window.botOutfitPanel && typeof window.botOutfitPanel.renderContent === 'function') {
+                if (window.botOutfitPanel &&
+                    typeof window.botOutfitPanel.renderContent === 'function') {
                     window.botOutfitPanel.renderContent();
                 }
             }
@@ -302,7 +308,8 @@ class EventService {
                 if (!appliedDefault) {
                     this.userManager.loadOutfit();
                 }
-                if (window.userOutfitPanel && typeof window.userOutfitPanel.renderContent === 'function') {
+                if (window.userOutfitPanel &&
+                    typeof window.userOutfitPanel.renderContent === 'function') {
                     window.userOutfitPanel.renderContent();
                 }
             }

@@ -36,14 +36,18 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     const autoOutfitPrompt = currentSettings.autoOutfitPrompt || '';
 
     // Function to fetch connection profiles from SillyTavern API
-    async function getConnectionProfiles(): Promise<Array<{ id: string, name: string }>> {
+    async function getConnectionProfiles(): Promise<Array<{ id: string; name: string }>> {
         try {
-            const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+            const context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                    ? window.getContext()
+                    : null;
             if (context?.ConnectionManagerRequestService?.getSupportedProfiles) {
                 const profiles = await context.ConnectionManagerRequestService.getSupportedProfiles();
                 return profiles.map((profile: any) => ({
                     id: profile.id,
-                    name: profile.name || profile.id
+                    name: profile.name || profile.id,
                 }));
             }
         } catch (error) {
@@ -53,10 +57,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     }
 
     // Generate profile options HTML
-    function generateProfileOptions(profiles: Array<{ id: string, name: string }>): string {
+    function generateProfileOptions(profiles: Array<{ id: string; name: string }>): string {
         let optionsHtml = '<option value="">Default Connection</option>';
 
-        profiles.forEach(profile => {
+        profiles.forEach((profile) => {
             const selected = autoOutfitConnectionProfile === profile.id ? 'selected' : '';
             optionsHtml += `<option value="${profile.id}" ${selected}>${profile.name}</option>`;
         });
@@ -75,7 +79,8 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         }
     }
 
-    const autoSettingsHtml = hasAutoSystem ? `
+    const autoSettingsHtml = hasAutoSystem
+        ? `
         <div class="flex-container setting-row">
             <label for="outfit-auto-system">Enable auto outfit updates</label>
             <input type="checkbox" id="outfit-auto-system"
@@ -95,7 +100,8 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             <button id="outfit-prompt-reset-btn" class="menu_button">Reset to Default Prompt</button>
             <button id="outfit-prompt-view-btn" class="menu_button">View Current Prompt</button>
         </div>
-    ` : `
+    `
+        : `
         <div class="flex-container setting-row">
             <label>Auto Outfit System: <span class="error-text">Not Available</span></label>
         </div>
@@ -146,25 +152,25 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                     <div class="flex-container setting-row">
                         <label for="outfit-sys-toggle">Enable system messages</label>
                         <input type="checkbox" id="outfit-sys-toggle"
-                               ${currentSettings.enableSysMessages ?? true ? 'checked' : ''}>
+                               ${(currentSettings.enableSysMessages ?? true) ? 'checked' : ''}>
                     </div>
                     
                     <div class="flex-container setting-row">
                         <label for="outfit-auto-bot">Auto-open character panel</label>
                         <input type="checkbox" id="outfit-auto-bot"
-                               ${currentSettings.autoOpenBot ?? true ? 'checked' : ''}>
+                               ${(currentSettings.autoOpenBot ?? true) ? 'checked' : ''}>
                     </div>
                     
                     <div class="flex-container setting-row">
                         <label for="outfit-auto-user">Auto-open user panel</label>
                         <input type="checkbox" id="outfit-auto-user"
-                               ${currentSettings.autoOpenUser ?? false ? 'checked' : ''}>
+                               ${(currentSettings.autoOpenUser ?? false) ? 'checked' : ''}>
                     </div>
                     
                     <div class="flex-container setting-row">
                         <label for="outfit-debug-mode">Enable debug mode</label>
                         <input type="checkbox" id="outfit-debug-mode"
-                               ${currentSettings.debugMode ?? false ? 'checked' : ''}>
+                               ${(currentSettings.debugMode ?? false) ? 'checked' : ''}>
                     </div>
                     
 
@@ -395,19 +401,27 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 // Check if auto outfit system is available and enabled
                 if (window.outfitTracker?.autoOutfitSystem) {
                     const autoOutfitSystem = window.outfitTracker.autoOutfitSystem;
-                    const autoOutfitStatus = typeof autoOutfitSystem.getStatus === 'function'
-                        ? autoOutfitSystem.getStatus()
-                        : null;
+                    const autoOutfitStatus =
+                        typeof autoOutfitSystem.getStatus === 'function' ? autoOutfitSystem.getStatus() : null;
 
                     if (autoOutfitStatus && autoOutfitStatus.enabled) {
                         $('#status-auto-outfit').removeClass('status-loading').addClass('status-active').text('Active');
                     } else if (autoOutfitStatus) {
-                        $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                        $('#status-auto-outfit')
+                            .removeClass('status-loading')
+                            .addClass('status-inactive')
+                            .text('Inactive');
                     } else {
-                        $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                        $('#status-auto-outfit')
+                            .removeClass('status-loading')
+                            .addClass('status-inactive')
+                            .text('Not Available');
                     }
                 } else {
-                    $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                    $('#status-auto-outfit')
+                        .removeClass('status-loading')
+                        .addClass('status-inactive')
+                        .text('Not Available');
                 }
 
                 // Check bot panel status
@@ -426,14 +440,24 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                     if (window.outfitTracker.userOutfitPanel.isVisible) {
                         $('#status-user-panel').removeClass('status-loading').addClass('status-active').text('Visible');
                     } else {
-                        $('#status-user-panel').removeClass('status-loading').addClass('status-inactive').text('Hidden');
+                        $('#status-user-panel')
+                            .removeClass('status-loading')
+                            .addClass('status-inactive')
+                            .text('Hidden');
                     }
                 } else {
-                    $('#status-user-panel').removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
+                    $('#status-user-panel')
+                        .removeClass('status-loading')
+                        .addClass('status-inactive')
+                        .text('Not Loaded');
                 }
 
                 // Check event system status (check if event listeners were set up)
-                const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                const context = window.SillyTavern?.getContext
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
 
                 if (context && context.eventSource) {
                     $('#status-events').removeClass('status-loading').addClass('status-active').text('Active');
@@ -442,8 +466,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 }
 
                 // Check outfit managers status
-                if (window.outfitTracker?.botOutfitPanel?.outfitManager &&
-                    window.outfitTracker?.userOutfitPanel?.outfitManager) {
+                if (
+                    window.outfitTracker?.botOutfitPanel?.outfitManager &&
+                    window.outfitTracker?.userOutfitPanel?.outfitManager
+                ) {
                     $('#status-managers').removeClass('status-loading').addClass('status-active').text('Active');
                 } else {
                     $('#status-managers').removeClass('status-loading').addClass('status-inactive').text('Inactive');
@@ -518,7 +544,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             // Update status after the panel is shown
             setTimeout(() => {
                 if (window.botOutfitPanel) {
-                    $('#status-bot-panel').removeClass('status-loading status-inactive').addClass('status-active').text('Visible');
+                    $('#status-bot-panel')
+                        .removeClass('status-loading status-inactive')
+                        .addClass('status-active')
+                        .text('Visible');
                 }
             }, 100);
         };
@@ -528,7 +557,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             // Update status after the panel is hidden
             setTimeout(() => {
                 if (window.botOutfitPanel) {
-                    $('#status-bot-panel').removeClass('status-loading status-active').addClass('status-inactive').text('Hidden');
+                    $('#status-bot-panel')
+                        .removeClass('status-loading status-active')
+                        .addClass('status-inactive')
+                        .text('Hidden');
                 }
             }, 100);
         };
@@ -543,7 +575,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             // Update status after the panel is shown
             setTimeout(() => {
                 if (window.userOutfitPanel) {
-                    $('#status-user-panel').removeClass('status-loading status-inactive').addClass('status-active').text('Visible');
+                    $('#status-user-panel')
+                        .removeClass('status-loading status-inactive')
+                        .addClass('status-active')
+                        .text('Visible');
                 }
             }, 100);
         };
@@ -553,7 +588,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             // Update status after the panel is hidden
             setTimeout(() => {
                 if (window.userOutfitPanel) {
-                    $('#status-user-panel').removeClass('status-loading status-active').addClass('status-inactive').text('Hidden');
+                    $('#status-user-panel')
+                        .removeClass('status-loading status-active')
+                        .addClass('status-inactive')
+                        .text('Hidden');
                 }
             }, 100);
         };
@@ -707,7 +745,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     }
 
     // Helper function to extract rgba values without regex
-    function extractRgbaValues(str: string): { r: any, g: any, b: any } | null {
+    function extractRgbaValues(str: string): { r: any; g: any; b: any } | null {
         // Check if the string starts with rgba( or rgb(
         if (!str || typeof str !== 'string') {
             return null;
@@ -733,7 +771,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         const content = str.substring(startIndex, endIndex);
 
         // Split by comma and trim whitespace to get the values
-        const parts = content.split(',').map(part => part.trim());
+        const parts = content.split(',').map((part) => part.trim());
 
         // Check if we have the right number of parts (at least 3 for rgb, up to 4 for rgba)
         if (parts.length < 3 || parts.length > 4) {
@@ -763,7 +801,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         return {
             r: r,
             g: g,
-            b: b
+            b: b,
         };
     }
 
@@ -774,13 +812,13 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             settings[MODULE_NAME].botPanelColors = {
                 primary: $('#bot-panel-primary-color').val(),
                 border: $('#bot-panel-border-color').val(),
-                shadow: $('#bot-panel-shadow-color').val()
+                shadow: $('#bot-panel-shadow-color').val(),
             };
 
             settings[MODULE_NAME].userPanelColors = {
                 primary: $('#user-panel-primary-color').val(),
                 border: $('#user-panel-border-color').val(),
-                shadow: $('#user-panel-shadow-color').val()
+                shadow: $('#user-panel-shadow-color').val(),
             };
 
             saveSettingsFn();
@@ -819,58 +857,81 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         }
     });
 
-
     // Update panel colors when settings change
-    $(document).on('input', '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color', function (this: HTMLElement) {
-        // Get the current input element
-        const $currentInput = $(this);
-        const colorValue = $currentInput.val();
+    $(document).on(
+        'input',
+        '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color',
+        function (this: HTMLElement) {
+            // Get the current input element
+            const $currentInput = $(this);
+            const colorValue = $currentInput.val();
 
-        // For non-hex colors (like gradients or rgba), don't validate
-        // Only validate if it looks like a hex color
-        const colorValueNoSpaces = colorValue.split(' ').join('').split('\t').join('').split('\n').join('').split('\r').join('');
-        const isHexColor = isValidHexColorNoRegex(colorValueNoSpaces);
+            // For non-hex colors (like gradients or rgba), don't validate
+            // Only validate if it looks like a hex color
+            const colorValueNoSpaces = colorValue
+                .split(' ')
+                .join('')
+                .split('\t')
+                .join('')
+                .split('\n')
+                .join('')
+                .split('\r')
+                .join('');
+            const isHexColor = isValidHexColorNoRegex(colorValueNoSpaces);
 
-        if (isHexColor) {
-            // If it doesn't start with #, add it
-            let normalizedValue = colorValue;
+            if (isHexColor) {
+                // If it doesn't start with #, add it
+                let normalizedValue = colorValue;
 
-            if (!colorValue.startsWith('#')) {
-                normalizedValue = '#' + colorValue;
-                $currentInput.val(normalizedValue);
+                if (!colorValue.startsWith('#')) {
+                    normalizedValue = '#' + colorValue;
+                    $currentInput.val(normalizedValue);
+                }
+
+                // Convert 3-digit hex to 6-digit if needed
+                if (normalizedValue.length === 4) {
+                    // # + 3 digits
+                    normalizedValue =
+                        '#' +
+                        normalizedValue[1] +
+                        normalizedValue[1] +
+                        normalizedValue[2] +
+                        normalizedValue[2] +
+                        normalizedValue[3] +
+                        normalizedValue[3];
+                    $currentInput.val(normalizedValue);
+                }
+
+                // Update the input to show the normalized value
+                $currentInput.val(normalizedValue.toUpperCase());
             }
 
-            // Convert 3-digit hex to 6-digit if needed
-            if (normalizedValue.length === 4) { // # + 3 digits
-                normalizedValue = '#' + normalizedValue[1] + normalizedValue[1] + normalizedValue[2] + normalizedValue[2] + normalizedValue[3] + normalizedValue[3];
-                $currentInput.val(normalizedValue);
-            }
-
-            // Update the input to show the normalized value
-            $currentInput.val(normalizedValue.toUpperCase());
+            updateColorSettingsAndApply();
         }
+    );
 
-        updateColorSettingsAndApply();
-    });
+    // Update outfit store when color values are changed directly
+    $(document).on(
+        'change',
+        '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color',
+        () => {
+            // Update the outfit store to reflect the new color settings
+            const newBotColors = {
+                primary: $('#bot-panel-primary-color').val(),
+                border: $('#bot-panel-border-color').val(),
+                shadow: $('#bot-panel-shadow-color').val(),
+            };
 
-    // Update outfit store when color values are changed directly 
-    $(document).on('change', '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color', () => {
-        // Update the outfit store to reflect the new color settings
-        const newBotColors = {
-            primary: $('#bot-panel-primary-color').val(),
-            border: $('#bot-panel-border-color').val(),
-            shadow: $('#bot-panel-shadow-color').val()
-        };
+            const newUserColors = {
+                primary: $('#user-panel-primary-color').val(),
+                border: $('#user-panel-border-color').val(),
+                shadow: $('#user-panel-shadow-color').val(),
+            };
 
-        const newUserColors = {
-            primary: $('#user-panel-primary-color').val(),
-            border: $('#user-panel-border-color').val(),
-            shadow: $('#user-panel-shadow-color').val()
-        };
-
-        outfitStore.setSetting('botPanelColors', newBotColors);
-        outfitStore.setSetting('userPanelColors', newUserColors);
-    });
+            outfitStore.setSetting('botPanelColors', newBotColors);
+            outfitStore.setSetting('userPanelColors', newUserColors);
+        }
+    );
 
     // Color customization event listeners
     $('#apply-panel-colors').on('click', function (this: HTMLElement) {
@@ -930,15 +991,22 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     });
 
     // Update color pickers when text inputs change (in case users type in values)
-    $(document).on('input', '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color', function (this: HTMLElement) {
-        updateColorPickersFromText();
-    });
+    $(document).on(
+        'input',
+        '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color',
+        function (this: HTMLElement) {
+            updateColorPickersFromText();
+        }
+    );
 
     // Add hover effects to the apply button
-    $('#apply-panel-colors').hover(function (this: HTMLElement) { // Mouse enter
+    $('#apply-panel-colors').hover(
+        function (this: HTMLElement) {
+            // Mouse enter
             $(this).css('background', 'linear-gradient(135deg, #5a6bc8 0%, #4a5ba8 100%)');
         },
-        function (this: HTMLElement) { // Mouse leave
+        function (this: HTMLElement) {
+            // Mouse leave
             $(this).css('background', 'linear-gradient(135deg, #4a5bb8 0%, #3a4ba8 100%)');
         }
     );
@@ -948,13 +1016,13 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         bot: {
             primary: 'linear-gradient(135deg, #6a4fc1 0%, #5a49d0 50%, #4a43c0 100%)',
             border: '#8a7fdb',
-            shadow: 'rgba(106, 79, 193, 0.4)'
+            shadow: 'rgba(106, 79, 193, 0.4)',
         },
         user: {
             primary: 'linear-gradient(135deg, #1a78d1 0%, #2a68c1 50%, #1a58b1 100%)',
             border: '#5da6f0',
-            shadow: 'rgba(26, 120, 209, 0.4)'
-        }
+            shadow: 'rgba(26, 120, 209, 0.4)',
+        },
     };
 
     // Function to check if a field has been modified from its default
@@ -978,18 +1046,38 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     // Function to update reset button visibility
     function updateResetButtonVisibility() {
         // Bot panel
-        toggleResetButton('bot-panel-primary-reset', isFieldModified('bot-panel-primary-color', originalDefaults.bot.primary));
-        toggleResetButton('bot-panel-border-reset', isFieldModified('bot-panel-border-color', originalDefaults.bot.border));
-        toggleResetButton('bot-panel-shadow-reset', isFieldModified('bot-panel-shadow-color', originalDefaults.bot.shadow));
+        toggleResetButton(
+            'bot-panel-primary-reset',
+            isFieldModified('bot-panel-primary-color', originalDefaults.bot.primary)
+        );
+        toggleResetButton(
+            'bot-panel-border-reset',
+            isFieldModified('bot-panel-border-color', originalDefaults.bot.border)
+        );
+        toggleResetButton(
+            'bot-panel-shadow-reset',
+            isFieldModified('bot-panel-shadow-color', originalDefaults.bot.shadow)
+        );
 
         // User panel
-        toggleResetButton('user-panel-primary-reset', isFieldModified('user-panel-primary-color', originalDefaults.user.primary));
-        toggleResetButton('user-panel-border-reset', isFieldModified('user-panel-border-color', originalDefaults.user.border));
-        toggleResetButton('user-panel-shadow-reset', isFieldModified('user-panel-shadow-color', originalDefaults.user.shadow));
+        toggleResetButton(
+            'user-panel-primary-reset',
+            isFieldModified('user-panel-primary-color', originalDefaults.user.primary)
+        );
+        toggleResetButton(
+            'user-panel-border-reset',
+            isFieldModified('user-panel-border-color', originalDefaults.user.border)
+        );
+        toggleResetButton(
+            'user-panel-shadow-reset',
+            isFieldModified('user-panel-shadow-color', originalDefaults.user.shadow)
+        );
     }
 
     // Attach input event listeners to text fields to check for modifications
-    $('#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color').on('input', () => {
+    $(
+        '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color'
+    ).on('input', () => {
         updateResetButtonVisibility();
     });
 
@@ -1070,7 +1158,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 saveSettingsFn();
 
                 // Update the outfit store to reflect the new settings
-                outfitStore.setSetting('autoOutfitConnectionProfile', settings[MODULE_NAME].autoOutfitConnectionProfile);
+                outfitStore.setSetting(
+                    'autoOutfitConnectionProfile',
+                    settings[MODULE_NAME].autoOutfitConnectionProfile
+                );
             }
         });
 
@@ -1106,21 +1197,30 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
 
         $('#outfit-prompt-view-btn').on('click', function () {
             const status = autoOutfitSystem.getStatus();
-            const preview = autoOutfitSystem.systemPrompt.length > 100
-                ? autoOutfitSystem.systemPrompt.substring(0, 100) + '...'
-                : autoOutfitSystem.systemPrompt;
+            const preview =
+                autoOutfitSystem.systemPrompt.length > 100
+                    ? autoOutfitSystem.systemPrompt.substring(0, 100) + '...'
+                    : autoOutfitSystem.systemPrompt;
 
-            toastr.info(`Prompt preview: ${preview}\n\nFull length: ${status.promptLength} characters`, 'Current System Prompt', {
-                timeOut: 15000,
-                extendedTimeOut: 30000
-            });
+            toastr.info(
+                `Prompt preview: ${preview}\n\nFull length: ${status.promptLength} characters`,
+                'Current System Prompt',
+                {
+                    timeOut: 15000,
+                    extendedTimeOut: 30000,
+                }
+            );
         });
     }
 
     // Add event listener for the wipe all outfits button
     $('#outfit-wipe-all-btn').on('click', function () {
         // Show confirmation dialog
-        if (confirm('Are you sure you want to permanently delete ALL extension data and reload the page? This action cannot be undone.')) {
+        if (
+            confirm(
+                'Are you sure you want to permanently delete ALL extension data and reload the page? This action cannot be undone.'
+            )
+        ) {
             // Call the wipe function after confirmation
             if (typeof window.wipeAllOutfits === 'function') {
                 window.wipeAllOutfits();
@@ -1183,7 +1283,10 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                         $commandsList.append('<li>No commands generated</li>');
                     }
 
-                    toastr.success('Outfit processing completed. See results in the LLM Output section.', 'Processing Complete');
+                    toastr.success(
+                        'Outfit processing completed. See results in the LLM Output section.',
+                        'Processing Complete'
+                    );
                 } else {
                     $('#outfit-llm-output').val('No output data available');
                     $('#outfit-generated-commands').empty().append('<li>No commands generated</li>');

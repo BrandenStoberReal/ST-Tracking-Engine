@@ -25,12 +25,16 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             try {
-                const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
                 if ((_b = context === null || context === void 0 ? void 0 : context.ConnectionManagerRequestService) === null || _b === void 0 ? void 0 : _b.getSupportedProfiles) {
                     const profiles = yield context.ConnectionManagerRequestService.getSupportedProfiles();
                     return profiles.map((profile) => ({
                         id: profile.id,
-                        name: profile.name || profile.id
+                        name: profile.name || profile.id,
                     }));
                 }
             }
@@ -43,7 +47,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
     // Generate profile options HTML
     function generateProfileOptions(profiles) {
         let optionsHtml = '<option value="">Default Connection</option>';
-        profiles.forEach(profile => {
+        profiles.forEach((profile) => {
             const selected = autoOutfitConnectionProfile === profile.id ? 'selected' : '';
             optionsHtml += `<option value="${profile.id}" ${selected}>${profile.name}</option>`;
         });
@@ -62,7 +66,8 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             }
         });
     }
-    const autoSettingsHtml = hasAutoSystem ? `
+    const autoSettingsHtml = hasAutoSystem
+        ? `
         <div class="flex-container setting-row">
             <label for="outfit-auto-system">Enable auto outfit updates</label>
             <input type="checkbox" id="outfit-auto-system"
@@ -82,7 +87,8 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             <button id="outfit-prompt-reset-btn" class="menu_button">Reset to Default Prompt</button>
             <button id="outfit-prompt-view-btn" class="menu_button">View Current Prompt</button>
         </div>
-    ` : `
+    `
+        : `
         <div class="flex-container setting-row">
             <label>Auto Outfit System: <span class="error-text">Not Available</span></label>
         </div>
@@ -382,21 +388,28 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 // Check if auto outfit system is available and enabled
                 if ((_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.autoOutfitSystem) {
                     const autoOutfitSystem = window.outfitTracker.autoOutfitSystem;
-                    const autoOutfitStatus = typeof autoOutfitSystem.getStatus === 'function'
-                        ? autoOutfitSystem.getStatus()
-                        : null;
+                    const autoOutfitStatus = typeof autoOutfitSystem.getStatus === 'function' ? autoOutfitSystem.getStatus() : null;
                     if (autoOutfitStatus && autoOutfitStatus.enabled) {
                         $('#status-auto-outfit').removeClass('status-loading').addClass('status-active').text('Active');
                     }
                     else if (autoOutfitStatus) {
-                        $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Inactive');
+                        $('#status-auto-outfit')
+                            .removeClass('status-loading')
+                            .addClass('status-inactive')
+                            .text('Inactive');
                     }
                     else {
-                        $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                        $('#status-auto-outfit')
+                            .removeClass('status-loading')
+                            .addClass('status-inactive')
+                            .text('Not Available');
                     }
                 }
                 else {
-                    $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                    $('#status-auto-outfit')
+                        .removeClass('status-loading')
+                        .addClass('status-inactive')
+                        .text('Not Available');
                 }
                 // Check bot panel status
                 if ((_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) {
@@ -416,14 +429,24 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                         $('#status-user-panel').removeClass('status-loading').addClass('status-active').text('Visible');
                     }
                     else {
-                        $('#status-user-panel').removeClass('status-loading').addClass('status-inactive').text('Hidden');
+                        $('#status-user-panel')
+                            .removeClass('status-loading')
+                            .addClass('status-inactive')
+                            .text('Hidden');
                     }
                 }
                 else {
-                    $('#status-user-panel').removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
+                    $('#status-user-panel')
+                        .removeClass('status-loading')
+                        .addClass('status-inactive')
+                        .text('Not Loaded');
                 }
                 // Check event system status (check if event listeners were set up)
-                const context = ((_d = window.SillyTavern) === null || _d === void 0 ? void 0 : _d.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                const context = ((_d = window.SillyTavern) === null || _d === void 0 ? void 0 : _d.getContext)
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
                 if (context && context.eventSource) {
                     $('#status-events').removeClass('status-loading').addClass('status-active').text('Active');
                 }
@@ -496,7 +519,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             // Update status after the panel is shown
             setTimeout(() => {
                 if (window.botOutfitPanel) {
-                    $('#status-bot-panel').removeClass('status-loading status-inactive').addClass('status-active').text('Visible');
+                    $('#status-bot-panel')
+                        .removeClass('status-loading status-inactive')
+                        .addClass('status-active')
+                        .text('Visible');
                 }
             }, 100);
         };
@@ -505,7 +531,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             // Update status after the panel is hidden
             setTimeout(() => {
                 if (window.botOutfitPanel) {
-                    $('#status-bot-panel').removeClass('status-loading status-active').addClass('status-inactive').text('Hidden');
+                    $('#status-bot-panel')
+                        .removeClass('status-loading status-active')
+                        .addClass('status-inactive')
+                        .text('Hidden');
                 }
             }, 100);
         };
@@ -518,7 +547,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             // Update status after the panel is shown
             setTimeout(() => {
                 if (window.userOutfitPanel) {
-                    $('#status-user-panel').removeClass('status-loading status-inactive').addClass('status-active').text('Visible');
+                    $('#status-user-panel')
+                        .removeClass('status-loading status-inactive')
+                        .addClass('status-active')
+                        .text('Visible');
                 }
             }, 100);
         };
@@ -527,7 +559,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             // Update status after the panel is hidden
             setTimeout(() => {
                 if (window.userOutfitPanel) {
-                    $('#status-user-panel').removeClass('status-loading status-active').addClass('status-inactive').text('Hidden');
+                    $('#status-user-panel')
+                        .removeClass('status-loading status-active')
+                        .addClass('status-inactive')
+                        .text('Hidden');
                 }
             }, 100);
         };
@@ -675,7 +710,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         }
         const content = str.substring(startIndex, endIndex);
         // Split by comma and trim whitespace to get the values
-        const parts = content.split(',').map(part => part.trim());
+        const parts = content.split(',').map((part) => part.trim());
         // Check if we have the right number of parts (at least 3 for rgb, up to 4 for rgba)
         if (parts.length < 3 || parts.length > 4) {
             return null;
@@ -699,7 +734,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         return {
             r: r,
             g: g,
-            b: b
+            b: b,
         };
     }
     // Function to update settings and apply colors
@@ -709,12 +744,12 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             settings[MODULE_NAME].botPanelColors = {
                 primary: $('#bot-panel-primary-color').val(),
                 border: $('#bot-panel-border-color').val(),
-                shadow: $('#bot-panel-shadow-color').val()
+                shadow: $('#bot-panel-shadow-color').val(),
             };
             settings[MODULE_NAME].userPanelColors = {
                 primary: $('#user-panel-primary-color').val(),
                 border: $('#user-panel-border-color').val(),
-                shadow: $('#user-panel-shadow-color').val()
+                shadow: $('#user-panel-shadow-color').val(),
             };
             saveSettingsFn();
             // Update the outfit store to reflect the new color settings
@@ -753,7 +788,15 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         const colorValue = $currentInput.val();
         // For non-hex colors (like gradients or rgba), don't validate
         // Only validate if it looks like a hex color
-        const colorValueNoSpaces = colorValue.split(' ').join('').split('\t').join('').split('\n').join('').split('\r').join('');
+        const colorValueNoSpaces = colorValue
+            .split(' ')
+            .join('')
+            .split('\t')
+            .join('')
+            .split('\n')
+            .join('')
+            .split('\r')
+            .join('');
         const isHexColor = isValidHexColorNoRegex(colorValueNoSpaces);
         if (isHexColor) {
             // If it doesn't start with #, add it
@@ -763,8 +806,16 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 $currentInput.val(normalizedValue);
             }
             // Convert 3-digit hex to 6-digit if needed
-            if (normalizedValue.length === 4) { // # + 3 digits
-                normalizedValue = '#' + normalizedValue[1] + normalizedValue[1] + normalizedValue[2] + normalizedValue[2] + normalizedValue[3] + normalizedValue[3];
+            if (normalizedValue.length === 4) {
+                // # + 3 digits
+                normalizedValue =
+                    '#' +
+                        normalizedValue[1] +
+                        normalizedValue[1] +
+                        normalizedValue[2] +
+                        normalizedValue[2] +
+                        normalizedValue[3] +
+                        normalizedValue[3];
                 $currentInput.val(normalizedValue);
             }
             // Update the input to show the normalized value
@@ -772,18 +823,18 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         }
         updateColorSettingsAndApply();
     });
-    // Update outfit store when color values are changed directly 
+    // Update outfit store when color values are changed directly
     $(document).on('change', '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color', () => {
         // Update the outfit store to reflect the new color settings
         const newBotColors = {
             primary: $('#bot-panel-primary-color').val(),
             border: $('#bot-panel-border-color').val(),
-            shadow: $('#bot-panel-shadow-color').val()
+            shadow: $('#bot-panel-shadow-color').val(),
         };
         const newUserColors = {
             primary: $('#user-panel-primary-color').val(),
             border: $('#user-panel-border-color').val(),
-            shadow: $('#user-panel-shadow-color').val()
+            shadow: $('#user-panel-shadow-color').val(),
         };
         outfitStore.setSetting('botPanelColors', newBotColors);
         outfitStore.setSetting('userPanelColors', newUserColors);
@@ -835,8 +886,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
     });
     // Add hover effects to the apply button
     $('#apply-panel-colors').hover(function () {
+        // Mouse enter
         $(this).css('background', 'linear-gradient(135deg, #5a6bc8 0%, #4a5ba8 100%)');
     }, function () {
+        // Mouse leave
         $(this).css('background', 'linear-gradient(135deg, #4a5bb8 0%, #3a4ba8 100%)');
     });
     // Store original default values for comparison
@@ -844,13 +897,13 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         bot: {
             primary: 'linear-gradient(135deg, #6a4fc1 0%, #5a49d0 50%, #4a43c0 100%)',
             border: '#8a7fdb',
-            shadow: 'rgba(106, 79, 193, 0.4)'
+            shadow: 'rgba(106, 79, 193, 0.4)',
         },
         user: {
             primary: 'linear-gradient(135deg, #1a78d1 0%, #2a68c1 50%, #1a58b1 100%)',
             border: '#5da6f0',
-            shadow: 'rgba(26, 120, 209, 0.4)'
-        }
+            shadow: 'rgba(26, 120, 209, 0.4)',
+        },
     };
     // Function to check if a field has been modified from its default
     function isFieldModified(fieldId, defaultValue) {
@@ -983,7 +1036,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 : autoOutfitSystem.systemPrompt;
             toastr.info(`Prompt preview: ${preview}\n\nFull length: ${status.promptLength} characters`, 'Current System Prompt', {
                 timeOut: 15000,
-                extendedTimeOut: 30000
+                extendedTimeOut: 30000,
             });
         });
     }

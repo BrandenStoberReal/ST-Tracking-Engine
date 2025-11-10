@@ -26,7 +26,12 @@ class MacroProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j;
             try {
-                const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null));
+                const ctx = context ||
+                    (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                        ? window.SillyTavern.getContext()
+                        : window.getContext
+                            ? window.getContext()
+                            : null);
                 if (!ctx || !ctx.chat) {
                     return;
                 }
@@ -95,7 +100,7 @@ class MacroProcessor {
                     if (currentInstanceId !== instanceId) {
                         debugLog('[OutfitTracker] Instance ID changed from', {
                             from: currentInstanceId,
-                            to: instanceId
+                            to: instanceId,
                         }, 'log');
                         outfitStore.setCurrentInstanceId(instanceId);
                         if ((_h = window.botOutfitPanel) === null || _h === void 0 ? void 0 : _h.outfitManager) {
@@ -128,9 +133,9 @@ class MacroProcessor {
         // Get all outfit values from all bot instances for this character (including "None")
         if (state.botInstances && state.botInstances[uniqueCharacterId]) {
             debugLog('[OutfitTracker] Found bot instances for character:', Object.keys(state.botInstances[uniqueCharacterId]));
-            Object.values(state.botInstances[uniqueCharacterId]).forEach(instanceData => {
+            Object.values(state.botInstances[uniqueCharacterId]).forEach((instanceData) => {
                 if (instanceData && instanceData.bot) {
-                    Object.values(instanceData.bot).forEach(value => {
+                    Object.values(instanceData.bot).forEach((value) => {
                         if (value !== undefined && value !== null && typeof value === 'string') {
                             outfitValues.add(value);
                             debugLog('[OutfitTracker] Added outfit value from instance:', value);
@@ -141,13 +146,13 @@ class MacroProcessor {
         }
         // Get all preset values for this character (including "None")
         if (state.presets && state.presets.bot) {
-            Object.keys(state.presets.bot).forEach(key => {
+            Object.keys(state.presets.bot).forEach((key) => {
                 if (key.startsWith(uniqueCharacterId + '_')) {
                     const presets = state.presets.bot[key];
                     if (presets) {
-                        Object.values(presets).forEach(preset => {
+                        Object.values(presets).forEach((preset) => {
                             if (preset) {
-                                Object.values(preset).forEach(value => {
+                                Object.values(preset).forEach((value) => {
                                     if (value !== undefined && value !== null && typeof value === 'string') {
                                         outfitValues.add(value);
                                         debugLog('[OutfitTracker] Added preset value:', value);
@@ -163,7 +168,7 @@ class MacroProcessor {
         const currentInstanceId = state.currentOutfitInstanceId;
         if (currentInstanceId && ((_b = (_a = state.botInstances[uniqueCharacterId]) === null || _a === void 0 ? void 0 : _a[currentInstanceId]) === null || _b === void 0 ? void 0 : _b.bot)) {
             const currentOutfit = state.botInstances[uniqueCharacterId][currentInstanceId].bot;
-            Object.values(currentOutfit).forEach(value => {
+            Object.values(currentOutfit).forEach((value) => {
                 if (value !== undefined && value !== null && typeof value === 'string') {
                     outfitValues.add(value);
                     debugLog('[OutfitTracker] Added current outfit value:', value);
@@ -253,9 +258,9 @@ class MacroProcessor {
         }
         // Additional cleaning: Remove "None" text that might be the result of macro replacement
         // This handles cases where "{{char_topwear}}" was replaced with "None" in the message
-        resultText = resultText.replace(/\bNone\b/g, "");
+        resultText = resultText.replace(/\bNone\b/g, '');
         // Clean up any double spaces that might result from the removal
-        resultText = resultText.replace(/\s+/g, " ").trim();
+        resultText = resultText.replace(/\s+/g, ' ').trim();
         return resultText;
     }
 }

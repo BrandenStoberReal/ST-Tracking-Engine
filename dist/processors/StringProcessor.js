@@ -148,7 +148,7 @@ export function extractValues(text, startMarker, endMarker) {
         const value = text.substring(contentStart, endIdx);
         values.push({
             fullMatch: text.substring(startIdx, endIdx + endMarker.length),
-            value
+            value,
         });
         startIndex = endIdx + endMarker.length;
     }

@@ -17,7 +17,7 @@ export abstract class OutfitManager {
         this.character = 'Unknown';
         this.characterId = null;
 
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             this.currentValues[slot] = 'None';
         });
     }
@@ -86,7 +86,7 @@ export abstract class OutfitManager {
 
         if (!this.characterId || !actualInstanceId) {
             debugLog(`[${this.constructor.name}] Cannot load outfit - missing characterId or instanceId`, null, 'warn');
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
             return;
@@ -109,7 +109,7 @@ export abstract class OutfitManager {
 
         const outfitData: { [key: string]: string } = {};
 
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             outfitData[slot] = this.currentValues[slot] || 'None';
         });
 
@@ -136,7 +136,11 @@ export abstract class OutfitManager {
 
         if (value.length > MAX_VALUE_LENGTH) {
             value = value.substring(0, MAX_VALUE_LENGTH);
-            debugLog(`[${this.constructor.name}] Value truncated to ${MAX_VALUE_LENGTH} characters for slot ${slot}`, null, 'warn');
+            debugLog(
+                `[${this.constructor.name}] Value truncated to ${MAX_VALUE_LENGTH} characters for slot ${slot}`,
+                null,
+                'warn'
+            );
         }
 
         const previousValue = this.currentValues[slot];
@@ -161,7 +165,7 @@ export abstract class OutfitManager {
                 previousValue: previousValue,
                 newValue: value,
                 characterName: this.character,
-                managerType: this.constructor.name.includes('Bot') ? 'bot' : 'user'
+                managerType: this.constructor.name.includes('Bot') ? 'bot' : 'user',
             });
         }
 
@@ -212,11 +216,11 @@ export abstract class OutfitManager {
         return null;
     }
 
-    getOutfitData(slots: string[]): { name: string, value: string, varName: string }[] {
-        return slots.map(slot => ({
+    getOutfitData(slots: string[]): { name: string; value: string; varName: string }[] {
+        return slots.map((slot) => ({
             name: slot,
             value: this.currentValues[slot],
-            varName: this.getVarName(slot)
+            varName: this.getVarName(slot),
         }));
     }
 

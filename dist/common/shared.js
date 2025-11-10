@@ -32,7 +32,7 @@ export function dragElementWithSave(element, storageKey) {
         animationFrameId = requestAnimationFrame(() => {
             // Use CSS transform instead of top/left for better performance
             $element.css({
-                transform: `translate(${currentX}px, ${currentY}px)`
+                transform: `translate(${currentX}px, ${currentY}px)`,
             });
         });
     }
@@ -52,14 +52,14 @@ export function dragElementWithSave(element, storageKey) {
         $element.css({
             top: finalTop + 'px',
             left: finalLeft + 'px',
-            transform: 'none'
+            transform: 'none',
         });
         // Remove dragging class to re-enable transitions
         $element.removeClass('dragging');
         // Save the position to localStorage
         const position = {
             top: finalTop || 0,
-            left: finalLeft || 0
+            left: finalLeft || 0,
         };
         localStorage.setItem(`outfitPanel_${storageKey}_position`, JSON.stringify(position));
     }
@@ -88,23 +88,25 @@ export function dragElementWithSave(element, storageKey) {
         const position = JSON.parse(savedPosition);
         $element.css({
             top: position.top + 'px',
-            left: position.left + 'px'
+            left: position.left + 'px',
         });
     }
     else {
         // Default position if no saved position
         $element.css({
             top: '10px',
-            left: '10px'
+            left: '10px',
         });
     }
     // Set the element's style
     $element.css({
         position: 'fixed',
-        cursor: 'move'
+        cursor: 'move',
     });
     // Get the element that will be used for moving (header)
-    const $header = $element.find('.panel-header, .dialogHeader, .title, .outfit-header, .outfit-debug-header, h2, h3').first();
+    const $header = $element
+        .find('.panel-header, .dialogHeader, .title, .outfit-header, .outfit-debug-header, h2, h3')
+        .first();
     if ($header.length) {
         // When the header is clicked, assign the event handlers
         $header.on('mousedown', dragMouseDown);
@@ -131,27 +133,29 @@ export function resizeElement(element, storageKey, options) {
         const height = originalHeight + (e.pageY - originalMouseY);
         // Calculate the maximum width and height based on current position to stay within viewport
         const elementRect = $element[0].getBoundingClientRect();
-        const maxWidth = (_a = options === null || options === void 0 ? void 0 : options.maxWidth) !== null && _a !== void 0 ? _a : (window.innerWidth - elementRect.left - 10); // 10px margin from right edge
-        const maxHeight = (_b = options === null || options === void 0 ? void 0 : options.maxHeight) !== null && _b !== void 0 ? _b : (window.innerHeight - elementRect.top - 10); // 10px margin from bottom edge
+        const maxWidth = (_a = options === null || options === void 0 ? void 0 : options.maxWidth) !== null && _a !== void 0 ? _a : window.innerWidth - elementRect.left - 10; // 10px margin from right edge
+        const maxHeight = (_b = options === null || options === void 0 ? void 0 : options.maxHeight) !== null && _b !== void 0 ? _b : window.innerHeight - elementRect.top - 10; // 10px margin from bottom edge
         // Set minimum and maximum sizes to prevent the element from becoming too small or too large
         const newWidth = Math.max((_c = options === null || options === void 0 ? void 0 : options.minWidth) !== null && _c !== void 0 ? _c : 200, Math.min(width, maxWidth));
         const newHeight = Math.max((_d = options === null || options === void 0 ? void 0 : options.minHeight) !== null && _d !== void 0 ? _d : 150, Math.min(height, maxHeight));
         $element.css({
             width: newWidth + 'px',
-            height: newHeight + 'px'
+            height: newHeight + 'px',
         });
     }
     function stopResize() {
         $(document).off('mousemove.resizer');
         $(document).off('mouseup.resizer');
         // Save the size to localStorage
-        if (typeof $ !== 'undefined' && typeof $.fn.outerWidth === 'function' && typeof $.fn.outerHeight === 'function') {
+        if (typeof $ !== 'undefined' &&
+            typeof $.fn.outerWidth === 'function' &&
+            typeof $.fn.outerHeight === 'function') {
             const width = $element.outerWidth();
             const height = $element.outerHeight();
             if (width !== undefined && height !== undefined) {
                 const size = {
                     width: parseFloat(width.toString()),
-                    height: parseFloat(height.toString())
+                    height: parseFloat(height.toString()),
                 };
                 localStorage.setItem(`outfitPanel_${storageKey}_size`, JSON.stringify(size));
             }
@@ -163,7 +167,7 @@ export function resizeElement(element, storageKey, options) {
         const size = JSON.parse(savedSize);
         $element.css({
             width: size.width + 'px',
-            height: size.height + 'px'
+            height: size.height + 'px',
         });
     }
     // Create a resize handle

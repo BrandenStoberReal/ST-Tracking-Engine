@@ -151,12 +151,12 @@ class OutfitStore {
     subscribe(listener: (state: State) => void): () => void {
         this.state.listeners.push(listener);
         return () => {
-            this.state.listeners = this.state.listeners.filter(l => l !== listener);
+            this.state.listeners = this.state.listeners.filter((l) => l !== listener);
         };
     }
 
     notifyListeners(): void {
-        this.state.listeners.forEach(listener => {
+        this.state.listeners.forEach((listener) => {
             try {
                 listener(this.state);
             } catch (error) {
@@ -199,7 +199,7 @@ class OutfitStore {
             extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
                 instanceId: instanceId,
                 instanceType: 'bot',
-                characterId: characterId
+                characterId: characterId,
             });
         }
 
@@ -210,7 +210,7 @@ class OutfitStore {
         this.state.botInstances[characterId][instanceId] = {
             bot: {...outfitData},
             user: this.state.botInstances[characterId][instanceId].user || {},
-            promptInjectionEnabled
+            promptInjectionEnabled,
         };
         this.notifyListeners();
     }
@@ -229,7 +229,11 @@ class OutfitStore {
         const existingInstanceData = this.state.userInstances[instanceId];
         let promptInjectionEnabled: boolean | undefined;
 
-        if (existingInstanceData && typeof existingInstanceData === 'object' && 'promptInjectionEnabled' in existingInstanceData) {
+        if (
+            existingInstanceData &&
+            typeof existingInstanceData === 'object' &&
+            'promptInjectionEnabled' in existingInstanceData
+        ) {
             promptInjectionEnabled = existingInstanceData.promptInjectionEnabled as boolean | undefined;
         }
 
@@ -240,7 +244,7 @@ class OutfitStore {
         }
 
         this.state.userInstances[instanceId] = updatedInstanceData as { [key: string]: string | boolean } & {
-            promptInjectionEnabled?: boolean
+            promptInjectionEnabled?: boolean;
         };
 
         if (instanceCreated) {
@@ -248,23 +252,30 @@ class OutfitStore {
             extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
                 instanceId: instanceId,
                 instanceType: 'user',
-                characterId: 'user'
+                characterId: 'user',
             });
         }
 
         this.notifyListeners();
     }
 
-    getPresets(characterId: string, instanceId: string): {
-        bot: { [presetName: string]: OutfitData },
-        user: { [presetName: string]: OutfitData }
+    getPresets(
+        characterId: string,
+        instanceId: string
+    ): {
+        bot: { [presetName: string]: OutfitData };
+        user: { [presetName: string]: OutfitData };
     } {
         // Check if characterId or instanceId are undefined/null to prevent errors
         if (!characterId || !instanceId) {
-            debugLog(`[OutfitStore] getPresets called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
+            debugLog(
+                `[OutfitStore] getPresets called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`,
+                null,
+                'warn'
+            );
             return {
                 bot: {},
-                user: deepClone(this.state.presets.user[instanceId || 'default'] || {})
+                user: deepClone(this.state.presets.user[instanceId || 'default'] || {}),
             };
         }
 
@@ -281,11 +292,21 @@ class OutfitStore {
         };
     }
 
-    savePreset(characterId: string, instanceId: string, presetName: string, outfitData: OutfitData, type: 'bot' | 'user' = 'bot'): void {
+    savePreset(
+        characterId: string,
+        instanceId: string,
+        presetName: string,
+        outfitData: OutfitData,
+        type: 'bot' | 'user' = 'bot'
+    ): void {
         if (type === 'bot') {
             // Check if characterId or instanceId are undefined/null to prevent errors
             if (!characterId || !instanceId) {
-                debugLog(`[OutfitStore] savePreset called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
+                debugLog(
+                    `[OutfitStore] savePreset called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`,
+                    null,
+                    'warn'
+                );
                 return;
             }
 
@@ -314,7 +335,11 @@ class OutfitStore {
         if (type === 'bot') {
             // Check if characterId or instanceId are undefined/null to prevent errors
             if (!characterId || !instanceId) {
-                debugLog(`[OutfitStore] deletePreset called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
+                debugLog(
+                    `[OutfitStore] deletePreset called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`,
+                    null,
+                    'warn'
+                );
                 return;
             }
 
@@ -347,7 +372,11 @@ class OutfitStore {
         if (type === 'bot') {
             // Check if characterId or instanceId are undefined/null to prevent errors
             if (!characterId || !instanceId) {
-                debugLog(`[OutfitStore] deleteAllPresetsForCharacter called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
+                debugLog(
+                    `[OutfitStore] deleteAllPresetsForCharacter called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`,
+                    null,
+                    'warn'
+                );
                 return;
             }
 
@@ -370,13 +399,21 @@ class OutfitStore {
         this.notifyListeners();
     }
 
-    getAllPresets(characterId: string, instanceId: string, type: 'bot' | 'user' = 'bot'): {
-        [presetName: string]: OutfitData
+    getAllPresets(
+        characterId: string,
+        instanceId: string,
+        type: 'bot' | 'user' = 'bot'
+    ): {
+        [presetName: string]: OutfitData;
     } {
         if (type === 'bot') {
             // Check if characterId or instanceId are undefined/null to prevent errors
             if (!characterId || !instanceId) {
-                debugLog(`[OutfitStore] getAllPresets called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`, null, 'warn');
+                debugLog(
+                    `[OutfitStore] getAllPresets called with invalid parameters: characterId=${characterId}, instanceId=${instanceId}`,
+                    null,
+                    'warn'
+                );
                 return {};
             }
 
@@ -414,7 +451,7 @@ class OutfitStore {
         extensionEventBus.emit(EXTENSION_EVENTS.SETTINGS_CHANGED, {
             key: key,
             oldValue: oldValue,
-            newValue: value
+            newValue: value,
         });
     }
 
@@ -499,9 +536,11 @@ class OutfitStore {
         this.setState({botInstances, userInstances, presets, settings});
 
         // Emit an event when outfit data is loaded to allow UI refresh
-        import('../core/events').then(({extensionEventBus, EXTENSION_EVENTS}) => {
-            extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
-        }).catch(error => debugLog('Error in store operation', error, 'error'));
+        import('../core/events')
+            .then(({extensionEventBus, EXTENSION_EVENTS}) => {
+                extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
+            })
+            .catch((error) => debugLog('Error in store operation', error, 'error'));
     }
 
     flush(): void {
@@ -566,7 +605,7 @@ class OutfitStore {
                 extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_DELETED, {
                     instanceId: instanceId,
                     instanceType: instanceType,
-                    characterId: characterId
+                    characterId: characterId,
                 });
             }
         } else if (instanceType === 'user') {
@@ -576,7 +615,7 @@ class OutfitStore {
                 extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_DELETED, {
                     instanceId: instanceId,
                     instanceType: instanceType,
-                    characterId: 'user'
+                    characterId: 'user',
                 });
             }
         }
@@ -596,7 +635,7 @@ class OutfitStore {
         // Clear all presets
         this.state.presets = {
             bot: {},
-            user: {}
+            user: {},
         };
 
         this.notifyListeners();

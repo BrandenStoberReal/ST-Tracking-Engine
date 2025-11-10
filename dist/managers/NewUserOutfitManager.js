@@ -25,13 +25,13 @@ export class NewUserOutfitManager extends OutfitManager {
     loadOutfit() {
         if (!this.outfitInstanceId) {
             debugLog('[NewUserOutfitManager] Cannot load outfit - missing outfitInstanceId', null, 'debug');
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
             return;
         }
         const userOutfit = outfitStore.getUserOutfit(this.outfitInstanceId);
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             const value = userOutfit[slot] !== undefined ? userOutfit[slot] : 'None';
             this.currentValues[slot] = value;
         });
@@ -42,7 +42,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return;
         }
         const userOutfit = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             userOutfit[slot] = this.currentValues[slot] || 'None';
         });
         outfitStore.setUserOutfit(this.outfitInstanceId, userOutfit);
@@ -67,7 +67,7 @@ export class NewUserOutfitManager extends OutfitManager {
         }
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         const presetData = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             presetData[slot] = this.currentValues[slot];
         });
         outfitStore.savePreset('user', actualInstanceId, presetName, presetData, 'user');
@@ -78,7 +78,7 @@ export class NewUserOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: 'User',
             managerType: 'user',
-            presetData: presetData
+            presetData: presetData,
         });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Saved "${presetName}" outfit for user character (instance: ${actualInstanceId}).`;
@@ -114,7 +114,7 @@ export class NewUserOutfitManager extends OutfitManager {
                     instanceId: actualInstanceId,
                     presetName: presetName,
                     characterName: 'User',
-                    changed: true
+                    changed: true,
                 });
                 return `You changed into the "${presetName}" outfit (instance: ${actualInstanceId}).`;
             }
@@ -141,7 +141,7 @@ export class NewUserOutfitManager extends OutfitManager {
             instanceId: actualInstanceId,
             presetName: presetName,
             characterName: 'User',
-            managerType: 'user'
+            managerType: 'user',
         });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Deleted your "${presetName}" outfit for instance ${actualInstanceId}.`;
@@ -200,7 +200,7 @@ export class NewUserOutfitManager extends OutfitManager {
                     characterName: 'User',
                     managerType: 'user',
                     source: 'legacy',
-                    changed: true
+                    changed: true,
                 });
                 return `You changed into your default outfit (instance: ${actualInstanceId}).`;
             }
@@ -222,7 +222,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] Preset "${presetName}" does not exist for user (instance: ${actualInstanceId}). Cannot overwrite.`;
         }
         const presetData = {};
-        this.slots.forEach(slot => {
+        this.slots.forEach((slot) => {
             presetData[slot] = this.currentValues[slot];
         });
         outfitStore.savePreset('user', actualInstanceId, presetName, presetData, 'user');
@@ -233,7 +233,7 @@ export class NewUserOutfitManager extends OutfitManager {
             presetName: presetName,
             characterName: 'User',
             managerType: 'user',
-            presetData: presetData
+            presetData: presetData,
         });
         if (outfitStore.getSetting('enableSysMessages')) {
             return `Overwrote your "${presetName}" outfit (instance: ${actualInstanceId}).`;
@@ -265,8 +265,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return true;
         }
         const instanceData = outfitStore.state.userInstances[actualInstanceId];
-        return (instanceData === null || instanceData === void 0 ? void 0 : instanceData.promptInjectionEnabled) !== undefined ?
-            instanceData.promptInjectionEnabled : true;
+        return (instanceData === null || instanceData === void 0 ? void 0 : instanceData.promptInjectionEnabled) !== undefined ? instanceData.promptInjectionEnabled : true;
     }
     hasDefaultOutfit(instanceId = null) {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
@@ -313,7 +312,7 @@ export class NewUserOutfitManager extends OutfitManager {
                 presetName: presetName,
                 characterName: 'User',
                 managerType: 'user',
-                embedded: false
+                embedded: false,
             });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Set "${presetName}" as your default outfit (instance: ${actualInstanceId}).`;
@@ -343,7 +342,7 @@ export class NewUserOutfitManager extends OutfitManager {
                 characterId: 'user',
                 instanceId: actualInstanceId,
                 characterName: 'User',
-                managerType: 'user'
+                managerType: 'user',
             });
             if (outfitStore.getSetting('enableSysMessages')) {
                 return `Default outfit cleared for user (instance: ${actualInstanceId}).`;
@@ -355,7 +354,7 @@ export class NewUserOutfitManager extends OutfitManager {
         if (!instanceId) {
             debugLog('[NewUserOutfitManager] Cannot load outfit - missing instanceId', null, 'debug');
             const defaultOutfit = {};
-            this.slots.forEach(slot => {
+            this.slots.forEach((slot) => {
                 defaultOutfit[slot] = 'None';
             });
             return defaultOutfit;

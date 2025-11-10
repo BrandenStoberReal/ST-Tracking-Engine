@@ -129,7 +129,11 @@ export class LLMUtility {
         return __awaiter(this, arguments, void 0, function* (prompt, systemPrompt = 'You are an AI assistant.', context = null, maxRetries = 3) {
             var _a;
             if (!context) {
-                context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
             }
             let attempt = 0;
             while (attempt < maxRetries) {
@@ -169,7 +173,11 @@ export class LLMUtility {
         return __awaiter(this, arguments, void 0, function* (prompt, systemPrompt = 'You are an AI assistant.', context = null, profile = null, maxRetries = 3) {
             var _a, _b;
             if (!context) {
-                context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+                context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                    ? window.SillyTavern.getContext()
+                    : window.getContext
+                        ? window.getContext()
+                        : null;
             }
             // If no profile specified, use the default generation method
             if (!profile) {

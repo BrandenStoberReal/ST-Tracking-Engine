@@ -26,7 +26,7 @@ export const CharacterInfoType = {
     CharacterId: 'CharCharacterId',
 } as const;
 
-export type CharacterInfoType = typeof CharacterInfoType[keyof typeof CharacterInfoType];
+export type CharacterInfoType = (typeof CharacterInfoType)[keyof typeof CharacterInfoType];
 
 /**
  * Get character information by character ID
@@ -36,7 +36,11 @@ export type CharacterInfoType = typeof CharacterInfoType[keyof typeof CharacterI
  */
 export function getCharacterInfoById(charId: string, infoType: CharacterInfoType): any | null {
     try {
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.characters) {
             const character = context.characters[charId];
@@ -121,7 +125,11 @@ export function getCharacterInfoById(charId: string, infoType: CharacterInfoType
             }
         }
 
-        debugLog(`Resolving character information (${infoType}) from ID failed. Returning null. Faulty ID: ${charId}`, null, 'error');
+        debugLog(
+            `Resolving character information (${infoType}) from ID failed. Returning null. Faulty ID: ${charId}`,
+            null,
+            'error'
+        );
         return null;
     } catch (error) {
         debugLog('Error getting character info by ID:', error, 'error');
@@ -134,7 +142,11 @@ export function getCharacterInfoById(charId: string, infoType: CharacterInfoType
  * @returns {any[]|null} The list of character objects or null if not found
  */
 export function getCharacters(): any[] | null {
-    const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+    const context = window.SillyTavern?.getContext
+        ? window.SillyTavern.getContext()
+        : window.getContext
+            ? window.getContext()
+            : null;
 
     if (context && context.characters) {
         debugLog('Character array fetched successfully.', null, 'info');
@@ -169,7 +181,11 @@ export function getCharacterIdByObject(char_object: any): number | null {
  */
 export async function getCharacterUniqueIdByIndex(charId: string): Promise<string | null> {
     try {
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.characters) {
             const character = context.characters[charId];
@@ -199,7 +215,11 @@ export async function getCurrentCharacterUniqueId(): Promise<string | null> {
         }
 
         // Fallback to old system
-        const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : (window.getContext ? window.getContext() : null);
+        const context = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+                ? window.getContext()
+                : null;
 
         if (context && context.characterId !== undefined && context.characterId !== null) {
             return await getCharacterUniqueIdByIndex(context.characterId.toString());

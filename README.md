@@ -347,11 +347,108 @@ ST-Outfits/
 
 ### Development Setup
 
-1. Clone the repository to your SillyTavern extensions directory
-2. Install dependencies: `npm install`
-3. Make changes to the source files in the `/src` directory
-4. Build the project: `npm run build`
-5. Use `npm test` to run tests
+#### Prerequisites
+
+- Node.js 18.x or 20.x
+- npm (comes with Node.js)
+- SillyTavern installation for testing
+
+#### Quick Start
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/BrandenStoberReal/ST-Outfits-Extended.git
+   cd ST-Outfits-Extended
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run quality checks:
+   ```bash
+   npm run typecheck  # TypeScript validation
+   npm run lint       # Code linting
+   npm test          # Run tests
+   ```
+
+4. Build the project:
+   ```bash
+   npm run build
+   ```
+
+#### Development Workflow
+
+1. **Make Changes**: Edit files in the `/src` directory
+2. **Check Quality**:
+   ```bash
+   npm run typecheck    # Ensure no type errors
+   npm run lint:fix     # Auto-fix linting issues
+   npm run format       # Format code
+   ```
+3. **Test Changes**:
+   ```bash
+   npm test             # Run all tests
+   npm run test:watch   # Run tests in watch mode
+   ```
+4. **Build and Test**:
+   ```bash
+   npm run build        # Build the extension
+   ```
+
+#### Available Scripts
+
+- `npm run build` - Compile TypeScript and prepare extension
+- `npm run clean` - Remove build artifacts and coverage
+- `npm run typecheck` - Run TypeScript type checking
+- `npm run lint` - Check code style with ESLint
+- `npm run lint:fix` - Auto-fix ESLint issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check if code is formatted
+- `npm test` - Run Jest tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+
+#### Testing in SillyTavern
+
+1. Copy the built extension to your SillyTavern extensions directory
+2. Restart SillyTavern
+3. Enable the extension in the Extensions tab
+4. Test your changes
+
+#### Troubleshooting
+
+**Build Errors**
+
+- Ensure Node.js version is 18.x or 20.x
+- Clear node_modules: `rm -rf node_modules && npm install`
+- Check TypeScript errors: `npm run typecheck`
+
+**Test Failures**
+
+- Run tests individually: `npx jest tests/specific-test.test.ts`
+- Check test setup in `tests/setup.ts`
+- Ensure jsdom environment is working
+
+**Linting Issues**
+
+- Auto-fix: `npm run lint:fix`
+- Check ESLint config in `.eslintrc.js`
+- Format code: `npm run format`
+
+**Extension Not Loading**
+
+- Verify build output in `dist/` directory
+- Check browser console for errors
+- Ensure manifest.json is valid
+- Confirm SillyTavern version compatibility
+
+**Performance Issues**
+
+- Run build with clean: `npm run clean && npm run build`
+- Check bundle size in `dist/`
+- Profile with browser dev tools
 
 See [AGENTS.md](AGENTS.md) for detailed coding guidelines, build commands, and project conventions.
 
