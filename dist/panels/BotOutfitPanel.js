@@ -79,8 +79,10 @@ export class BotOutfitPanel {
         tabs.forEach((tab) => {
             tab.addEventListener('click', (event) => {
                 const tabName = event.target.dataset.tab;
-                this.currentTab = tabName;
-                this.renderContent();
+                if (tabName) {
+                    this.currentTab = tabName;
+                    this.renderContent();
+                }
                 tabs.forEach((t) => t.classList.remove('active'));
                 event.target.classList.add('active');
             });
@@ -190,6 +192,7 @@ export class BotOutfitPanel {
     renderSlots(slots, container) {
         const outfitData = this.outfitManager.getOutfitData(slots);
         outfitData.forEach((slot) => {
+            var _a;
             const slotElement = document.createElement('div');
             slotElement.className = 'outfit-slot';
             slotElement.dataset.slot = slot.name;
@@ -200,7 +203,7 @@ export class BotOutfitPanel {
                     <button class="slot-change">Change</button>
                 </div>
             `;
-            slotElement.querySelector('.slot-change').addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+            (_a = slotElement.querySelector('.slot-change')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 const message = yield this.outfitManager.changeOutfitItem(slot.name);
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
@@ -226,6 +229,7 @@ export class BotOutfitPanel {
         else {
             // Show all presets including the default one
             presets.forEach((preset) => {
+                var _a, _b, _c, _d;
                 const isDefault = defaultPresetName === preset;
                 const presetElement = document.createElement('div');
                 presetElement.className = `outfit-preset ${isDefault ? 'default-preset-highlight' : ''}`;
@@ -238,7 +242,7 @@ export class BotOutfitPanel {
                         <button class="delete-preset" data-preset="${preset}">×</button>
                     </div>
                 `;
-                presetElement.querySelector('.load-preset').addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                (_a = presetElement.querySelector('.load-preset')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                     const message = yield this.outfitManager.loadPreset(preset);
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
@@ -246,7 +250,7 @@ export class BotOutfitPanel {
                     this.saveSettingsDebounced();
                     this.renderContent();
                 }));
-                presetElement.querySelector('.set-default-preset').addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                (_b = presetElement.querySelector('.set-default-preset')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                     const message = yield this.outfitManager.setPresetAsDefault(preset);
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
@@ -254,7 +258,7 @@ export class BotOutfitPanel {
                     this.saveSettingsDebounced();
                     this.renderContent();
                 }));
-                presetElement.querySelector('.delete-preset').addEventListener('click', () => {
+                (_c = presetElement.querySelector('.delete-preset')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
                     if (confirm(`Delete "${preset}" outfit?`)) {
                         const message = this.outfitManager.deletePreset(preset);
                         if (message && areSystemMessagesEnabled()) {
@@ -264,7 +268,7 @@ export class BotOutfitPanel {
                         this.renderContent();
                     }
                 });
-                presetElement.querySelector('.overwrite-preset').addEventListener('click', () => {
+                (_d = presetElement.querySelector('.overwrite-preset')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => {
                     // Confirmation dialog to confirm overwriting the preset
                     if (confirm(`Overwrite "${preset}" with current outfit?`)) {
                         const message = this.outfitManager.overwritePreset(preset);
@@ -592,12 +596,14 @@ export class BotOutfitPanel {
             dragElementWithSave(this.domElement, 'bot-outfit-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement(this.domElement, 'bot-outfit-panel', {
-                    minWidth: 250,
-                    minHeight: 200,
-                    maxWidth: 600,
-                    maxHeight: 800,
-                });
+                if (this.domElement) {
+                    resizeElement(this.domElement, 'bot-outfit-panel', {
+                        minWidth: 250,
+                        minHeight: 200,
+                        maxWidth: 600,
+                        maxHeight: 800,
+                    });
+                }
             }, 10); // Small delay to ensure panel is rendered first
             (_a = this.domElement.querySelector('#bot-outfit-refresh')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
                 const outfitInstanceId = this.outfitManager.getOutfitInstanceId();

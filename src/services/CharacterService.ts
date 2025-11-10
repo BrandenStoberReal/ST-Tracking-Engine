@@ -38,7 +38,8 @@ function refreshMacroProcessing() {
                     if (message && message.mes && typeof message.mes === 'string') {
                         const originalMes = message.mes;
 
-                        message.mes = (window as any).customMacroSystem!.replaceMacrosInText(message.mes);
+                        message.mes =
+                            (window as any).customMacroSystem?.replaceMacrosInText(message.mes) ?? message.mes;
                         if (originalMes !== message.mes) {
                             const textElement = messageElement.querySelector('.mes_text');
 

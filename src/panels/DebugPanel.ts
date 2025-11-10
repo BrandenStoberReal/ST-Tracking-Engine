@@ -150,7 +150,9 @@ export class DebugPanel {
             dragElementWithSave(this.domElement, 'outfit-debug-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement(this.domElement!, 'outfit-debug-panel');
+                if (this.domElement) {
+                    resizeElement(this.domElement, 'outfit-debug-panel');
+                }
             }, 10); // Small delay to ensure panel is rendered first
 
             this.domElement.querySelector('#outfit-debug-close')?.addEventListener('click', () => this.hide());
@@ -1740,7 +1742,7 @@ export class DebugPanel {
             if (!groups.has(key)) {
                 groups.set(key, []);
             }
-            groups.get(key)!.push(log);
+            groups.get(key)?.push(log);
         }
 
         // Convert to array of groups, keeping only the most recent log for each group

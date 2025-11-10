@@ -115,7 +115,9 @@ export class DebugPanel {
             dragElementWithSave(this.domElement, 'outfit-debug-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement(this.domElement, 'outfit-debug-panel');
+                if (this.domElement) {
+                    resizeElement(this.domElement, 'outfit-debug-panel');
+                }
             }, 10); // Small delay to ensure panel is rendered first
             (_a = this.domElement.querySelector('#outfit-debug-close')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => this.hide());
         }
@@ -1503,6 +1505,7 @@ export class DebugPanel {
      * Groups logs with the same message and data together
      */
     groupSimilarLogs(logs) {
+        var _a;
         const groups = new Map();
         for (const log of logs) {
             // Create a key based on message and data
@@ -1511,7 +1514,7 @@ export class DebugPanel {
             if (!groups.has(key)) {
                 groups.set(key, []);
             }
-            groups.get(key).push(log);
+            (_a = groups.get(key)) === null || _a === void 0 ? void 0 : _a.push(log);
         }
         // Convert to array of groups, keeping only the most recent log for each group
         return Array.from(groups.values()).map((logsInGroup) => ({

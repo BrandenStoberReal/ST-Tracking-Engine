@@ -32,7 +32,7 @@ function refreshMacroProcessing() {
             if (context && context.chat) {
                 const visibleMessages = Array.from(document.querySelectorAll('#chat .mes'));
                 visibleMessages.forEach((messageElement) => {
-                    var _a;
+                    var _a, _b, _c;
                     // Add null check for parentElement
                     if (!messageElement.parentElement)
                         return;
@@ -40,7 +40,8 @@ function refreshMacroProcessing() {
                     const message = (_a = context.chat) === null || _a === void 0 ? void 0 : _a[messageIndex];
                     if (message && message.mes && typeof message.mes === 'string') {
                         const originalMes = message.mes;
-                        message.mes = window.customMacroSystem.replaceMacrosInText(message.mes);
+                        message.mes =
+                            (_c = (_b = window.customMacroSystem) === null || _b === void 0 ? void 0 : _b.replaceMacrosInText(message.mes)) !== null && _c !== void 0 ? _c : message.mes;
                         if (originalMes !== message.mes) {
                             const textElement = messageElement.querySelector('.mes_text');
                             if (textElement) {
