@@ -2,6 +2,7 @@ import {generateInstanceIdFromText} from '../utils/utilities';
 import {outfitStore} from '../common/Store';
 import {ALL_SLOTS} from '../config/constants';
 import {debugLog} from '../logging/DebugLogger';
+import type {Character, ChatMessage, InstanceData, STContext} from '../types';
 
 class MacroProcessor {
     allSlots: string[];
@@ -21,7 +22,7 @@ class MacroProcessor {
         this.textProcessingCache.clear();
     }
 
-    async processMacrosInFirstMessage(context?: SillyTavernContext): Promise<void> {
+    async processMacrosInFirstMessage(context?: STContext): Promise<void> {
         try {
             const ctx =
                 context ||
@@ -35,7 +36,7 @@ class MacroProcessor {
                 return;
             }
 
-            const firstBotMessage = ctx.chat.find((message: any) => !message.is_user && !message.is_system);
+            const firstBotMessage = ctx.chat.find((message: ChatMessage) => !message.is_user && !message.is_system);
 
             if (firstBotMessage) {
                 // Get the unique character ID for outfit lookups
@@ -50,19 +51,19 @@ class MacroProcessor {
                 // Fallback: try to find character by name and get their unique ID
                 if (!uniqueCharacterId && firstBotMessage.name) {
                     if (ctx.characters && Array.isArray(ctx.characters)) {
-                        const character = ctx.characters.find((char: any) => char?.name === firstBotMessage.name);
+                        const character = ctx.characters.find((char: Character) => char?.name === firstBotMessage.name);
                         if (character) {
                             // Get the unique ID from the character's extensions
-                            uniqueCharacterId = character.data?.extensions?.character_id;
+                            uniqueCharacterId = (character.data as any)?.extensions?.character_id;
                         }
                     }
                 }
 
                 // Additional fallback: try to get unique ID from current character index
-                if (!uniqueCharacterId && ctx.characterId !== undefined && ctx.characterId !== null) {
+                if (!uniqueCharacterId && ctx.characterId !== undefined && ctx.characterId !== null && ctx.characters) {
                     const character = ctx.characters[ctx.characterId];
                     if (character) {
-                        uniqueCharacterId = character.data?.extensions?.character_id;
+                        uniqueCharacterId = (character.data as any)?.extensions?.character_id;
                     }
                 }
 
@@ -158,7 +159,7 @@ class MacroProcessor {
                 '[OutfitTracker] Found bot instances for character:',
                 Object.keys(state.botInstances[uniqueCharacterId])
             );
-            Object.values(state.botInstances[uniqueCharacterId]).forEach((instanceData) => {
+            Object.values(state.botInstances[uniqueCharacterId]).forEach((instanceData: InstanceData) => {
                 if (instanceData && instanceData.bot) {
                     Object.values(instanceData.bot).forEach((value) => {
                         if (value !== undefined && value !== null && typeof value === 'string') {

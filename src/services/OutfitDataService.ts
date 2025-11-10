@@ -2,6 +2,7 @@ import {ALL_SLOTS} from '../config/constants';
 import {DataManager} from '../managers/DataManager';
 import {outfitStore} from '../common/Store';
 import {debugLog} from '../logging/DebugLogger';
+import {FullOutfitData} from '../types';
 
 class OutfitDataService {
     dataManager: DataManager;
@@ -12,20 +13,23 @@ class OutfitDataService {
 
     clearGlobalOutfitVariables(): void {
         try {
-            const extensionSettings = this.dataManager.load();
+            const extensionSettings = this.dataManager.load() as FullOutfitData | null;
 
-            if (extensionSettings?.variables?.global) {
-                const globalVars = extensionSettings.variables.global;
-                const outfitVars = Object.keys(globalVars).filter((key) =>
-                    ALL_SLOTS.some((slot) => key.endsWith(`_${slot}`))
-                );
+            if (extensionSettings?.variables && typeof extensionSettings.variables === 'object') {
+                const variables = extensionSettings.variables as Record<string, unknown>;
+                if (variables.global && typeof variables.global === 'object') {
+                    const globalVars = variables.global as Record<string, unknown>;
+                    const outfitVars = Object.keys(globalVars).filter((key) =>
+                        ALL_SLOTS.some((slot) => key.endsWith(`_${slot}`))
+                    );
 
-                outfitVars.forEach((key) => {
-                    delete globalVars[key];
-                });
+                    outfitVars.forEach((key) => {
+                        delete globalVars[key];
+                    });
 
-                this.dataManager.save({ variables: { global: globalVars } });
-                debugLog(`[OutfitTracker] Removed ${outfitVars.length} outfit-related global variables`);
+                    this.dataManager.save({ variables: { global: globalVars } });
+                    debugLog(`[OutfitTracker] Removed ${outfitVars.length} outfit-related global variables`);
+                }
             }
         } catch (error) {
             debugLog('[OutfitTracker] Error clearing global outfit variables:', error, 'error');

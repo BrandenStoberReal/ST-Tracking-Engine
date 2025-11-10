@@ -4,9 +4,9 @@ import { debugLog } from '../logging/DebugLogger.js';
  */
 /**
  * Safely get a setting value from various possible sources
- * @param {string} key - The setting key to retrieve
- * @param {*} defaultValue - The default value to return if the setting is not found
- * @returns {*} The value of the setting or the default value
+ * @param key - The setting key to retrieve
+ * @param defaultValue - The default value to return if the setting is not found
+ * @returns The value of the setting or the default value
  */
 export function getSettingValue(key, defaultValue = undefined) {
     var _a, _b, _c, _d, _e;
@@ -42,5 +42,5 @@ export function getSettingValue(key, defaultValue = undefined) {
  * @returns {boolean} True if system messages are enabled, false otherwise
  */
 export function areSystemMessagesEnabled() {
-    return getSettingValue('enableSysMessages', false);
+    return Boolean(getSettingValue('enableSysMessages', false));
 }

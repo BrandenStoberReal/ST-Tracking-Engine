@@ -21,10 +21,10 @@ import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 export class UserOutfitPanel {
     /**
      * Creates a new UserOutfitPanel instance
-     * @param {object} outfitManager - The outfit manager for the user character
-     * @param {Array<string>} clothingSlots - Array of clothing slot names
-     * @param {Array<string>} accessorySlots - Array of accessory slot names
-     * @param {Function} saveSettingsDebounced - Debounced function to save settings
+     * @param outfitManager - The outfit manager for the user character
+     * @param clothingSlots - Array of clothing slot names
+     * @param accessorySlots - Array of accessory slot names
+     * @param saveSettingsDebounced - Debounced function to save settings
      */
     constructor(outfitManager, clothingSlots, accessorySlots, saveSettingsDebounced) {
         this.outfitManager = outfitManager;
@@ -330,7 +330,7 @@ export class UserOutfitPanel {
             dragElementWithSave(this.domElement, 'user-outfit-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement($(this.domElement), 'user-outfit-panel', {
+                resizeElement(this.domElement, 'user-outfit-panel', {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
@@ -477,7 +477,7 @@ export class UserOutfitPanel {
     cleanupDynamicRefresh() {
         // Unsubscribe from store changes
         if (this.outfitSubscription) {
-            this.outfitSubscription();
+            this.outfitSubscription.unsubscribe();
             this.outfitSubscription = null;
         }
         // Remove event listeners
@@ -543,5 +543,23 @@ export class UserOutfitPanel {
         }
         // Convert to positive and return 8-character string representation
         return Math.abs(hash).toString(36).substring(0, 8).padEnd(8, '0');
+    }
+    /**
+     * Gets the current outfit data
+     * @returns {SlotOutfitData} The current outfit data
+     */
+    getCurrentOutfit() {
+        return Object.assign({}, this.outfitManager.currentValues);
+    }
+    /**
+     * Updates the outfit with new data
+     * @param {SlotOutfitData} outfit - The new outfit data
+     */
+    updateOutfit(outfit) {
+        Object.entries(outfit).forEach(([slot, item]) => {
+            if (this.outfitManager.slots.includes(slot)) {
+                this.outfitManager.setOutfitItem(slot, item);
+            }
+        });
     }
 }

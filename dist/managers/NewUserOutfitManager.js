@@ -251,7 +251,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return;
         }
         if (!outfitStore.state.userInstances[actualInstanceId]) {
-            outfitStore.state.userInstances[actualInstanceId] = {};
+            outfitStore.state.userInstances[actualInstanceId] = { bot: {}, user: {} };
         }
         const updatedInstanceData = Object.assign(Object.assign({}, outfitStore.state.userInstances[actualInstanceId]), { promptInjectionEnabled: Boolean(enabled) });
         outfitStore.state.userInstances[actualInstanceId] = updatedInstanceData;

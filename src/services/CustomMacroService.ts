@@ -575,7 +575,7 @@ export const invalidateSpecificMacroCaches = (
     instanceId: string,
     slotName: string
 ): void => {
-    for (const [key, _entry] of customMacroSystem.macroValueCache.entries()) {
+    for (const [key] of customMacroSystem.macroValueCache.entries()) {
         if (key.includes(characterId) && key.includes(instanceId) && key.includes(slotName)) {
             customMacroSystem.macroValueCache.delete(key);
         }

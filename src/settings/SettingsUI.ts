@@ -1,26 +1,9 @@
 import {outfitStore} from '../common/Store';
 import {debugLog} from '../logging/DebugLogger';
-
-interface IDummyAutoOutfitSystem {
-    name: string;
-}
+import {IDummyAutoOutfitSystem} from '../types';
 
 declare const $: any;
 declare const toastr: any;
-
-declare global {
-    interface Window {
-        getOutfitExtensionStatus: any;
-        botOutfitPanel: any;
-        userOutfitPanel: any;
-        outfitTracker: any;
-        wipeAllOutfits: any;
-        outfitDebugPanel: any;
-        SillyTavern: any;
-        getContext: any;
-        saveSettingsDebounced: any;
-    }
-}
 
 export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoOutfitSystem: any, context: any) {
     const MODULE_NAME = 'outfit_tracker';
@@ -1188,7 +1171,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 outfitStore.setSetting('autoOutfitPrompt', settings[MODULE_NAME].autoOutfitPrompt);
             }
 
-            if (currentSettings?.enableSysMessages) {
+            if (currentSettings?.enableSysMessages && window.botOutfitPanel?.sendSystemMessage) {
                 window.botOutfitPanel.sendSystemMessage(message);
             } else {
                 toastr.info(message);

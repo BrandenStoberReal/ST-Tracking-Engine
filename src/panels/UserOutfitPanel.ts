@@ -4,10 +4,15 @@ import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
 import {outfitStore} from '../common/Store';
 import {debugLog} from '../logging/DebugLogger';
 import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
-
-declare const window: any;
-declare const toastr: any;
-declare const $: any;
+import {
+    ChatMessage,
+    OutfitManager,
+    OutfitSlotData,
+    OutfitStoreState,
+    OutfitSubscription,
+    SaveSettingsFunction,
+    SlotOutfitData,
+} from '../types';
 
 /**
  * UserOutfitPanel - Manages the UI for the user character's outfit tracking
@@ -15,7 +20,7 @@ declare const $: any;
  * the user character's outfit, including clothing, accessories, and saved presets
  */
 export class UserOutfitPanel {
-    outfitManager: any;
+    outfitManager: OutfitManager;
     clothingSlots: string[];
     accessorySlots: string[];
     isVisible: boolean;
@@ -23,18 +28,23 @@ export class UserOutfitPanel {
     currentTab: string;
     currentPresetCategory: string;
     presetCategories: string[];
-    saveSettingsDebounced: any;
-    eventListeners: any[];
-    outfitSubscription: any;
+    saveSettingsDebounced: SaveSettingsFunction;
+    eventListeners: (() => void)[];
+    outfitSubscription: OutfitSubscription | null;
 
     /**
      * Creates a new UserOutfitPanel instance
-     * @param {object} outfitManager - The outfit manager for the user character
-     * @param {Array<string>} clothingSlots - Array of clothing slot names
-     * @param {Array<string>} accessorySlots - Array of accessory slot names
-     * @param {Function} saveSettingsDebounced - Debounced function to save settings
+     * @param outfitManager - The outfit manager for the user character
+     * @param clothingSlots - Array of clothing slot names
+     * @param accessorySlots - Array of accessory slot names
+     * @param saveSettingsDebounced - Debounced function to save settings
      */
-    constructor(outfitManager: any, clothingSlots: string[], accessorySlots: string[], saveSettingsDebounced: any) {
+    constructor(
+        outfitManager: OutfitManager,
+        clothingSlots: string[],
+        accessorySlots: string[],
+        saveSettingsDebounced: SaveSettingsFunction
+    ) {
         this.outfitManager = outfitManager;
         this.clothingSlots = clothingSlots;
         this.accessorySlots = accessorySlots;
@@ -117,7 +127,7 @@ export class UserOutfitPanel {
 
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
-                const aiMessages = context.chat.filter((msg: any) => !msg.is_user && !msg.is_system);
+                const aiMessages = context.chat.filter((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
                 if (aiMessages.length > 0) {
                     const firstMessage = aiMessages[0];
@@ -196,7 +206,7 @@ export class UserOutfitPanel {
     renderSlots(slots: string[], container: HTMLElement): void {
         const outfitData = this.outfitManager.getOutfitData(slots);
 
-        outfitData.forEach((slot: any) => {
+        outfitData.forEach((slot: OutfitSlotData) => {
             const slotElement = document.createElement('div');
 
             slotElement.className = 'outfit-slot';
@@ -401,7 +411,7 @@ export class UserOutfitPanel {
             dragElementWithSave(this.domElement, 'user-outfit-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement($(this.domElement), 'user-outfit-panel', {
+                resizeElement(this.domElement!, 'user-outfit-panel', {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
@@ -495,7 +505,7 @@ export class UserOutfitPanel {
         // Subscribe to store changes if we have access to the store
         if (window.outfitStore) {
             // Listen for changes in user outfit data
-            this.outfitSubscription = window.outfitStore.subscribe((state: any) => {
+            this.outfitSubscription = window.outfitStore.subscribe((state: OutfitStoreState) => {
                 // Check if this panel's outfit instance has changed
                 if (this.outfitManager.outfitInstanceId) {
                     const currentUserOutfit = state.userInstances[this.outfitManager.outfitInstanceId];
@@ -583,7 +593,7 @@ export class UserOutfitPanel {
     cleanupDynamicRefresh(): void {
         // Unsubscribe from store changes
         if (this.outfitSubscription) {
-            this.outfitSubscription();
+            this.outfitSubscription.unsubscribe();
             this.outfitSubscription = null;
         }
 
@@ -661,5 +671,25 @@ export class UserOutfitPanel {
 
         // Convert to positive and return 8-character string representation
         return Math.abs(hash).toString(36).substring(0, 8).padEnd(8, '0');
+    }
+
+    /**
+     * Gets the current outfit data
+     * @returns {SlotOutfitData} The current outfit data
+     */
+    getCurrentOutfit(): SlotOutfitData {
+        return { ...this.outfitManager.currentValues };
+    }
+
+    /**
+     * Updates the outfit with new data
+     * @param {SlotOutfitData} outfit - The new outfit data
+     */
+    updateOutfit(outfit: SlotOutfitData): void {
+        Object.entries(outfit).forEach(([slot, item]) => {
+            if (this.outfitManager.slots.includes(slot)) {
+                this.outfitManager.setOutfitItem(slot, item);
+            }
+        });
     }
 }

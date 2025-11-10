@@ -457,7 +457,7 @@ export const updateMacroCacheOnOutfitChange = (_outfitType, _characterId, _insta
     customMacroSystem.clearCache();
 };
 export const invalidateSpecificMacroCaches = (outfitType, characterId, instanceId, slotName) => {
-    for (const [key, _entry] of customMacroSystem.macroValueCache.entries()) {
+    for (const [key] of customMacroSystem.macroValueCache.entries()) {
         if (key.includes(characterId) && key.includes(instanceId) && key.includes(slotName)) {
             customMacroSystem.macroValueCache.delete(key);
         }

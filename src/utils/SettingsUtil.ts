@@ -6,11 +6,11 @@ import {debugLog} from '../logging/DebugLogger';
 
 /**
  * Safely get a setting value from various possible sources
- * @param {string} key - The setting key to retrieve
- * @param {*} defaultValue - The default value to return if the setting is not found
- * @returns {*} The value of the setting or the default value
+ * @param key - The setting key to retrieve
+ * @param defaultValue - The default value to return if the setting is not found
+ * @returns The value of the setting or the default value
  */
-export function getSettingValue(key: string, defaultValue: any = undefined): any {
+export function getSettingValue(key: string, defaultValue: unknown = undefined): unknown {
     try {
         // First try to get settings from the store
         if ((window as any).outfitStore && typeof (window as any).outfitStore.getSetting === 'function') {
@@ -46,5 +46,5 @@ export function getSettingValue(key: string, defaultValue: any = undefined): any
  * @returns {boolean} True if system messages are enabled, false otherwise
  */
 export function areSystemMessagesEnabled(): boolean {
-    return getSettingValue('enableSysMessages', false);
+    return Boolean(getSettingValue('enableSysMessages', false));
 }

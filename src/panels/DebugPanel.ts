@@ -4,8 +4,8 @@ import {customMacroSystem} from '../services/CustomMacroService';
 import {debugLogger} from '../logging/DebugLogger';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
 import {extensionEventBus} from '../core/events';
-
 import {getCharacterOutfitData} from '../services/CharacterOutfitService';
+import {LogEntry, OutfitStoreState} from '../types';
 
 interface OutfitData {
     [key: string]: string;
@@ -25,14 +25,17 @@ interface UserOutfit {
     outfit: OutfitData;
 }
 
-declare const toastr: any;
-declare const $: any;
+interface DebugEventListener {
+    element: Element;
+    event: string;
+    handler: EventListener;
+}
 
 export class DebugPanel {
     private isVisible: boolean = false;
     private domElement: HTMLElement | null = null;
     private currentTab: string = 'instances';
-    private eventListeners: any[] = [];
+    private eventListeners: DebugEventListener[] = [];
     private storeSubscription: (() => void) | null = null;
     private previousInstanceId: string | null = null;
     private realTimeUpdateInterval: number | null = null;
@@ -147,7 +150,7 @@ export class DebugPanel {
             dragElementWithSave(this.domElement, 'outfit-debug-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement($(this.domElement), 'outfit-debug-panel');
+                resizeElement(this.domElement!, 'outfit-debug-panel');
             }, 10); // Small delay to ensure panel is rendered first
 
             this.domElement.querySelector('#outfit-debug-close')?.addEventListener('click', () => this.hide());
@@ -1007,11 +1010,11 @@ export class DebugPanel {
      */
     private resetPanelPositions(): void {
         try {
-            if (window.botOutfitPanel) {
+            if (window.botOutfitPanel?.domElement) {
                 window.botOutfitPanel.domElement.style.top = '100px';
                 window.botOutfitPanel.domElement.style.left = '20px';
             }
-            if (window.userOutfitPanel) {
+            if (window.userOutfitPanel?.domElement) {
                 window.userOutfitPanel.domElement.style.top = '100px';
                 window.userOutfitPanel.domElement.style.right = '20px';
             }
@@ -1131,7 +1134,7 @@ export class DebugPanel {
             instancesHtml += '<p class="no-instances">No bot instances found</p>';
         } else {
             for (const [charId, charData] of Object.entries(botInstances)) {
-                const charName = getCharacterInfoById(charId, CharacterInfoType.Name);
+                const charName = String(getCharacterInfoById(charId, CharacterInfoType.Name) || 'Unknown');
 
                 instancesHtml += `<h5>Character: ${charName} (${charId})</h5>`;
                 for (const [instId, instData] of Object.entries(charData as any)) {
@@ -1508,7 +1511,7 @@ export class DebugPanel {
     /**
      * Gets detailed information about a reference
      */
-    private getReferenceDetails(key: string, value: any): string {
+    private getReferenceDetails(key: string, value: unknown): string {
         if (!value) return 'N/A';
 
         try {
@@ -1716,7 +1719,7 @@ export class DebugPanel {
     /**
      * Updates tabs that need real-time data based on store changes
      */
-    private updateRealTimeTabs(_newState: any): void {
+    private updateRealTimeTabs(_newState: OutfitStoreState): void {
         if (!this.isVisible) return;
 
         // Note: Real-time updates are handled by intervals in startRealTimeUpdates()
@@ -1726,7 +1729,7 @@ export class DebugPanel {
     /**
      * Groups logs with the same message and data together
      */
-    private groupSimilarLogs(logs: any[]): Array<{ logs: any[]; count: number }> {
+    private groupSimilarLogs(logs: LogEntry[]): Array<{ logs: LogEntry[]; count: number }> {
         const groups: Map<string, any[]> = new Map();
 
         for (const log of logs) {

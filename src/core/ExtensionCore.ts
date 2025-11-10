@@ -9,7 +9,15 @@ import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
 import {UserOutfitPanel} from '../panels/UserOutfitPanel';
 import {DebugPanel} from '../panels/DebugPanel';
 import {setupEventListeners} from '../services/EventService';
-import {registerOutfitCommands} from '../commands/OutfitCommands';
+import {
+    AutoOutfitSystemAPI,
+    AutoOutfitSystemConstructor,
+    ChatMessage,
+    EventService,
+    OutfitManager,
+    OutfitPanelAPI,
+    STContext,
+} from '../types';
 import {createSettingsUI} from '../settings/SettingsUI';
 import {initSettings} from '../settings/settings';
 import {ACCESSORY_SLOTS, ALL_SLOTS, CLOTHING_SLOTS} from '../config/constants';
@@ -19,9 +27,7 @@ import {OutfitDataService} from '../services/OutfitDataService';
 import {macroProcessor} from '../processors/MacroProcessor';
 import {debugLog} from '../logging/DebugLogger';
 
-declare const window: any;
-
-let AutoOutfitSystem: any;
+let AutoOutfitSystem: AutoOutfitSystemConstructor;
 
 /**
  * Loads the AutoOutfitSystem module dynamically.
@@ -39,7 +45,40 @@ async function loadAutoOutfitSystem(): Promise<void> {
     } catch (error) {
         debugLog('[OutfitTracker] Failed to load AutoOutfitSystem:', error, 'error');
         debugLog('Failed to load AutoOutfitSystem, using dummy class', error, 'error');
-        AutoOutfitSystem = class DummyAutoOutfitSystem {};
+        AutoOutfitSystem = class DummyAutoOutfitSystem implements AutoOutfitSystemAPI {
+            isEnabled = false;
+            systemPrompt = '';
+            enable(): string {
+                return 'Dummy auto outfit system - not available';
+            }
+            disable(): string {
+                return 'Dummy auto outfit system - not available';
+            }
+            setPrompt(): void {}
+            getPrompt(): string {
+                return '';
+            }
+            setConnectionProfile(): void {}
+            getConnectionProfile(): string | null {
+                return null;
+            }
+            getStatus() {
+                return {
+                    enabled: false,
+                    hasPrompt: false,
+                    promptLength: 0,
+                    isProcessing: false,
+                    consecutiveFailures: 0,
+                    currentRetryCount: 0,
+                    maxRetries: 0,
+                };
+            }
+            resetToDefaultPrompt(): void {}
+            manualTrigger(): Promise<string> {
+                return Promise.resolve('Dummy auto outfit system - not available');
+            }
+            markAppInitialized(): void {}
+        };
     }
 }
 
@@ -67,38 +106,45 @@ function isMobileUserAgent(userAgent: string): boolean {
  * Sets up the global API for the outfit extension.
  * This function registers the panel and system references in the global API,
  * and registers character-specific macros when the system initializes.
- * @param {any} botManager - The bot outfit manager instance
- * @param {any} userManager - The user outfit manager instance
- * @param {any} botPanel - The bot outfit panel instance
- * @param {any} userPanel - The user outfit panel instance
- * @param {any} autoOutfitSystem - The auto outfit system instance
- * @param {any} outfitDataService - The outfit data service instance
+ * @param botManager - The bot outfit manager instance
+ * @param userManager - The user outfit manager instance
+ * @param botPanel - The bot outfit panel instance
+ * @param userPanel - The user outfit panel instance
+ * @param autoOutfitSystem - The auto outfit system instance
+ * @param outfitDataService - The outfit data service instance
+ * @param storageService - The storage service instance
+ * @param dataManager - The data manager instance
+ * @param eventService - The event service instance
  * @returns {void}
  */
 function setupApi(
-    botManager: any,
-    userManager: any,
-    botPanel: any,
-    userPanel: any,
-    autoOutfitSystem: any,
-    outfitDataService: any,
-    storageService?: any,
-    dataManager?: any,
-    eventService?: any
+    botManager: OutfitManager,
+    userManager: OutfitManager,
+    botPanel: OutfitPanelAPI,
+    userPanel: OutfitPanelAPI,
+    autoOutfitSystem: AutoOutfitSystemAPI,
+    outfitDataService: OutfitDataService,
+    storageService?: StorageService,
+    dataManager?: DataManager,
+    eventService?: EventService
 ): void {
     extension_api.botOutfitPanel = botPanel;
     extension_api.userOutfitPanel = userPanel;
     extension_api.autoOutfitSystem = autoOutfitSystem;
-    extension_api.wipeAllOutfits = () => outfitDataService.wipeAllOutfits();
-    window.wipeAllOutfits = () => outfitDataService.wipeAllOutfits(); // Make it directly accessible globally
+    extension_api.wipeAllOutfits = async () => {
+        await outfitDataService.wipeAllOutfits();
+    };
+    window.wipeAllOutfits = async () => {
+        await outfitDataService.wipeAllOutfits();
+    }; // Make it directly accessible globally
 
     // Attach services to window for debug panel
     window.characterService = { updateForCurrentCharacter };
     window.llmService = { generateOutfitFromLLM, importOutfitFromCharacterCard };
-    window.eventService = eventService;
-    window.storageService = storageService;
-    window.dataManager = dataManager;
-    window.outfitDataService = outfitDataService;
+    window.eventService = eventService as any;
+    if (storageService) window.storageService = storageService as any;
+    if (dataManager) window.dataManager = dataManager as any;
+    window.outfitDataService = outfitDataService as any;
 
     extension_api.getOutfitExtensionStatus = () => ({
         core: true,
@@ -147,10 +193,10 @@ function setupApi(
  * @returns {void}
  */
 function updatePanelStyles(): void {
-    if (window.botOutfitPanel) {
+    if (window.botOutfitPanel?.applyPanelColors) {
         window.botOutfitPanel.applyPanelColors();
     }
-    if (window.userOutfitPanel) {
+    if (window.userOutfitPanel?.applyPanelColors) {
         window.userOutfitPanel.applyPanelColors();
     }
 }
@@ -176,10 +222,10 @@ function isMobileDevice(): boolean {
  * The interceptor function to inject outfit information into the conversation context.
  * This function is called by SillyTavern during generation to inject outfit information
  * into the AI's context, making it aware of the current character and user outfits.
- * @param {any[]} chat - The chat array that will be passed to the AI
+ * @param chat - The chat array that will be passed to the AI
  * @returns {Promise<void>} A promise that resolves when the injection is complete
  */
-(globalThis as any).outfitTrackerInterceptor = async function (chat: any[]): Promise<void> {
+window.outfitTrackerInterceptor = async function (chat: ChatMessage[]): Promise<void> {
     try {
         // Create a temporary reference to the managers using the panel references
         const botPanel = window.botOutfitPanel;
@@ -264,16 +310,16 @@ export async function initializeExtension(): Promise<void> {
     await loadAutoOutfitSystem();
     debugLog('Starting extension initialization', null, 'info');
 
-    const STContext = window.SillyTavern?.getContext?.() || window.getContext?.();
+    const stContext: STContext | null = window.SillyTavern?.getContext?.() || window.getContext?.();
 
-    if (!STContext) {
+    if (!stContext) {
         debugLog('[OutfitTracker] Required SillyTavern context is not available.', null, 'error');
         throw new Error('Missing required SillyTavern globals.');
     }
 
     const storageService = new StorageService(
-        (data: any) => STContext.saveSettingsDebounced({ outfit_tracker: data }),
-        () => STContext.extensionSettings.outfit_tracker
+        (data: unknown) => stContext.saveSettingsDebounced?.({ outfit_tracker: data }),
+        () => stContext.extensionSettings?.outfit_tracker
     );
 
     const dataManager = new DataManager(storageService);
@@ -296,11 +342,11 @@ export async function initializeExtension(): Promise<void> {
 
     debugLog('Outfit managers created', { botManager, userManager }, 'info');
 
-    const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) =>
-        STContext.saveSettingsDebounced({ outfit_tracker: data })
+    const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: unknown) =>
+        stContext.saveSettingsDebounced?.({ outfit_tracker: data })
     );
-    const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) =>
-        STContext.saveSettingsDebounced({ outfit_tracker: data })
+    const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: unknown) =>
+        stContext.saveSettingsDebounced?.({ outfit_tracker: data })
     );
 
     debugLog('Outfit panels created', { botPanel, userPanel }, 'info');
@@ -325,8 +371,8 @@ export async function initializeExtension(): Promise<void> {
         userPanel,
         autoOutfitSystem,
         updateForCurrentCharacter: () => updateForCurrentCharacter(botManager, userManager, botPanel, userPanel),
-        processMacrosInFirstMessage: () => macroProcessor.processMacrosInFirstMessage(STContext),
-        context: STContext,
+        processMacrosInFirstMessage: () => macroProcessor.processMacrosInFirstMessage(stContext),
+        context: stContext,
     });
 
     setupApi(
@@ -340,10 +386,9 @@ export async function initializeExtension(): Promise<void> {
         dataManager,
         eventService
     );
-    initSettings(autoOutfitSystem, AutoOutfitSystem, STContext);
-    await registerOutfitCommands(botManager, userManager, autoOutfitSystem);
-    customMacroSystem.registerMacros(STContext);
-    createSettingsUI(AutoOutfitSystem, autoOutfitSystem, STContext);
+    initSettings(autoOutfitSystem, AutoOutfitSystem, stContext);
+    customMacroSystem.registerMacros(stContext);
+    createSettingsUI(AutoOutfitSystem, autoOutfitSystem, stContext);
     debugLog('Extension components initialized', null, 'info');
 
     debugLog('Event listeners set up', null, 'info');

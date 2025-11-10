@@ -1,18 +1,14 @@
 import {deepMerge} from '../utils/utilities';
 import {StorageService} from '../services/StorageService';
+import {DEFAULT_SETTINGS} from '../config/constants';
+import {FullOutfitData, Settings} from '../types';
 
 const DATA_VERSION = '1.0.0';
-
-interface OutfitData {
-    botInstances: any;
-    userInstances: any;
-    presets: any;
-}
 
 class DataManager {
     storageService: StorageService;
     version: string;
-    data: any;
+    data: FullOutfitData | null;
 
     constructor(storageService: StorageService) {
         this.storageService = storageService;
@@ -21,25 +17,33 @@ class DataManager {
     }
 
     async initialize(): Promise<void> {
-        this.data = await this.storageService.load();
+        this.data = (await this.storageService.load()) as FullOutfitData | null;
         if (!this.data) {
-            this.data = {};
+            this.data = {
+                botInstances: {},
+                userInstances: {},
+                presets: { bot: {}, user: {} },
+                settings: { ...DEFAULT_SETTINGS },
+                version: DATA_VERSION,
+            };
         }
         this.migrateData();
     }
 
     migrateData(): void {
+        if (!this.data) return;
+
         if (!this.data.version || this.data.version < this.version) {
             console.log(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`);
 
             // Migration: Convert 'default' presets to settings-based default preset names
             if (this.data.presets) {
-                const settings = this.data.settings || {};
+                const settings = this.data.settings || { ...DEFAULT_SETTINGS };
 
                 // Migrate bot presets
                 if (this.data.presets.bot) {
-                    for (const [key, presetGroup] of Object.entries(this.data.presets.bot as any)) {
-                        if (presetGroup && (presetGroup as any)['default']) {
+                    for (const [key, presetGroup] of Object.entries(this.data.presets.bot)) {
+                        if (presetGroup && presetGroup['default']) {
                             // Extract character and instance from key
                             const parts = key.split('_');
                             if (parts.length >= 2) {
@@ -60,8 +64,8 @@ class DataManager {
 
                 // Migrate user presets
                 if (this.data.presets.user) {
-                    for (const [instanceId, presetGroup] of Object.entries(this.data.presets.user as any)) {
-                        if (presetGroup && (presetGroup as any)['default']) {
+                    for (const [instanceId, presetGroup] of Object.entries(this.data.presets.user)) {
+                        if (presetGroup && presetGroup['default']) {
                             if (!settings.defaultUserPresets) {
                                 settings.defaultUserPresets = {};
                             }
@@ -77,52 +81,56 @@ class DataManager {
         }
     }
 
-    save(data: any): void {
-        this.data = deepMerge(this.data, data);
-        this.storageService.save(this.data);
+    save(data: Partial<FullOutfitData>): void {
+        if (this.data) {
+            this.data = deepMerge(this.data, data);
+            this.storageService.save(this.data);
+        }
     }
 
-    load(): any {
-        return this.data;
+    load(): FullOutfitData | null {
+        return this.data || null;
     }
 
-    saveOutfitData(outfitData: OutfitData): void {
+    saveOutfitData(outfitData: FullOutfitData): void {
         this.save({
-            instances: outfitData.botInstances || {},
-            user_instances: outfitData.userInstances || {},
+            botInstances: outfitData.botInstances || {},
+            userInstances: outfitData.userInstances || {},
             presets: outfitData.presets || {},
         });
     }
 
     // Direct method to save wiped outfit data that bypasses deepMerge for complete wipe operations
     saveWipedOutfitData(): void {
-        // Directly set the properties without using deepMerge
-        this.data.instances = {};
-        this.data.user_instances = {};
-        this.data.presets = {};
+        if (this.data) {
+            // Directly set the properties without using deepMerge
+            this.data.botInstances = {};
+            this.data.userInstances = {};
+            this.data.presets = { bot: {}, user: {} };
 
-        // Save the updated data to storage
-        this.storageService.save(this.data);
+            // Save the updated data to storage
+            this.storageService.save(this.data);
+        }
     }
 
-    loadOutfitData(): OutfitData {
+    loadOutfitData(): FullOutfitData {
         const data = this.load();
 
         return {
-            botInstances: data.instances || {},
-            userInstances: data.user_instances || {},
-            presets: data.presets || {},
+            botInstances: data?.botInstances || data?.instances || {},
+            userInstances: data?.userInstances || data?.user_instances || {},
+            presets: data?.presets || { bot: {}, user: {} },
         };
     }
 
-    saveSettings(settings: any): void {
+    saveSettings(settings: Settings): void {
         this.save({ settings });
     }
 
-    loadSettings(): any {
+    loadSettings(): Settings {
         const data = this.load();
 
-        return data.settings || {};
+        return data?.settings || { ...DEFAULT_SETTINGS };
     }
 
     flush(): void {

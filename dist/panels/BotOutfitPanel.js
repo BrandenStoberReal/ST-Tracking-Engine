@@ -25,10 +25,10 @@ import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 export class BotOutfitPanel {
     /**
      * Creates a new BotOutfitPanel instance
-     * @param {object} outfitManager - The outfit manager for the bot character
-     * @param {Array<string>} clothingSlots - Array of clothing slot names
-     * @param {Array<string>} accessorySlots - Array of accessory slot names
-     * @param {Function} saveSettingsDebounced - Debounced function to save settings
+     * @param outfitManager - The outfit manager for the bot character
+     * @param clothingSlots - Array of clothing slot names
+     * @param accessorySlots - Array of accessory slot names
+     * @param saveSettingsDebounced - Debounced function to save settings
      */
     constructor(outfitManager, clothingSlots, accessorySlots, saveSettingsDebounced) {
         this.outfitManager = outfitManager;
@@ -108,8 +108,8 @@ export class BotOutfitPanel {
                 }
             }
             // Fallback to old system if needed
-            if (!characterName && context.characterId !== undefined && context.characterId !== null) {
-                characterName = getCharacterInfoById(context.characterId, CharacterInfoType.Name);
+            if (!characterName && context && context.characterId !== undefined && context.characterId !== null) {
+                characterName = getCharacterInfoById(context.characterId.toString(), CharacterInfoType.Name);
             }
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
@@ -348,7 +348,8 @@ export class BotOutfitPanel {
             catch (error) {
                 debugLog('Error in generateOutfitFromCharacterInfo:', error, 'error');
                 if (areSystemMessagesEnabled()) {
-                    this.sendSystemMessage(`Error generating outfit: ${error.message}`);
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    this.sendSystemMessage(`Error generating outfit: ${errorMessage}`);
                 }
             }
         });
@@ -373,7 +374,7 @@ export class BotOutfitPanel {
      */
     getCharacterData() {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b, _c, _d, _e, _f, _g;
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
                 ? window.SillyTavern.getContext()
                 : window.getContext
@@ -394,16 +395,17 @@ export class BotOutfitPanel {
                 };
             }
             // Get character information
+            const char = character;
             const characterInfo = {
-                name: character.name || 'Unknown',
-                description: character.description || '',
-                personality: character.personality || '',
-                scenario: character.scenario || '',
-                firstMessage: character.first_mes || '',
-                characterNotes: character.character_notes || '',
+                name: String((_b = char.name) !== null && _b !== void 0 ? _b : 'Unknown'),
+                description: String((_c = char.description) !== null && _c !== void 0 ? _c : ''),
+                personality: String((_d = char.personality) !== null && _d !== void 0 ? _d : ''),
+                scenario: String((_e = char.scenario) !== null && _e !== void 0 ? _e : ''),
+                firstMessage: String((_f = char.first_mes) !== null && _f !== void 0 ? _f : ''),
+                characterNotes: String((_g = char.character_notes) !== null && _g !== void 0 ? _g : ''),
             };
             // Get the first message from the current chat if it's different from the character's first_message
-            if (context.chat && context.chat.length > 0) {
+            if (context && context.chat && context.chat.length > 0) {
                 const firstChatMessage = context.chat.find((msg) => !msg.is_user && !msg.is_system);
                 if (firstChatMessage && firstChatMessage.mes) {
                     characterInfo.firstMessage = firstChatMessage.mes;
@@ -417,25 +419,34 @@ export class BotOutfitPanel {
     }
     generateOutfitFromLLM(characterInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b, _c, _d, _e, _f, _g;
             try {
                 // Get the current system prompt or use the default
                 let prompt = this.getDefaultOutfitPrompt();
+                // Ensure all character info properties are strings
+                const safeCharacterInfo = {
+                    name: String((_a = characterInfo.name) !== null && _a !== void 0 ? _a : 'Unknown'),
+                    description: String((_b = characterInfo.description) !== null && _b !== void 0 ? _b : ''),
+                    personality: String((_c = characterInfo.personality) !== null && _c !== void 0 ? _c : ''),
+                    scenario: String((_d = characterInfo.scenario) !== null && _d !== void 0 ? _d : ''),
+                    characterNotes: String((_e = characterInfo.characterNotes) !== null && _e !== void 0 ? _e : ''),
+                    firstMessage: String((_f = characterInfo.firstMessage) !== null && _f !== void 0 ? _f : ''),
+                };
                 // Replace placeholders with actual character info
                 prompt = prompt
-                    .replace('<CHARACTER_NAME>', characterInfo.name)
-                    .replace('<CHARACTER_DESCRIPTION>', characterInfo.description)
-                    .replace('<CHARACTER_PERSONALITY>', characterInfo.personality)
-                    .replace('<CHARACTER_SCENARIO>', characterInfo.scenario)
-                    .replace('<CHARACTER_NOTES>', characterInfo.characterNotes)
-                    .replace('<CHARACTER_FIRST_MESSAGE>', characterInfo.firstMessage);
+                    .replace('<CHARACTER_NAME>', safeCharacterInfo.name)
+                    .replace('<CHARACTER_DESCRIPTION>', safeCharacterInfo.description)
+                    .replace('<CHARACTER_PERSONALITY>', safeCharacterInfo.personality)
+                    .replace('<CHARACTER_SCENARIO>', safeCharacterInfo.scenario)
+                    .replace('<CHARACTER_NOTES>', safeCharacterInfo.characterNotes)
+                    .replace('<CHARACTER_FIRST_MESSAGE>', safeCharacterInfo.firstMessage);
                 // Check if there is a connection profile set for the auto outfit system
                 let connectionProfile = null;
                 if (window.autoOutfitSystem && typeof window.autoOutfitSystem.getConnectionProfile === 'function') {
                     connectionProfile = window.autoOutfitSystem.getConnectionProfile();
                 }
                 // Use the unified LLM utility with profile if available
-                return yield LLMUtility.generateWithProfile(prompt, "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.", ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+                return yield LLMUtility.generateWithProfile(prompt, "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.", ((_g = window.SillyTavern) === null || _g === void 0 ? void 0 : _g.getContext)
                     ? window.SillyTavern.getContext()
                     : window.getContext
                         ? window.getContext()
@@ -581,7 +592,7 @@ export class BotOutfitPanel {
             dragElementWithSave(this.domElement, 'bot-outfit-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement($(this.domElement), 'bot-outfit-panel', {
+                resizeElement(this.domElement, 'bot-outfit-panel', {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
@@ -730,7 +741,7 @@ export class BotOutfitPanel {
     cleanupDynamicRefresh() {
         // Unsubscribe from store changes
         if (this.outfitSubscription) {
-            this.outfitSubscription();
+            this.outfitSubscription.unsubscribe();
             this.outfitSubscription = null;
         }
         // Remove event listeners
@@ -788,5 +799,23 @@ export class BotOutfitPanel {
         }
         // Convert to positive and return 8-character string representation
         return Math.abs(hash).toString(36).substring(0, 8).padEnd(8, '0');
+    }
+    /**
+     * Gets the current outfit data
+     * @returns {SlotOutfitData} The current outfit data
+     */
+    getCurrentOutfit() {
+        return Object.assign({}, this.outfitManager.currentValues);
+    }
+    /**
+     * Updates the outfit with new data
+     * @param {SlotOutfitData} outfit - The new outfit data
+     */
+    updateOutfit(outfit) {
+        Object.entries(outfit).forEach(([slot, item]) => {
+            if (this.outfitManager.slots.includes(slot)) {
+                this.outfitManager.setOutfitItem(slot, item);
+            }
+        });
     }
 }

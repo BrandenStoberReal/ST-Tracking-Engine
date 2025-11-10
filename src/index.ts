@@ -1,7 +1,7 @@
 import {initializeExtension} from './core/ExtensionCore';
 import {debugLog} from './logging/DebugLogger';
 
-declare const $: any;
+// jQuery is available globally
 
 debugLog('[OutfitTracker] Starting extension loading...');
 debugLog('Starting extension loading...', null, 'info');

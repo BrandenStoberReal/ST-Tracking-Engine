@@ -11,10 +11,11 @@ import { LLMUtility } from '../utils/LLMUtility.js';
 import { extractCommands } from '../processors/StringProcessor.js';
 import { findCharacterById } from './CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
+// Window is available globally
 /**
  * Process a single outfit command
- * @param {string} command - The command string to process
- * @param {object} botManager - The bot outfit manager
+ * @param command - The command string to process
+ * @param botManager - The bot outfit manager
  * @returns {Promise<void>}
  */
 function processSingleCommand(command, botManager) {
@@ -36,7 +37,9 @@ function processSingleCommand(command, botManager) {
                 finalAction = 'remove';
             }
             // Apply the outfit change to the bot manager
-            yield botManager.setOutfitItem(slot, finalAction === 'remove' ? 'None' : cleanValue);
+            if (botManager && typeof botManager.setOutfitItem === 'function') {
+                yield botManager.setOutfitItem(slot, finalAction === 'remove' ? 'None' : cleanValue);
+            }
         }
         catch (error) {
             debugLog('Error processing single command:', error, 'error');
@@ -46,8 +49,8 @@ function processSingleCommand(command, botManager) {
 }
 /**
  * Generates outfit from LLM based on provided options
- * @param {object} options - Generation options containing the prompt
- * @returns {Promise<string>} - The LLM response containing outfit commands
+ * @param options - Generation options containing the prompt
+ * @returns The LLM response containing outfit commands
  */
 export function generateOutfitFromLLM(options) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -58,12 +61,12 @@ export function generateOutfitFromLLM(options) {
                 throw new Error('Prompt is required for LLM generation');
             }
             // Use LLMUtility to generate with retry logic
-            const response = yield LLMUtility.generateWithRetry(prompt, "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.", // Corrected escaping for \'
-            ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
+            const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
                 ? window.SillyTavern.getContext()
                 : window.getContext
                     ? window.getContext()
-                    : null);
+                    : null;
+            const response = yield LLMUtility.generateWithRetry(prompt, "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.", context);
             return response;
         }
         catch (error) {
@@ -74,7 +77,7 @@ export function generateOutfitFromLLM(options) {
 }
 /**
  * Imports outfit from character card using LLM analysis
- * @returns {Promise<object>} - Result with message and any extracted outfit information
+ * @returns Result with message and any extracted outfit information
  */
 export function importOutfitFromCharacterCard() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -92,7 +95,11 @@ export function importOutfitFromCharacterCard() {
                 character = findCharacterById(botOutfitManager.characterId);
             }
             // Fallback to old system if needed
-            if (!character && context && context.characterId !== undefined && context.characterId !== null) {
+            if (!character &&
+                context &&
+                context.characterId !== undefined &&
+                context.characterId !== null &&
+                context.characters) {
                 character = context.characters[context.characterId];
             }
             if (!character) {
@@ -162,10 +169,11 @@ export function importOutfitFromCharacterCard() {
         }
         catch (error) {
             debugLog('Error importing outfit from character card:', error, 'error');
+            const errorMessage = error instanceof Error ? error.message : String(error);
             return {
-                message: `Error importing outfit: ${error.message}`, // Corrected escaping for \'
+                message: `Error importing outfit: ${errorMessage}`,
                 commands: [],
-                error: error.message,
+                error: errorMessage,
             };
         }
     });

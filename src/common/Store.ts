@@ -3,98 +3,26 @@ import {deepClone} from '../utils/utilities';
 import {DataManager} from '../managers/DataManager';
 import {debugLog} from '../logging/DebugLogger';
 import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
-
-interface OutfitData {
-    [key: string]: string;
-}
-
-interface InstanceData {
-    bot: OutfitData;
-    user: OutfitData;
-    promptInjectionEnabled?: boolean;
-
-    [key: string]: any;
-}
-
-interface BotInstances {
-    [characterId: string]: {
-        [instanceId: string]: InstanceData;
-    };
-}
-
-interface UserInstances {
-    [instanceId: string]: any;
-}
-
-interface Presets {
-    bot: {
-        [key: string]: {
-            [presetName: string]: OutfitData;
-        };
-    };
-    user: {
-        [key: string]: {
-            [presetName: string]: OutfitData;
-        };
-    };
-}
-
-interface PanelSettings {
-    botPanelColors: {
-        primary: string;
-        border: string;
-        shadow: string;
-    };
-    userPanelColors: {
-        primary: string;
-        border: string;
-        shadow: string;
-    };
-}
-
-interface Settings {
-    autoOpenBot: boolean;
-    autoOpenUser: boolean;
-    position: string;
-    enableSysMessages: boolean;
-    autoOutfitSystem: boolean;
-    debugMode: boolean;
-    autoOutfitPrompt: string;
-    autoOutfitConnectionProfile: string | null;
-    botPanelColors: {
-        primary: string;
-        border: string;
-        shadow: string;
-    };
-    userPanelColors: {
-        primary: string;
-        border: string;
-        shadow: string;
-    };
-    defaultBotPresets: {
-        [characterId: string]: {
-            [instanceId: string]: string | null;
-        };
-    };
-    defaultUserPresets: {
-        [instanceId: string]: string | null;
-    };
-}
-
-interface PanelVisibility {
-    bot: boolean;
-    user: boolean;
-}
+import {
+    BotInstances,
+    InstanceData,
+    OutfitData,
+    PanelSettings,
+    PanelVisibility,
+    Presets,
+    Settings,
+    UserInstances,
+} from '../types';
 
 interface References {
-    botPanel: any;
-    userPanel: any;
-    autoOutfitSystem: any;
+    botPanel: unknown;
+    userPanel: unknown;
+    autoOutfitSystem: unknown;
 }
 
 interface State {
-    botOutfits: any;
-    userOutfits: any;
+    botOutfits: BotInstances;
+    userOutfits: UserInstances;
     botInstances: BotInstances;
     userInstances: UserInstances;
     presets: Presets;
@@ -218,7 +146,7 @@ class OutfitStore {
     getUserOutfit(instanceId: string): OutfitData {
         const instanceData = this.state.userInstances[instanceId];
 
-        return deepClone(instanceData || {});
+        return deepClone(instanceData?.user || {});
     }
 
     setUserOutfit(instanceId: string, outfitData: OutfitData): void {
@@ -238,14 +166,13 @@ class OutfitStore {
         }
 
         // Create the new instance data with both outfit data and settings
-        const updatedInstanceData = { ...outfitData };
-        if (promptInjectionEnabled !== undefined) {
-            (updatedInstanceData as any).promptInjectionEnabled = promptInjectionEnabled;
-        }
-
-        this.state.userInstances[instanceId] = updatedInstanceData as { [key: string]: string | boolean } & {
-            promptInjectionEnabled?: boolean;
+        const updatedInstanceData: InstanceData = {
+            bot: {},
+            user: { ...outfitData },
+            promptInjectionEnabled,
         };
+
+        this.state.userInstances[instanceId] = updatedInstanceData;
 
         if (instanceCreated) {
             // Emit instance created event
@@ -484,12 +411,12 @@ class OutfitStore {
         return this.state.references[`${panelType}Panel`];
     }
 
-    setAutoOutfitSystem(autoOutfitSystem: any): void {
+    setAutoOutfitSystem(autoOutfitSystem: unknown): void {
         this.state.references.autoOutfitSystem = autoOutfitSystem;
         this.notifyListeners();
     }
 
-    getAutoOutfitSystem(): any {
+    getAutoOutfitSystem(): unknown {
         return this.state.references.autoOutfitSystem;
     }
 

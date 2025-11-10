@@ -1,15 +1,15 @@
 import {debugLog} from '../logging/DebugLogger';
 
 class StorageService {
-    saveFn: (data: any) => void;
-    loadFn: () => any;
+    saveFn: (data: unknown) => void;
+    loadFn: () => unknown;
 
-    constructor(saveFn: (data: any) => void, loadFn: () => any) {
+    constructor(saveFn: (data: unknown) => void, loadFn: () => unknown) {
         this.saveFn = saveFn;
         this.loadFn = loadFn;
     }
 
-    save(data: any): void {
+    save(data: unknown): void {
         if (typeof this.saveFn !== 'function') {
             debugLog('[StorageService] Save function is not configured.', null, 'error');
             return;
@@ -17,7 +17,7 @@ class StorageService {
         this.saveFn(data);
     }
 
-    load(): any {
+    load(): unknown {
         if (typeof this.loadFn !== 'function') {
             debugLog('[StorageService] Load function is not configured.', null, 'error');
             return null;

@@ -1,17 +1,11 @@
 import {outfitStore} from '../common/Store';
 
-interface LogEntry {
-    timestamp: string;
-    message: string;
-    data: any;
-    level: string;
-    formattedMessage: string;
-}
+import {LogEntry} from '../types';
 
 const logs: LogEntry[] = [];
 const MAX_LOGS = 1000;
 
-function addLogToStorage(message: string, data: any, level: string = 'log'): void {
+function addLogToStorage(message: string, data: unknown, level: string = 'log'): void {
     const timestamp = new Date().toISOString();
 
     logs.push({

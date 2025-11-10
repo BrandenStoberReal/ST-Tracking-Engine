@@ -32,11 +32,12 @@ function refreshMacroProcessing() {
             if (context && context.chat) {
                 const visibleMessages = Array.from(document.querySelectorAll('#chat .mes'));
                 visibleMessages.forEach((messageElement) => {
+                    var _a;
                     // Add null check for parentElement
                     if (!messageElement.parentElement)
                         return;
                     const messageIndex = Array.from(messageElement.parentElement.children).indexOf(messageElement);
-                    const message = context.chat[messageIndex];
+                    const message = (_a = context.chat) === null || _a === void 0 ? void 0 : _a[messageIndex];
                     if (message && message.mes && typeof message.mes === 'string') {
                         const originalMes = message.mes;
                         message.mes = window.customMacroSystem.replaceMacrosInText(message.mes);
@@ -95,10 +96,10 @@ function syncEmbeddedOutfitData(characterId) {
 let isUpdating = false;
 /**
  * Updates outfit managers and panels for the current character
- * @param {object} botManager - Bot outfit manager instance
- * @param {object} userManager - User outfit manager instance
- * @param {object} botPanel - Bot outfit panel instance
- * @param {object} userPanel - User outfit panel instance
+ * @param botManager - Bot outfit manager instance
+ * @param userManager - User outfit manager instance
+ * @param botPanel - Bot outfit panel instance
+ * @param userPanel - User outfit panel instance
  * @returns {Promise<void>}
  */
 export function updateForCurrentCharacter(botManager, userManager, botPanel, userPanel) {
@@ -128,16 +129,16 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
                 : window.getContext
                     ? window.getContext()
                     : null;
-            const charIndex = context.characterId;
+            const charIndex = context === null || context === void 0 ? void 0 : context.characterId;
             let characterUniqueId = null;
             let characterName = null;
-            if (charIndex !== undefined && charIndex !== null) {
+            if (context && charIndex !== undefined && charIndex !== null && context.characters) {
                 const character = context.characters[charIndex];
                 if (character) {
                     characterUniqueId = yield getOrCreateCharacterId(character);
-                    characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
-                    if (characterName) {
-                        botManager.setCharacter(characterName, characterUniqueId);
+                    characterName = getCharacterInfoById(charIndex.toString(), CharacterInfoType.Name);
+                    if (characterName && characterUniqueId) {
+                        botManager.setCharacter(String(characterName), characterUniqueId);
                         // Sync any embedded outfit data from the character card
                         yield syncEmbeddedOutfitData(characterUniqueId);
                     }
@@ -147,7 +148,7 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             const botOutfitInstanceId = botManager.getOutfitInstanceId();
             botManager.loadOutfit(botOutfitInstanceId);
             // Update the bot panel character name
-            if (botPanel) {
+            if (botPanel === null || botPanel === void 0 ? void 0 : botPanel.updateCharacter) {
                 botPanel.updateCharacter(botManager.character);
             }
             // Update the user manager and panel
@@ -155,7 +156,7 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
             userManager.setCharacter('User');
             const userOutfitInstanceId = userManager.getOutfitInstanceId();
             userManager.loadOutfit(userOutfitInstanceId);
-            if (userPanel) {
+            if (userPanel === null || userPanel === void 0 ? void 0 : userPanel.updateHeader) {
                 // Update the header to reflect any changes (like new instance ID)
                 userPanel.updateHeader();
             }

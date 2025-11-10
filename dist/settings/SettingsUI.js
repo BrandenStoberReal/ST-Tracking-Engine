@@ -1014,6 +1014,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             }
         });
         $('#outfit-prompt-reset-btn').on('click', function () {
+            var _a;
             const message = autoOutfitSystem.resetToDefaultPrompt();
             if (settings && settings[MODULE_NAME]) {
                 $('#outfit-prompt-input').val(autoOutfitSystem.systemPrompt);
@@ -1022,7 +1023,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 // Update the outfit store to reflect the new settings
                 outfitStore.setSetting('autoOutfitPrompt', settings[MODULE_NAME].autoOutfitPrompt);
             }
-            if (currentSettings === null || currentSettings === void 0 ? void 0 : currentSettings.enableSysMessages) {
+            if ((currentSettings === null || currentSettings === void 0 ? void 0 : currentSettings.enableSysMessages) && ((_a = window.botOutfitPanel) === null || _a === void 0 ? void 0 : _a.sendSystemMessage)) {
                 window.botOutfitPanel.sendSystemMessage(message);
             }
             else {

@@ -1,22 +1,13 @@
 import {outfitStore} from '../common/Store';
 import {debugLog} from '../logging/DebugLogger';
-
-declare global {
-    interface Window {
-        connectionManager: any;
-        SlashCommandParser: any;
-        extension_settings: any;
-        SillyTavern: any;
-        getContext: any;
-    }
-}
+import {SillyTavernContext} from '../types';
 
 class ConnectionProfileHelper {
     static async withConnectionProfile(
         profileId: string,
-        generationFunc: (context: SillyTavernContext) => Promise<any>,
+        generationFunc: (context: SillyTavernContext) => Promise<string>,
         context: SillyTavernContext | null = null
-    ): Promise<any> {
+    ): Promise<string> {
         if (!profileId) {
             if (context) {
                 return generationFunc(context);
@@ -153,7 +144,7 @@ export class LLMUtility {
                 let result: string;
 
                 if (context && context.generateRaw) {
-                    result = await context.generateRaw(prompt, systemPrompt);
+                    result = await context.generateRaw(prompt, { systemPrompt });
                 } else if (context && context.generateQuietPrompt) {
                     result = await context.generateQuietPrompt(prompt);
                 } else {
@@ -258,7 +249,7 @@ export class LLMUtility {
         );
         const generationFunc = async (genContext: SillyTavernContext): Promise<string> => {
             if (genContext && genContext.generateRaw) {
-                return genContext.generateRaw(prompt, systemPrompt);
+                return genContext.generateRaw(prompt, { systemPrompt });
             } else if (genContext && genContext.generateQuietPrompt) {
                 return genContext.generateQuietPrompt(prompt);
             }

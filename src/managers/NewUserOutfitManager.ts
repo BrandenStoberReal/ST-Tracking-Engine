@@ -303,7 +303,7 @@ export class NewUserOutfitManager extends OutfitManager {
         }
 
         if (!outfitStore.state.userInstances[actualInstanceId]) {
-            outfitStore.state.userInstances[actualInstanceId] = {};
+            outfitStore.state.userInstances[actualInstanceId] = { bot: {}, user: {} };
         }
 
         const updatedInstanceData = {

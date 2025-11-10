@@ -55,7 +55,7 @@ class MacroProcessor {
                         }
                     }
                     // Additional fallback: try to get unique ID from current character index
-                    if (!uniqueCharacterId && ctx.characterId !== undefined && ctx.characterId !== null) {
+                    if (!uniqueCharacterId && ctx.characterId !== undefined && ctx.characterId !== null && ctx.characters) {
                         const character = ctx.characters[ctx.characterId];
                         if (character) {
                             uniqueCharacterId = (_g = (_f = character.data) === null || _f === void 0 ? void 0 : _f.extensions) === null || _g === void 0 ? void 0 : _g.character_id;

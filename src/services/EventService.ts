@@ -1,32 +1,32 @@
 import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import {AutoOutfitSystemAPI, ChatMessage, EventCallback, OutfitPanelAPI, STContext} from '../types';
 import {customMacroSystem} from './CustomMacroService';
 import {outfitStore} from '../common/Store';
 import {generateMessageHash} from '../utils/utilities';
 import {NewBotOutfitManager} from '../managers/NewBotOutfitManager';
 import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
-import {AutoOutfitService} from './AutoOutfitService';
 import {debugLog} from '../logging/DebugLogger';
 
 interface EventServiceContext {
     botManager: NewBotOutfitManager;
     userManager: NewUserOutfitManager;
-    botPanel: any; // The BotOutfitPanel instance
-    userPanel: any; // The UserOutfitPanel instance
-    autoOutfitSystem: AutoOutfitService;
+    botPanel: OutfitPanelAPI;
+    userPanel: OutfitPanelAPI;
+    autoOutfitSystem: AutoOutfitSystemAPI;
     updateForCurrentCharacter: () => void;
-    processMacrosInFirstMessage: (context?: any) => Promise<void>;
-    context?: any;
+    processMacrosInFirstMessage: (context?: STContext) => Promise<void>;
+    context?: STContext;
 }
 
 class EventService {
     botManager: NewBotOutfitManager;
     userManager: NewUserOutfitManager;
-    botPanel: any;
-    userPanel: any;
-    autoOutfitSystem: AutoOutfitService;
+    botPanel: OutfitPanelAPI;
+    userPanel: OutfitPanelAPI;
+    autoOutfitSystem: AutoOutfitSystemAPI;
     updateForCurrentCharacter: () => void;
-    processMacrosInFirstMessage: (context?: SillyTavernContext) => Promise<void>;
-    context: SillyTavernContext | null;
+    processMacrosInFirstMessage: (context?: STContext) => Promise<void>;
+    context: STContext | null;
     currentFirstMessageHash: string | null;
 
     constructor(context: EventServiceContext) {
@@ -71,7 +71,7 @@ class EventService {
             debugLog('[EventService] Context is null, cannot setup event listeners', null, 'warn');
             return;
         }
-        const { eventSource, event_types } = this.context;
+        const { eventSource, event_types } = this.context as any;
 
         eventSource.on(event_types.APP_READY, () => this.handleAppReady());
         eventSource.on(event_types.CHAT_CHANGED, () => this.handleChatChange());
@@ -102,7 +102,7 @@ class EventService {
             return;
         }
         if (this.context.chat?.length > 0) {
-            const firstBotMessage = this.context.chat.find((msg) => !msg.is_user && !msg.is_system);
+            const firstBotMessage = this.context.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
             if (firstBotMessage) {
                 const firstMessageHash = this.generateMessageHash(firstBotMessage.mes);
@@ -136,7 +136,8 @@ class EventService {
             return;
         }
         const chat = this.context.chat;
-        const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
+        if (!chat) return;
+        const aiMessages = chat.filter((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length === 1 && !data.is_user) {
             debugLog('[OutfitTracker] First AI message received, updating outfit instance.');
@@ -171,7 +172,7 @@ class EventService {
             return;
         }
 
-        const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
+        const aiMessages = chat.filter((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
             debugLog('[OutfitTracker] First message was swiped, updating outfit instance.');
@@ -329,6 +330,19 @@ class EventService {
 
             return result;
         };
+    }
+
+    // EventService interface implementation
+    registerEvent(event: string, handler: EventCallback): void {
+        extensionEventBus.on(event, handler);
+    }
+
+    unregisterEvent(event: string, handler: EventCallback): void {
+        extensionEventBus.off(event, handler);
+    }
+
+    emitEvent(event: string, ...args: unknown[]): void {
+        extensionEventBus.emit(event, ...args);
     }
 
     overrideClearChat(): void {

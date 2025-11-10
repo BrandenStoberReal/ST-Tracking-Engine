@@ -4,6 +4,7 @@ import {debugLog} from '../logging/DebugLogger';
 import {findCharacterById, getOrCreateCharacterId} from './CharacterIdService';
 import {getCharacterOutfitData} from './CharacterOutfitService';
 import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import {OutfitManager, OutfitPanelAPI, STContext} from '../types';
 
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
@@ -18,7 +19,7 @@ function refreshMacroProcessing() {
             (window as any).customMacroSystem &&
             typeof (window as any).customMacroSystem.replaceMacrosInText === 'function'
         ) {
-            const context = window.SillyTavern?.getContext
+            const context: STContext | null = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
                   ? window.getContext()
@@ -32,7 +33,7 @@ function refreshMacroProcessing() {
                     if (!messageElement.parentElement) return;
 
                     const messageIndex = Array.from(messageElement.parentElement.children).indexOf(messageElement);
-                    const message = context.chat[messageIndex];
+                    const message = context.chat?.[messageIndex];
 
                     if (message && message.mes && typeof message.mes === 'string') {
                         const originalMes = message.mes;
@@ -96,13 +97,18 @@ let isUpdating = false;
 
 /**
  * Updates outfit managers and panels for the current character
- * @param {object} botManager - Bot outfit manager instance
- * @param {object} userManager - User outfit manager instance
- * @param {object} botPanel - Bot outfit panel instance
- * @param {object} userPanel - User outfit panel instance
+ * @param botManager - Bot outfit manager instance
+ * @param userManager - User outfit manager instance
+ * @param botPanel - Bot outfit panel instance
+ * @param userPanel - User outfit panel instance
  * @returns {Promise<void>}
  */
-export async function updateForCurrentCharacter(botManager: any, userManager: any, botPanel: any, userPanel: any) {
+export async function updateForCurrentCharacter(
+    botManager: OutfitManager,
+    userManager: OutfitManager,
+    botPanel: OutfitPanelAPI,
+    userPanel: OutfitPanelAPI
+) {
     if (isUpdating) {
         debugLog('[OutfitTracker] Already updating for current character, skipping.', null, 'warn');
         return;
@@ -127,23 +133,23 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
         }
 
         // Update the bot manager with the current character info
-        const context = window.SillyTavern?.getContext
+        const context: STContext | null = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
               ? window.getContext()
               : null;
-        const charIndex = context.characterId;
+        const charIndex = context?.characterId;
         let characterUniqueId = null;
         let characterName = null;
 
-        if (charIndex !== undefined && charIndex !== null) {
+        if (context && charIndex !== undefined && charIndex !== null && context.characters) {
             const character = context.characters[charIndex];
             if (character) {
                 characterUniqueId = await getOrCreateCharacterId(character);
-                characterName = getCharacterInfoById(charIndex, CharacterInfoType.Name);
+                characterName = getCharacterInfoById(charIndex.toString(), CharacterInfoType.Name);
 
-                if (characterName) {
-                    botManager.setCharacter(characterName, characterUniqueId);
+                if (characterName && characterUniqueId) {
+                    botManager.setCharacter(String(characterName), characterUniqueId);
 
                     // Sync any embedded outfit data from the character card
                     await syncEmbeddedOutfitData(characterUniqueId);
@@ -157,7 +163,7 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
         botManager.loadOutfit(botOutfitInstanceId);
 
         // Update the bot panel character name
-        if (botPanel) {
+        if (botPanel?.updateCharacter) {
             botPanel.updateCharacter(botManager.character);
         }
 
@@ -168,7 +174,7 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
 
         userManager.loadOutfit(userOutfitInstanceId);
 
-        if (userPanel) {
+        if (userPanel?.updateHeader) {
             // Update the header to reflect any changes (like new instance ID)
             userPanel.updateHeader();
         }

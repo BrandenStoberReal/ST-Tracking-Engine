@@ -1,4 +1,6 @@
 // Function to make an element draggable with position saving
+import {ExtensionAPI} from '../types';
+
 export function dragElementWithSave(element: HTMLElement, storageKey: string): void {
     if (!element) {
         return;
@@ -140,7 +142,7 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
         $header.on('mousedown', dragMouseDown as any);
     } else {
         // If no header found, allow dragging from the entire element
-        $element.on('mousedown', dragMouseDown as any);
+        ($element as any).on('mousedown', dragMouseDown);
     }
 }
 
@@ -241,15 +243,15 @@ export function resizeElement(
         originalMouseX = e.pageX;
         originalMouseY = e.pageY;
 
-        $(document).on('mousemove.resizer', resizeElementHandler as any);
-        $(document).on('mouseup.resizer', stopResize);
+        ($(document) as any).on('mousemove.resizer', resizeElementHandler);
+        ($(document) as any).on('mouseup.resizer', stopResize);
 
         e.stopPropagation();
         e.preventDefault();
     });
 }
 
-export const extension_api: any = {
+export const extension_api: ExtensionAPI = {
     botOutfitPanel: null,
     userOutfitPanel: null,
     autoOutfitSystem: null,

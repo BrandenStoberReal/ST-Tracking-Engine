@@ -8,10 +8,16 @@ import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
 import {findCharacterById} from '../services/CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
 import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
-
-declare const window: any;
-declare const toastr: any;
-declare const $: any;
+import {
+    CharacterInfo,
+    ChatMessage,
+    OutfitManager,
+    OutfitSlotData,
+    OutfitStoreState,
+    OutfitSubscription,
+    SaveSettingsFunction,
+    SlotOutfitData,
+} from '../types';
 
 /**
  * BotOutfitPanel - Manages the UI for the bot character's outfit tracking
@@ -19,7 +25,7 @@ declare const $: any;
  * the bot character's outfit, including clothing, accessories, and saved presets
  */
 export class BotOutfitPanel {
-    outfitManager: any;
+    outfitManager: OutfitManager;
     clothingSlots: string[];
     accessorySlots: string[];
     isVisible: boolean;
@@ -27,18 +33,23 @@ export class BotOutfitPanel {
     currentTab: string;
     currentPresetCategory: string;
     presetCategories: string[];
-    eventListeners: any[];
-    outfitSubscription: any;
-    saveSettingsDebounced: any;
+    eventListeners: (() => void)[];
+    outfitSubscription: OutfitSubscription | null;
+    saveSettingsDebounced: SaveSettingsFunction;
 
     /**
      * Creates a new BotOutfitPanel instance
-     * @param {object} outfitManager - The outfit manager for the bot character
-     * @param {Array<string>} clothingSlots - Array of clothing slot names
-     * @param {Array<string>} accessorySlots - Array of accessory slot names
-     * @param {Function} saveSettingsDebounced - Debounced function to save settings
+     * @param outfitManager - The outfit manager for the bot character
+     * @param clothingSlots - Array of clothing slot names
+     * @param accessorySlots - Array of accessory slot names
+     * @param saveSettingsDebounced - Debounced function to save settings
      */
-    constructor(outfitManager: any, clothingSlots: string[], accessorySlots: string[], saveSettingsDebounced: any) {
+    constructor(
+        outfitManager: OutfitManager,
+        clothingSlots: string[],
+        accessorySlots: string[],
+        saveSettingsDebounced: SaveSettingsFunction
+    ) {
         this.outfitManager = outfitManager;
         this.clothingSlots = clothingSlots;
         this.accessorySlots = accessorySlots;
@@ -132,14 +143,14 @@ export class BotOutfitPanel {
             }
 
             // Fallback to old system if needed
-            if (!characterName && context.characterId !== undefined && context.characterId !== null) {
-                characterName = getCharacterInfoById(context.characterId, CharacterInfoType.Name);
+            if (!characterName && context && context.characterId !== undefined && context.characterId !== null) {
+                characterName = getCharacterInfoById(context.characterId.toString(), CharacterInfoType.Name);
             }
 
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
                 const aiMessages = context.chat.filter(
-                    (msg: any) =>
+                    (msg: ChatMessage) =>
                         !msg.is_user &&
                         !msg.is_system &&
                         (msg.name === this.outfitManager.character || (characterName && msg.name === characterName))
@@ -232,7 +243,7 @@ export class BotOutfitPanel {
     renderSlots(slots: string[], container: HTMLElement): void {
         const outfitData = this.outfitManager.getOutfitData(slots);
 
-        outfitData.forEach((slot: any) => {
+        outfitData.forEach((slot: OutfitSlotData) => {
             const slotElement = document.createElement('div');
 
             slotElement.className = 'outfit-slot';
@@ -419,10 +430,11 @@ export class BotOutfitPanel {
             if (areSystemMessagesEnabled()) {
                 this.sendSystemMessage('Outfit generated and applied successfully!');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             debugLog('Error in generateOutfitFromCharacterInfo:', error, 'error');
             if (areSystemMessagesEnabled()) {
-                this.sendSystemMessage(`Error generating outfit: ${error.message}`);
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                this.sendSystemMessage(`Error generating outfit: ${errorMessage}`);
             }
         }
     }
@@ -471,18 +483,26 @@ export class BotOutfitPanel {
         }
 
         // Get character information
-        const characterInfo = {
-            name: character.name || 'Unknown',
-            description: character.description || '',
-            personality: character.personality || '',
-            scenario: character.scenario || '',
-            firstMessage: character.first_mes || '',
-            characterNotes: character.character_notes || '',
+        const char = character as any;
+        const characterInfo: {
+            name: string;
+            description: string;
+            personality: string;
+            scenario: string;
+            firstMessage: string;
+            characterNotes: string;
+        } = {
+            name: String(char.name ?? 'Unknown'),
+            description: String(char.description ?? ''),
+            personality: String(char.personality ?? ''),
+            scenario: String(char.scenario ?? ''),
+            firstMessage: String(char.first_mes ?? ''),
+            characterNotes: String(char.character_notes ?? ''),
         };
 
         // Get the first message from the current chat if it's different from the character's first_message
-        if (context.chat && context.chat.length > 0) {
-            const firstChatMessage = context.chat.find((msg: any) => !msg.is_user && !msg.is_system);
+        if (context && context.chat && context.chat.length > 0) {
+            const firstChatMessage = context.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
             if (firstChatMessage && firstChatMessage.mes) {
                 characterInfo.firstMessage = firstChatMessage.mes;
@@ -496,19 +516,29 @@ export class BotOutfitPanel {
         return `Based on the character's description, personality, scenario, notes, and first message, generate appropriate outfit commands.\n\nCHARACTER INFO:\nName: <CHARACTER_NAME>\nDescription: <CHARACTER_DESCRIPTION>\nPersonality: <CHARACTER_PERSONALITY>\nScenario: <CHARACTER_SCENARIO>\nNotes: <CHARACTER_NOTES>\nFirst Message: <CHARACTER_FIRST_MESSAGE>\n\nOUTPUT FORMAT (one command per line):\noutfit-system_wear_headwear("item name")\noutfit-system_wear_topwear("item name")\noutfit-system_remove_headwear()  // for items not applicable\n\nSLOTS:\nClothing: headwear, topwear, topunderwear, bottomwear, bottomunderwear, footwear, footunderwear\nAccessories: head-accessory, ears-accessory, eyes-accessory, mouth-accessory, neck-accessory, body-accessory, arms-accessory, hands-accessory, waist-accessory, bottom-accessory, legs-accessory, foot-accessory\n\nINSTRUCTIONS:\n- Only output outfit commands based on character details\n- Use "remove" for items that don't fit the character\n- If uncertain about an item, omit the command\n- Output only commands, no explanations`;
     }
 
-    async generateOutfitFromLLM(characterInfo: any): Promise<string> {
+    async generateOutfitFromLLM(characterInfo: CharacterInfo): Promise<string> {
         try {
             // Get the current system prompt or use the default
             let prompt = this.getDefaultOutfitPrompt();
 
+            // Ensure all character info properties are strings
+            const safeCharacterInfo = {
+                name: String(characterInfo.name ?? 'Unknown'),
+                description: String(characterInfo.description ?? ''),
+                personality: String(characterInfo.personality ?? ''),
+                scenario: String(characterInfo.scenario ?? ''),
+                characterNotes: String(characterInfo.characterNotes ?? ''),
+                firstMessage: String(characterInfo.firstMessage ?? ''),
+            };
+
             // Replace placeholders with actual character info
             prompt = prompt
-                .replace('<CHARACTER_NAME>', characterInfo.name)
-                .replace('<CHARACTER_DESCRIPTION>', characterInfo.description)
-                .replace('<CHARACTER_PERSONALITY>', characterInfo.personality)
-                .replace('<CHARACTER_SCENARIO>', characterInfo.scenario)
-                .replace('<CHARACTER_NOTES>', characterInfo.characterNotes)
-                .replace('<CHARACTER_FIRST_MESSAGE>', characterInfo.firstMessage);
+                .replace('<CHARACTER_NAME>', safeCharacterInfo.name)
+                .replace('<CHARACTER_DESCRIPTION>', safeCharacterInfo.description)
+                .replace('<CHARACTER_PERSONALITY>', safeCharacterInfo.personality)
+                .replace('<CHARACTER_SCENARIO>', safeCharacterInfo.scenario)
+                .replace('<CHARACTER_NOTES>', safeCharacterInfo.characterNotes)
+                .replace('<CHARACTER_FIRST_MESSAGE>', safeCharacterInfo.firstMessage);
 
             // Check if there is a connection profile set for the auto outfit system
             let connectionProfile = null;
@@ -685,7 +715,7 @@ export class BotOutfitPanel {
             dragElementWithSave(this.domElement, 'bot-outfit-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement($(this.domElement), 'bot-outfit-panel', {
+                resizeElement(this.domElement!, 'bot-outfit-panel', {
                     minWidth: 250,
                     minHeight: 200,
                     maxWidth: 600,
@@ -788,7 +818,7 @@ export class BotOutfitPanel {
         // Subscribe to store changes if we have access to the store
         if (window.outfitStore) {
             // Listen for changes in bot outfit data
-            this.outfitSubscription = window.outfitStore.subscribe((state: any) => {
+            this.outfitSubscription = window.outfitStore.subscribe((state: OutfitStoreState) => {
                 // Check if this panel's character/outfit instance has changed
                 if (this.outfitManager.characterId && this.outfitManager.outfitInstanceId) {
                     const currentOutfit =
@@ -874,7 +904,7 @@ export class BotOutfitPanel {
     cleanupDynamicRefresh(): void {
         // Unsubscribe from store changes
         if (this.outfitSubscription) {
-            this.outfitSubscription();
+            this.outfitSubscription.unsubscribe();
             this.outfitSubscription = null;
         }
 
@@ -944,5 +974,25 @@ export class BotOutfitPanel {
 
         // Convert to positive and return 8-character string representation
         return Math.abs(hash).toString(36).substring(0, 8).padEnd(8, '0');
+    }
+
+    /**
+     * Gets the current outfit data
+     * @returns {SlotOutfitData} The current outfit data
+     */
+    getCurrentOutfit(): SlotOutfitData {
+        return { ...this.outfitManager.currentValues };
+    }
+
+    /**
+     * Updates the outfit with new data
+     * @param {SlotOutfitData} outfit - The new outfit data
+     */
+    updateOutfit(outfit: SlotOutfitData): void {
+        Object.entries(outfit).forEach(([slot, item]) => {
+            if (this.outfitManager.slots.includes(slot)) {
+                this.outfitManager.setOutfitItem(slot, item);
+            }
+        });
     }
 }

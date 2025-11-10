@@ -1,5 +1,6 @@
 import {debugLog} from '../logging/DebugLogger';
 import {getCharacterId, getOrCreateCharacterId} from '../services/CharacterIdService';
+import {Character} from '../types';
 
 export const CharacterInfoType = {
     Name: 'CharName',
@@ -30,11 +31,11 @@ export type CharacterInfoType = (typeof CharacterInfoType)[keyof typeof Characte
 
 /**
  * Get character information by character ID
- * @param {string} charId - The character ID to look up
- * @param {string} infoType - A field from the CharacterInfoType enum representing the desired data
- * @returns {any|null} The character info or null if not found
+ * @param charId - The character ID to look up
+ * @param infoType - A field from the CharacterInfoType enum representing the desired data
+ * @returns The character info or null if not found
  */
-export function getCharacterInfoById(charId: string, infoType: CharacterInfoType): any | null {
+export function getCharacterInfoById(charId: string, infoType: CharacterInfoType): unknown | null {
     try {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
@@ -43,29 +44,30 @@ export function getCharacterInfoById(charId: string, infoType: CharacterInfoType
               : null;
 
         if (context && context.characters) {
-            const character = context.characters[charId];
+            const characterIndex = parseInt(charId, 10);
+            const character = context.characters[characterIndex];
 
             if (character) {
-                let infoBuffer: any;
+                let infoBuffer: unknown;
 
                 switch (infoType) {
                     case CharacterInfoType.Name:
-                        infoBuffer = character.name;
+                        infoBuffer = 'name' in character ? character.name : character.data?.name;
                         break;
                     case CharacterInfoType.Description:
-                        infoBuffer = character.description;
+                        infoBuffer = 'description' in character ? character.description : character.data?.description;
                         break;
                     case CharacterInfoType.Personality:
-                        infoBuffer = character.personality;
+                        infoBuffer = 'personality' in character ? character.personality : character.data?.personality;
                         break;
                     case CharacterInfoType.Scenario:
-                        infoBuffer = character.scenario;
+                        infoBuffer = 'scenario' in character ? character.scenario : character.data?.scenario;
                         break;
                     case CharacterInfoType.DefaultMessage:
-                        infoBuffer = character.first_mes;
+                        infoBuffer = 'first_mes' in character ? character.first_mes : character.data?.first_mes;
                         break;
                     case CharacterInfoType.ExampleMessage:
-                        infoBuffer = character.mes_example;
+                        infoBuffer = 'mes_example' in character ? character.mes_example : character.data?.mes_example;
                         break;
                     case CharacterInfoType.CreatorComment:
                         infoBuffer = character.creatorcomment;
@@ -110,7 +112,7 @@ export function getCharacterInfoById(charId: string, infoType: CharacterInfoType
                         infoBuffer = character.data_size;
                         break;
                     case CharacterInfoType.CharacterNotes:
-                        infoBuffer = character.data.extensions.depth_prompt.prompt;
+                        infoBuffer = (character.data as any).extensions.depth_prompt.prompt;
                         break;
                     case CharacterInfoType.CharacterId:
                         infoBuffer = getCharacterId(character);
@@ -139,9 +141,9 @@ export function getCharacterInfoById(charId: string, infoType: CharacterInfoType
 
 /**
  * Gets a list of all loaded characters.
- * @returns {any[]|null} The list of character objects or null if not found
+ * @returns The list of character objects or null if not found
  */
-export function getCharacters(): any[] | null {
+export function getCharacters(): Character[] | null {
     const context = window.SillyTavern?.getContext
         ? window.SillyTavern.getContext()
         : window.getContext
@@ -159,10 +161,10 @@ export function getCharacters(): any[] | null {
 
 /**
  * Gets the character ID by the character object.
- * @param {object} char_object The character object from the master array
- * @returns {number|null} The character ID or null if not found
+ * @param char_object The character object from the master array
+ * @returns The character ID or null if not found
  */
-export function getCharacterIdByObject(char_object: any): number | null {
+export function getCharacterIdByObject(char_object: Character): number | null {
     const characters = getCharacters();
 
     if (char_object && characters) {
@@ -188,7 +190,8 @@ export async function getCharacterUniqueIdByIndex(charId: string): Promise<strin
               : null;
 
         if (context && context.characters) {
-            const character = context.characters[charId];
+            const characterIndex = parseInt(charId, 10);
+            const character = context.characters[characterIndex];
             if (character) {
                 return await getOrCreateCharacterId(character);
             }

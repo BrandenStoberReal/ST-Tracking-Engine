@@ -4,24 +4,19 @@ import {customMacroSystem} from './CustomMacroService';
 import {outfitStore} from '../common/Store';
 import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
 import {debugLog} from '../logging/DebugLogger';
+import {AutoOutfitSystemAPI, IAutoOutfitSystemStatus} from '../types';
 
 declare const window: any;
 declare const toastr: any;
 
-export interface IAutoOutfitSystemStatus {
-    enabled: boolean;
-    hasPrompt: boolean;
-    promptLength: number;
-    isProcessing: boolean;
-    consecutiveFailures: number;
-    currentRetryCount: number;
-    maxRetries: number;
-}
-
-export class AutoOutfitService {
+export class AutoOutfitService implements AutoOutfitSystemAPI {
     public systemPrompt: string;
     private outfitManager: any;
-    private isEnabled: boolean;
+    private _isEnabled: boolean;
+
+    get isEnabled(): boolean {
+        return this._isEnabled;
+    }
     private connectionProfile: any;
     private isProcessing: boolean;
     private consecutiveFailures: number;
@@ -37,7 +32,7 @@ export class AutoOutfitService {
 
     constructor(outfitManager: any) {
         this.outfitManager = outfitManager;
-        this.isEnabled = false;
+        this._isEnabled = false;
         this.systemPrompt = this.getDefaultPrompt();
         this.connectionProfile = null;
         this.isProcessing = false;
@@ -129,11 +124,11 @@ You have the following commands at your disposal:
     }
 
     enable(): string {
-        if (this.isEnabled) {
+        if (this._isEnabled) {
             return '[Outfit System] Auto outfit updates already enabled.';
         }
 
-        this.isEnabled = true;
+        this._isEnabled = true;
         this.consecutiveFailures = 0;
         this.currentRetryCount = 0;
         this.setupEventListeners();
@@ -141,11 +136,11 @@ You have the following commands at your disposal:
     }
 
     disable(): string {
-        if (!this.isEnabled) {
+        if (!this._isEnabled) {
             return '[Outfit System] Auto outfit updates already disabled.';
         }
 
-        this.isEnabled = false;
+        this._isEnabled = false;
         this.removeEventListeners();
         return '[Outfit System] Auto outfit updates disabled.';
     }
@@ -168,7 +163,7 @@ You have the following commands at your disposal:
             const { eventSource, event_types } = context;
 
             this.eventHandler = (data: any) => {
-                if (this.isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
+                if (this._isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
                     debugLog('[AutoOutfitSystem] New AI message received, processing...');
 
                     setTimeout(() => {
@@ -434,7 +429,7 @@ You have the following commands at your disposal:
 
             if (charId !== undefined) {
                 const characterName = getCharacterInfoById(charId, CharacterInfoType.Name);
-                return characterName || 'Character';
+                return String(characterName || 'Character');
             }
             return 'Character';
         } catch (error) {
@@ -635,7 +630,7 @@ You have the following commands at your disposal:
 
     getStatus(): IAutoOutfitSystemStatus {
         return {
-            enabled: this.isEnabled,
+            enabled: this._isEnabled,
             hasPrompt: Boolean(this.systemPrompt),
             promptLength: this.systemPrompt?.length || 0,
             isProcessing: this.isProcessing,
@@ -645,23 +640,21 @@ You have the following commands at your disposal:
         };
     }
 
-    async manualTrigger(): Promise<void> {
+    async manualTrigger(): Promise<string> {
         if (this.isProcessing) {
-            this.showPopup('Auto outfit check already in progress.', 'warning');
-            return;
+            return 'Auto outfit check already in progress.';
         }
 
         try {
-            this.showPopup('Manual outfit check started...', 'info');
             await this.processOutfitCommands();
+            return 'Manual outfit check completed successfully.';
         } catch (error: any) {
-            this.showPopup(`Manual trigger failed: ${error.message}`, 'error');
+            return `Manual trigger failed: ${error.message}`;
         }
     }
 
-    setPrompt(prompt: string | null | undefined): string {
-        this.systemPrompt = prompt ? prompt : this.getDefaultPrompt();
-        return '[Outfit System] System prompt updated.';
+    setPrompt(prompt: string): void {
+        this.systemPrompt = prompt;
     }
 
     getProcessedSystemPrompt(): string {
@@ -672,17 +665,19 @@ You have the following commands at your disposal:
         return customMacroSystem.getCurrentUserName();
     }
 
-    resetToDefaultPrompt(): string {
+    resetToDefaultPrompt(): void {
         this.systemPrompt = this.getDefaultPrompt();
-        return '[Outfit System] Reset to default prompt.';
     }
 
-    setConnectionProfile(profile: any): string {
+    setConnectionProfile(profile: string | null): void {
         this.connectionProfile = profile;
-        return `[Outfit System] Connection profile set to: ${profile || 'default'}`;
     }
 
-    getConnectionProfile(): any {
+    getConnectionProfile(): string | null {
         return this.connectionProfile;
+    }
+
+    getPrompt(): string {
+        return this.systemPrompt;
     }
 }

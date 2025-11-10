@@ -97,7 +97,7 @@ class OutfitStore {
     }
     getUserOutfit(instanceId) {
         const instanceData = this.state.userInstances[instanceId];
-        return deepClone(instanceData || {});
+        return deepClone((instanceData === null || instanceData === void 0 ? void 0 : instanceData.user) || {});
     }
     setUserOutfit(instanceId, outfitData) {
         // Check if instance is being created
@@ -111,10 +111,11 @@ class OutfitStore {
             promptInjectionEnabled = existingInstanceData.promptInjectionEnabled;
         }
         // Create the new instance data with both outfit data and settings
-        const updatedInstanceData = Object.assign({}, outfitData);
-        if (promptInjectionEnabled !== undefined) {
-            updatedInstanceData.promptInjectionEnabled = promptInjectionEnabled;
-        }
+        const updatedInstanceData = {
+            bot: {},
+            user: Object.assign({}, outfitData),
+            promptInjectionEnabled,
+        };
         this.state.userInstances[instanceId] = updatedInstanceData;
         if (instanceCreated) {
             // Emit instance created event

@@ -15,17 +15,19 @@ class OutfitDataService {
         this.dataManager = dataManager;
     }
     clearGlobalOutfitVariables() {
-        var _a;
         try {
             const extensionSettings = this.dataManager.load();
-            if ((_a = extensionSettings === null || extensionSettings === void 0 ? void 0 : extensionSettings.variables) === null || _a === void 0 ? void 0 : _a.global) {
-                const globalVars = extensionSettings.variables.global;
-                const outfitVars = Object.keys(globalVars).filter((key) => ALL_SLOTS.some((slot) => key.endsWith(`_${slot}`)));
-                outfitVars.forEach((key) => {
-                    delete globalVars[key];
-                });
-                this.dataManager.save({ variables: { global: globalVars } });
-                debugLog(`[OutfitTracker] Removed ${outfitVars.length} outfit-related global variables`);
+            if ((extensionSettings === null || extensionSettings === void 0 ? void 0 : extensionSettings.variables) && typeof extensionSettings.variables === 'object') {
+                const variables = extensionSettings.variables;
+                if (variables.global && typeof variables.global === 'object') {
+                    const globalVars = variables.global;
+                    const outfitVars = Object.keys(globalVars).filter((key) => ALL_SLOTS.some((slot) => key.endsWith(`_${slot}`)));
+                    outfitVars.forEach((key) => {
+                        delete globalVars[key];
+                    });
+                    this.dataManager.save({ variables: { global: globalVars } });
+                    debugLog(`[OutfitTracker] Removed ${outfitVars.length} outfit-related global variables`);
+                }
             }
         }
         catch (error) {

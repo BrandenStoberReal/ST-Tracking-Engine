@@ -65,10 +65,10 @@ export function isValidSlot(slotName, allSlots) {
 }
 /**
  * Safely gets a nested property from an object
- * @param {object} obj - The object to get the property from
- * @param {string} path - Dot notation path to the property
- * @param {*} defaultValue - Value to return if path doesn't exist
- * @returns {*} - The value at the path or the default value
+ * @param obj - The object to get the property from
+ * @param path - Dot notation path to the property
+ * @param defaultValue - Value to return if path doesn't exist
+ * @returns The value at the path or the default value
  */
 export function safeGet(obj, path, defaultValue = null) {
     try {
@@ -81,8 +81,8 @@ export function safeGet(obj, path, defaultValue = null) {
 }
 /**
  * Creates a deep clone of an object
- * @param {any} obj - The object to clone
- * @returns {any} A deep clone of the input object
+ * @param obj - The object to clone
+ * @returns A deep clone of the input object
  */
 export function deepClone(obj) {
     const visited = new WeakMap();

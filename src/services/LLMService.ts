@@ -2,16 +2,17 @@ import {LLMUtility} from '../utils/LLMUtility';
 import {extractCommands} from '../processors/StringProcessor';
 import {findCharacterById} from './CharacterIdService';
 import {debugLog} from '../logging/DebugLogger';
+import {Character, LLMGenerationOptions, LLMImportResult, OutfitManager, STContext} from '../types';
 
-declare const window: any;
+// Window is available globally
 
 /**
  * Process a single outfit command
- * @param {string} command - The command string to process
- * @param {object} botManager - The bot outfit manager
+ * @param command - The command string to process
+ * @param botManager - The bot outfit manager
  * @returns {Promise<void>}
  */
-async function processSingleCommand(command: string, botManager: any): Promise<void> {
+async function processSingleCommand(command: string, botManager: OutfitManager): Promise<void> {
     try {
         const commandRegex = /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\(?:"([^"]*\)"|)\)$/;
         const match = command.match(commandRegex);
@@ -34,7 +35,9 @@ async function processSingleCommand(command: string, botManager: any): Promise<v
         }
 
         // Apply the outfit change to the bot manager
-        await botManager.setOutfitItem(slot, finalAction === 'remove' ? 'None' : cleanValue);
+        if (botManager && typeof botManager.setOutfitItem === 'function') {
+            await botManager.setOutfitItem(slot, finalAction === 'remove' ? 'None' : cleanValue);
+        }
     } catch (error) {
         debugLog('Error processing single command:', error, 'error');
         throw error;
@@ -43,10 +46,10 @@ async function processSingleCommand(command: string, botManager: any): Promise<v
 
 /**
  * Generates outfit from LLM based on provided options
- * @param {object} options - Generation options containing the prompt
- * @returns {Promise<string>} - The LLM response containing outfit commands
+ * @param options - Generation options containing the prompt
+ * @returns The LLM response containing outfit commands
  */
-export async function generateOutfitFromLLM(options: { prompt: string }): Promise<string> {
+export async function generateOutfitFromLLM(options: LLMGenerationOptions): Promise<string> {
     try {
         const prompt = options?.prompt || '';
 
@@ -55,14 +58,16 @@ export async function generateOutfitFromLLM(options: { prompt: string }): Promis
         }
 
         // Use LLMUtility to generate with retry logic
+        const context: STContext | null = window.SillyTavern?.getContext
+            ? window.SillyTavern.getContext()
+            : window.getContext
+              ? window.getContext()
+              : null;
+
         const response = await LLMUtility.generateWithRetry(
             prompt,
-            "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.", // Corrected escaping for \'
-            window.SillyTavern?.getContext
-                ? window.SillyTavern.getContext()
-                : window.getContext
-                  ? window.getContext()
-                  : null
+            "You are an outfit generation system. Based on the character information provided, output outfit commands to set the character's clothing and accessories.",
+            context
         );
 
         return response;
@@ -74,30 +79,31 @@ export async function generateOutfitFromLLM(options: { prompt: string }): Promis
 
 /**
  * Imports outfit from character card using LLM analysis
- * @returns {Promise<object>} - Result with message and any extracted outfit information
+ * @returns Result with message and any extracted outfit information
  */
-export async function importOutfitFromCharacterCard(): Promise<{
-    message: string;
-    commands: string[];
-    characterName?: string;
-    error?: string;
-}> {
+export async function importOutfitFromCharacterCard(): Promise<LLMImportResult> {
     try {
-        const context = window.SillyTavern?.getContext
+        const context: STContext | null = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
               ? window.getContext()
               : null;
 
         // Try to get character using the new character ID system first
-        let character = null;
+        let character: Character | null = null;
         const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
         if (botOutfitManager?.characterId) {
             character = findCharacterById(botOutfitManager.characterId);
         }
 
         // Fallback to old system if needed
-        if (!character && context && context.characterId !== undefined && context.characterId !== null) {
+        if (
+            !character &&
+            context &&
+            context.characterId !== undefined &&
+            context.characterId !== null &&
+            context.characters
+        ) {
             character = context.characters[context.characterId];
         }
 
@@ -177,13 +183,14 @@ export async function importOutfitFromCharacterCard(): Promise<{
             commands: commands,
             characterName: characterName,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         debugLog('Error importing outfit from character card:', error, 'error');
 
+        const errorMessage = error instanceof Error ? error.message : String(error);
         return {
-            message: `Error importing outfit: ${error.message}`, // Corrected escaping for \'
+            message: `Error importing outfit: ${errorMessage}`,
             commands: [],
-            error: error.message,
+            error: errorMessage,
         };
     }
 }

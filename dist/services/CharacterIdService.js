@@ -14,7 +14,7 @@ import { debugLog } from '../logging/DebugLogger.js';
  */
 /**
  * Gets or generates a character ID from the character's extensions object
- * @param {any} character - The character object
+ * @param character - The character object
  * @returns {Promise<string>} The character ID
  */
 export function getOrCreateCharacterId(character) {
@@ -49,7 +49,7 @@ export function getOrCreateCharacterId(character) {
                     characterIndex = context.characters.findIndex((char) => char === character);
                 }
                 if (characterIndex !== -1) {
-                    yield context.writeExtensionField(characterIndex, 'character_id', newCharacterId);
+                    yield context.writeExtensionField(characterIndex.toString(), 'character_id', newCharacterId);
                     debugLog(`[CharacterIdService] Stored character ID using writeExtensionField for character at index ${characterIndex}`, null, 'info');
                 }
                 else {
@@ -85,7 +85,7 @@ export function getOrCreateCharacterId(character) {
 }
 /**
  * Gets the character ID from a character object without creating one
- * @param {any} character - The character object
+ * @param character - The character object
  * @returns {string|null} The character ID or null if not found
  */
 export function getCharacterId(character) {
@@ -108,8 +108,8 @@ export function getCharacterId(character) {
 }
 /**
  * Finds a character by their character ID
- * @param {string} characterId - The character ID to search for
- * @returns {any|null} The character object or null if not found
+ * @param characterId - The character ID to search for
+ * @returns The character object or null if not found
  */
 export function findCharacterById(characterId) {
     var _a;
@@ -167,7 +167,7 @@ export function getCurrentCharacterId() {
  */
 export function migrateAllCharacters() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b;
         try {
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
                 ? window.SillyTavern.getContext()
@@ -183,7 +183,7 @@ export function migrateAllCharacters() {
             let migratedCount = 0;
             for (let i = 0; i < context.characters.length; i++) {
                 const character = context.characters[i];
-                const characterName = character.name || 'Unnamed Character';
+                const characterName = ('name' in character ? character.name : (_b = character.data) === null || _b === void 0 ? void 0 : _b.name) || 'Unnamed Character';
                 const existingId = getCharacterId(character);
                 debugLog(`[CharacterIdService] Checking character "${characterName}" for existing ID...`, null, 'debug');
                 if (!existingId) {
@@ -191,7 +191,7 @@ export function migrateAllCharacters() {
                     debugLog(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`, null, 'info');
                     console.log(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`);
                     if (context.writeExtensionField) {
-                        yield context.writeExtensionField(i, 'character_id', newCharacterId);
+                        yield context.writeExtensionField(i.toString(), 'character_id', newCharacterId);
                         debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using writeExtensionField`, null, 'info');
                     }
                     else {
@@ -200,10 +200,11 @@ export function migrateAllCharacters() {
                         if (!character.data) {
                             character.data = {};
                         }
-                        if (!character.data.extensions) {
-                            character.data.extensions = {};
+                        const charData = character.data;
+                        if (!charData.extensions) {
+                            charData.extensions = {};
                         }
-                        character.data.extensions.character_id = newCharacterId;
+                        charData.extensions.character_id = newCharacterId;
                         debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using fallback method`, null, 'info');
                     }
                     migratedCount++;

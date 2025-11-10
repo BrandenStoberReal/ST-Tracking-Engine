@@ -23,26 +23,26 @@ export const EXTENSION_EVENTS = {
 
 // Simple event bus implementation
 class ExtensionEventBus {
-    private listeners: { [key: string]: Array<(data?: any) => void> } = {};
+    private listeners: { [key: string]: Array<(data?: unknown) => void> } = {};
 
     constructor() {
         this.listeners = {};
     }
 
-    on(event: string, callback: (data?: any) => void) {
+    on(event: string, callback: (data?: unknown) => void) {
         if (!this.listeners[event]) {
             this.listeners[event] = [];
         }
         this.listeners[event].push(callback);
     }
 
-    off(event: string, callback: (data?: any) => void) {
+    off(event: string, callback: (data?: unknown) => void) {
         if (this.listeners[event]) {
             this.listeners[event] = this.listeners[event].filter((listener) => listener !== callback);
         }
     }
 
-    emit(event: string, data?: any) {
+    emit(event: string, data?: unknown) {
         if (this.listeners[event]) {
             this.listeners[event].forEach((callback) => {
                 try {

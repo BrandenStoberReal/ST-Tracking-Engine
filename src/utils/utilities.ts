@@ -70,14 +70,14 @@ export function isValidSlot(slotName: string, allSlots: string[]): boolean {
 
 /**
  * Safely gets a nested property from an object
- * @param {object} obj - The object to get the property from
- * @param {string} path - Dot notation path to the property
- * @param {*} defaultValue - Value to return if path doesn't exist
- * @returns {*} - The value at the path or the default value
+ * @param obj - The object to get the property from
+ * @param path - Dot notation path to the property
+ * @param defaultValue - Value to return if path doesn't exist
+ * @returns The value at the path or the default value
  */
-export function safeGet(obj: any, path: string, defaultValue: any = null): any {
+export function safeGet(obj: unknown, path: string, defaultValue: unknown = null): unknown {
     try {
-        return path.split('.').reduce((acc, key) => acc && acc[key], obj) || defaultValue;
+        return path.split('.').reduce((acc, key) => acc && (acc as any)[key], obj) || defaultValue;
     } catch (error) {
         debugLog(`Error in safeGet for path "${path}":`, error, 'error');
         return defaultValue;
@@ -86,13 +86,13 @@ export function safeGet(obj: any, path: string, defaultValue: any = null): any {
 
 /**
  * Creates a deep clone of an object
- * @param {any} obj - The object to clone
- * @returns {any} A deep clone of the input object
+ * @param obj - The object to clone
+ * @returns A deep clone of the input object
  */
 export function deepClone<T>(obj: T): T {
     const visited = new WeakMap();
 
-    function clone(obj: any): any {
+    function clone(obj: unknown): unknown {
         if (obj === null || typeof obj !== 'object') {
             return obj;
         }
@@ -113,7 +113,7 @@ export function deepClone<T>(obj: T): T {
 
             for (const key in obj) {
                 if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    clonedObj[key] = clone(obj[key]);
+                    clonedObj[key] = clone((obj as any)[key]);
                 }
             }
             return clonedObj;
@@ -123,7 +123,7 @@ export function deepClone<T>(obj: T): T {
         return obj;
     }
 
-    return clone(obj);
+    return clone(obj) as T;
 }
 
 /**

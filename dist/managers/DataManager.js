@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { deepMerge } from '../utils/utilities.js';
+import { DEFAULT_SETTINGS } from '../config/constants.js';
 const DATA_VERSION = '1.0.0';
 class DataManager {
     constructor(storageService) {
@@ -17,19 +18,27 @@ class DataManager {
     }
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.data = yield this.storageService.load();
+            this.data = (yield this.storageService.load());
             if (!this.data) {
-                this.data = {};
+                this.data = {
+                    botInstances: {},
+                    userInstances: {},
+                    presets: { bot: {}, user: {} },
+                    settings: Object.assign({}, DEFAULT_SETTINGS),
+                    version: DATA_VERSION,
+                };
             }
             this.migrateData();
         });
     }
     migrateData() {
+        if (!this.data)
+            return;
         if (!this.data.version || this.data.version < this.version) {
             console.log(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`);
             // Migration: Convert 'default' presets to settings-based default preset names
             if (this.data.presets) {
-                const settings = this.data.settings || {};
+                const settings = this.data.settings || Object.assign({}, DEFAULT_SETTINGS);
                 // Migrate bot presets
                 if (this.data.presets.bot) {
                     for (const [key, presetGroup] of Object.entries(this.data.presets.bot)) {
@@ -67,34 +76,38 @@ class DataManager {
         }
     }
     save(data) {
-        this.data = deepMerge(this.data, data);
-        this.storageService.save(this.data);
+        if (this.data) {
+            this.data = deepMerge(this.data, data);
+            this.storageService.save(this.data);
+        }
     }
     load() {
-        return this.data;
+        return this.data || null;
     }
     saveOutfitData(outfitData) {
         this.save({
-            instances: outfitData.botInstances || {},
-            user_instances: outfitData.userInstances || {},
+            botInstances: outfitData.botInstances || {},
+            userInstances: outfitData.userInstances || {},
             presets: outfitData.presets || {},
         });
     }
     // Direct method to save wiped outfit data that bypasses deepMerge for complete wipe operations
     saveWipedOutfitData() {
-        // Directly set the properties without using deepMerge
-        this.data.instances = {};
-        this.data.user_instances = {};
-        this.data.presets = {};
-        // Save the updated data to storage
-        this.storageService.save(this.data);
+        if (this.data) {
+            // Directly set the properties without using deepMerge
+            this.data.botInstances = {};
+            this.data.userInstances = {};
+            this.data.presets = { bot: {}, user: {} };
+            // Save the updated data to storage
+            this.storageService.save(this.data);
+        }
     }
     loadOutfitData() {
         const data = this.load();
         return {
-            botInstances: data.instances || {},
-            userInstances: data.user_instances || {},
-            presets: data.presets || {},
+            botInstances: (data === null || data === void 0 ? void 0 : data.botInstances) || (data === null || data === void 0 ? void 0 : data.instances) || {},
+            userInstances: (data === null || data === void 0 ? void 0 : data.userInstances) || (data === null || data === void 0 ? void 0 : data.user_instances) || {},
+            presets: (data === null || data === void 0 ? void 0 : data.presets) || { bot: {}, user: {} },
         };
     }
     saveSettings(settings) {
@@ -102,7 +115,7 @@ class DataManager {
     }
     loadSettings() {
         const data = this.load();
-        return data.settings || {};
+        return (data === null || data === void 0 ? void 0 : data.settings) || Object.assign({}, DEFAULT_SETTINGS);
     }
     flush() {
         // No flush operation needed as the save function doesn't support it

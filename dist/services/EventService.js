@@ -103,6 +103,8 @@ class EventService {
                 return;
             }
             const chat = this.context.chat;
+            if (!chat)
+                return;
             const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
             if (aiMessages.length === 1 && !data.is_user) {
                 debugLog('[OutfitTracker] First AI message received, updating outfit instance.');
@@ -261,6 +263,16 @@ class EventService {
             extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
             return result;
         });
+    }
+    // EventService interface implementation
+    registerEvent(event, handler) {
+        extensionEventBus.on(event, handler);
+    }
+    unregisterEvent(event, handler) {
+        extensionEventBus.off(event, handler);
+    }
+    emitEvent(event, ...args) {
+        extensionEventBus.emit(event, ...args);
     }
     overrideClearChat() {
         if (typeof window.clearChat !== 'function') {

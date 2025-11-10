@@ -14,9 +14,12 @@ import { outfitStore } from '../common/Store.js';
 import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { debugLog } from '../logging/DebugLogger.js';
 export class AutoOutfitService {
+    get isEnabled() {
+        return this._isEnabled;
+    }
     constructor(outfitManager) {
         this.outfitManager = outfitManager;
-        this.isEnabled = false;
+        this._isEnabled = false;
         this.systemPrompt = this.getDefaultPrompt();
         this.connectionProfile = null;
         this.isProcessing = false;
@@ -106,20 +109,20 @@ You have the following commands at your disposal:
 `;
     }
     enable() {
-        if (this.isEnabled) {
+        if (this._isEnabled) {
             return '[Outfit System] Auto outfit updates already enabled.';
         }
-        this.isEnabled = true;
+        this._isEnabled = true;
         this.consecutiveFailures = 0;
         this.currentRetryCount = 0;
         this.setupEventListeners();
         return '[Outfit System] Auto outfit updates enabled.';
     }
     disable() {
-        if (!this.isEnabled) {
+        if (!this._isEnabled) {
             return '[Outfit System] Auto outfit updates already disabled.';
         }
-        this.isEnabled = false;
+        this._isEnabled = false;
         this.removeEventListeners();
         return '[Outfit System] Auto outfit updates disabled.';
     }
@@ -138,7 +141,7 @@ You have the following commands at your disposal:
             }
             const { eventSource, event_types } = context;
             this.eventHandler = (data) => {
-                if (this.isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
+                if (this._isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
                     debugLog('[AutoOutfitSystem] New AI message received, processing...');
                     setTimeout(() => {
                         this.processOutfitCommands().catch((error) => {
@@ -363,7 +366,7 @@ You have the following commands at your disposal:
             const charId = context.this_chid;
             if (charId !== undefined) {
                 const characterName = getCharacterInfoById(charId, CharacterInfoType.Name);
-                return characterName || 'Character';
+                return String(characterName || 'Character');
             }
             return 'Character';
         }
@@ -527,7 +530,7 @@ You have the following commands at your disposal:
     getStatus() {
         var _a;
         return {
-            enabled: this.isEnabled,
+            enabled: this._isEnabled,
             hasPrompt: Boolean(this.systemPrompt),
             promptLength: ((_a = this.systemPrompt) === null || _a === void 0 ? void 0 : _a.length) || 0,
             isProcessing: this.isProcessing,
@@ -539,21 +542,19 @@ You have the following commands at your disposal:
     manualTrigger() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.isProcessing) {
-                this.showPopup('Auto outfit check already in progress.', 'warning');
-                return;
+                return 'Auto outfit check already in progress.';
             }
             try {
-                this.showPopup('Manual outfit check started...', 'info');
                 yield this.processOutfitCommands();
+                return 'Manual outfit check completed successfully.';
             }
             catch (error) {
-                this.showPopup(`Manual trigger failed: ${error.message}`, 'error');
+                return `Manual trigger failed: ${error.message}`;
             }
         });
     }
     setPrompt(prompt) {
-        this.systemPrompt = prompt ? prompt : this.getDefaultPrompt();
-        return '[Outfit System] System prompt updated.';
+        this.systemPrompt = prompt;
     }
     getProcessedSystemPrompt() {
         return this.replaceMacrosInPrompt(this.systemPrompt);
@@ -563,13 +564,14 @@ You have the following commands at your disposal:
     }
     resetToDefaultPrompt() {
         this.systemPrompt = this.getDefaultPrompt();
-        return '[Outfit System] Reset to default prompt.';
     }
     setConnectionProfile(profile) {
         this.connectionProfile = profile;
-        return `[Outfit System] Connection profile set to: ${profile || 'default'}`;
     }
     getConnectionProfile() {
         return this.connectionProfile;
+    }
+    getPrompt() {
+        return this.systemPrompt;
     }
 }

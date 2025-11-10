@@ -15,10 +15,10 @@ import { debugLog } from '../logging/DebugLogger.js';
  * Registers all outfit-related slash commands with SillyTavern's command system.
  * This function sets up commands for outfit management, auto outfit system control,
  * preset management, and mobile-friendly outfit commands.
- * @param {any} botManager - The bot outfit manager instance
- * @param {any} userManager - The user outfit manager instance
- * @param {any} autoOutfitSystem - The auto outfit system instance
- * @returns {Promise<void>} A promise that resolves when all commands are registered
+ * @param botManager - The bot outfit manager instance
+ * @param userManager - The user outfit manager instance
+ * @param autoOutfitSystem - The auto outfit system instance
+ * @returns A promise that resolves when all commands are registered
  */
 export function registerOutfitCommands(botManager, userManager, autoOutfitSystem) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -145,7 +145,8 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
         `,
             }));
             // Only register auto commands if AutoOutfitSystem loaded successfully
-            if (typeof autoOutfitSystem !== 'undefined' && autoOutfitSystem.constructor.name !== 'DummyAutoOutfitSystem') {
+            if (autoOutfitSystem !== null) {
+                const system = autoOutfitSystem;
                 SlashCommandParser.addCommandObject(SlashCommand.fromProps({
                     name: 'outfit-auto',
                     callback: function (args, value) {
@@ -154,20 +155,20 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             const isQuiet = (args === null || args === void 0 ? void 0 : args.quiet) === true;
                             if (window.autoOutfitSystem) {
                                 if (arg === 'on') {
-                                    const message = autoOutfitSystem.enable();
+                                    const message = system.enable();
                                     if (!isQuiet) {
                                         toastr.info(message, 'Outfit System');
                                     }
                                     return message;
                                 }
                                 else if (arg === 'off') {
-                                    const message = autoOutfitSystem.disable();
+                                    const message = system.disable();
                                     if (!isQuiet) {
                                         toastr.info(message, 'Outfit System');
                                     }
                                     return message;
                                 }
-                                const status = autoOutfitSystem.getStatus();
+                                const status = system.getStatus();
                                 const statusMessage = `Auto outfit: ${status.enabled ? 'ON' : 'OFF'}\nPrompt: ${status.hasPrompt ? 'SET' : 'NOT SET'}`;
                                 if (!isQuiet) {
                                     toastr.info(statusMessage);
@@ -239,13 +240,13 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             if (window.autoOutfitSystem) {
                                 const prompt = (value === null || value === void 0 ? void 0 : value.toString()) || '';
                                 if (prompt) {
-                                    const message = autoOutfitSystem.setPrompt(prompt);
+                                    const message = system.setPrompt(prompt);
                                     if (areSystemMessagesEnabled()) {
                                         window.botOutfitPanel.sendSystemMessage(message);
                                     }
                                     return message;
                                 }
-                                const length = ((_a = autoOutfitSystem.systemPrompt) === null || _a === void 0 ? void 0 : _a.length) || 0;
+                                const length = ((_a = system.systemPrompt) === null || _a === void 0 ? void 0 : _a.length) || 0;
                                 toastr.info(`Current prompt length: ${length}`);
                                 return `Current prompt length: ${length}`;
                             }
@@ -289,12 +290,12 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                     callback: function (args) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (window.autoOutfitSystem) {
-                                const message = autoOutfitSystem.resetToDefaultPrompt();
+                                const message = system.resetToDefaultPrompt();
                                 if (areSystemMessagesEnabled()) {
                                     window.botOutfitPanel.sendSystemMessage(message);
                                 }
                                 // Update the textarea in settings
-                                $('#outfit-prompt-input').val(autoOutfitSystem.systemPrompt);
+                                $('#outfit-prompt-input').val(system.systemPrompt);
                                 // Use the store's save method which uses the new persistence service
                                 if (typeof window.outfitStore !== 'undefined') {
                                     window.outfitStore.saveState();
@@ -334,10 +335,10 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                     callback: function (args) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (window.autoOutfitSystem) {
-                                const status = autoOutfitSystem.getStatus();
-                                const preview = autoOutfitSystem.systemPrompt.length > 100
-                                    ? autoOutfitSystem.systemPrompt.substring(0, 100) + '...'
-                                    : autoOutfitSystem.systemPrompt;
+                                const status = system.getStatus();
+                                const preview = system.systemPrompt.length > 100
+                                    ? system.systemPrompt.substring(0, 100) + '...'
+                                    : system.systemPrompt;
                                 const message = `Prompt preview: ${preview}\n                    \nFull length: ${status.promptLength} chars`;
                                 toastr.info(message, 'Current System Prompt', {
                                     timeOut: 10000,
@@ -375,7 +376,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                     callback: function (args) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (window.autoOutfitSystem) {
-                                const result = yield autoOutfitSystem.manualTrigger();
+                                const result = yield system.manualTrigger();
                                 toastr.info(result, 'Manual Outfit Check');
                                 return result;
                             }
@@ -422,10 +423,13 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                         try {
                             // First try to load the outfit for the bot character
                             let message = yield botManager.loadPreset(outfitName);
-                            if (message.includes('not found')) {
+                            if (message && message.includes('not found')) {
                                 // If not found for bot, try loading default outfit if requested
                                 if (outfitName.toLowerCase() === 'default') {
-                                    message = yield botManager.loadDefaultOutfit();
+                                    const defaultMessage = yield botManager.loadDefaultOutfit();
+                                    if (defaultMessage) {
+                                        message = defaultMessage;
+                                    }
                                 }
                             }
                             if (areSystemMessagesEnabled()) {
@@ -433,10 +437,13 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             }
                             // Also try to load the outfit for the user if it exists
                             let userMessage = yield userManager.loadPreset(outfitName);
-                            if (userMessage.includes('not found')) {
+                            if (userMessage && userMessage.includes('not found')) {
                                 // If not found for user, try loading default outfit if requested
                                 if (outfitName.toLowerCase() === 'default') {
-                                    userMessage = yield userManager.loadDefaultOutfit();
+                                    const defaultUserMessage = yield userManager.loadDefaultOutfit();
+                                    if (defaultUserMessage) {
+                                        userMessage = defaultUserMessage;
+                                    }
                                 }
                             }
                             if (areSystemMessagesEnabled() && userMessage && !userMessage.includes('not found')) {
@@ -515,7 +522,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                         }
                         catch (error) {
                             debugLog('Error importing outfit from character card:', error, 'error');
-                            const errorMessage = `Error importing outfit: ${error.message}`;
+                            const errorMessage = `Error importing outfit: ${error instanceof Error ? error.message : String(error)}`;
                             if (!isQuiet) {
                                 toastr.error(errorMessage, 'Outfit Import');
                             }

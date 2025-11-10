@@ -1,8 +1,4 @@
-interface PanelColors {
-    primary: string;
-    border: string;
-    shadow: string;
-}
+import {PanelColors} from '../types';
 
 interface DefaultSettings {
     autoOpenBot: boolean;

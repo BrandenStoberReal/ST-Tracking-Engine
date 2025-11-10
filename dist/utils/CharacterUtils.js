@@ -35,12 +35,12 @@ export const CharacterInfoType = {
 };
 /**
  * Get character information by character ID
- * @param {string} charId - The character ID to look up
- * @param {string} infoType - A field from the CharacterInfoType enum representing the desired data
- * @returns {any|null} The character info or null if not found
+ * @param charId - The character ID to look up
+ * @param infoType - A field from the CharacterInfoType enum representing the desired data
+ * @returns The character info or null if not found
  */
 export function getCharacterInfoById(charId, infoType) {
-    var _a;
+    var _a, _b, _c, _d, _e, _f, _g;
     try {
         const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
             ? window.SillyTavern.getContext()
@@ -48,27 +48,28 @@ export function getCharacterInfoById(charId, infoType) {
                 ? window.getContext()
                 : null;
         if (context && context.characters) {
-            const character = context.characters[charId];
+            const characterIndex = parseInt(charId, 10);
+            const character = context.characters[characterIndex];
             if (character) {
                 let infoBuffer;
                 switch (infoType) {
                     case CharacterInfoType.Name:
-                        infoBuffer = character.name;
+                        infoBuffer = 'name' in character ? character.name : (_b = character.data) === null || _b === void 0 ? void 0 : _b.name;
                         break;
                     case CharacterInfoType.Description:
-                        infoBuffer = character.description;
+                        infoBuffer = 'description' in character ? character.description : (_c = character.data) === null || _c === void 0 ? void 0 : _c.description;
                         break;
                     case CharacterInfoType.Personality:
-                        infoBuffer = character.personality;
+                        infoBuffer = 'personality' in character ? character.personality : (_d = character.data) === null || _d === void 0 ? void 0 : _d.personality;
                         break;
                     case CharacterInfoType.Scenario:
-                        infoBuffer = character.scenario;
+                        infoBuffer = 'scenario' in character ? character.scenario : (_e = character.data) === null || _e === void 0 ? void 0 : _e.scenario;
                         break;
                     case CharacterInfoType.DefaultMessage:
-                        infoBuffer = character.first_mes;
+                        infoBuffer = 'first_mes' in character ? character.first_mes : (_f = character.data) === null || _f === void 0 ? void 0 : _f.first_mes;
                         break;
                     case CharacterInfoType.ExampleMessage:
-                        infoBuffer = character.mes_example;
+                        infoBuffer = 'mes_example' in character ? character.mes_example : (_g = character.data) === null || _g === void 0 ? void 0 : _g.mes_example;
                         break;
                     case CharacterInfoType.CreatorComment:
                         infoBuffer = character.creatorcomment;
@@ -136,7 +137,7 @@ export function getCharacterInfoById(charId, infoType) {
 }
 /**
  * Gets a list of all loaded characters.
- * @returns {any[]|null} The list of character objects or null if not found
+ * @returns The list of character objects or null if not found
  */
 export function getCharacters() {
     var _a;
@@ -154,8 +155,8 @@ export function getCharacters() {
 }
 /**
  * Gets the character ID by the character object.
- * @param {object} char_object The character object from the master array
- * @returns {number|null} The character ID or null if not found
+ * @param char_object The character object from the master array
+ * @returns The character ID or null if not found
  */
 export function getCharacterIdByObject(char_object) {
     const characters = getCharacters();
@@ -181,7 +182,8 @@ export function getCharacterUniqueIdByIndex(charId) {
                     ? window.getContext()
                     : null;
             if (context && context.characters) {
-                const character = context.characters[charId];
+                const characterIndex = parseInt(charId, 10);
+                const character = context.characters[characterIndex];
                 if (character) {
                     return yield getOrCreateCharacterId(character);
                 }

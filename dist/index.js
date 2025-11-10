@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { initializeExtension } from './core/ExtensionCore.js';
 import { debugLog } from './logging/DebugLogger.js';
+// jQuery is available globally
 debugLog('[OutfitTracker] Starting extension loading...');
 debugLog('Starting extension loading...', null, 'info');
 $(document).ready(() => __awaiter(void 0, void 0, void 0, function* () {

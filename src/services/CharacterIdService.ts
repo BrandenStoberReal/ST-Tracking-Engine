@@ -1,5 +1,6 @@
 import {generateGUID} from '../utils/utilities';
 import {debugLog} from '../logging/DebugLogger';
+import {Character} from '../types';
 
 /**
  * CharacterIdService - Manages character ID generation and assignment
@@ -7,10 +8,10 @@ import {debugLog} from '../logging/DebugLogger';
 
 /**
  * Gets or generates a character ID from the character's extensions object
- * @param {any} character - The character object
+ * @param character - The character object
  * @returns {Promise<string>} The character ID
  */
-export async function getOrCreateCharacterId(character: any): Promise<string> {
+export async function getOrCreateCharacterId(character: Character): Promise<string> {
     try {
         if (!character) {
             debugLog('[CharacterIdService] Character object is null or undefined', null, 'error');
@@ -46,7 +47,7 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
             }
 
             if (characterIndex !== -1) {
-                await context.writeExtensionField(characterIndex, 'character_id', newCharacterId);
+                await context.writeExtensionField(characterIndex.toString(), 'character_id', newCharacterId);
                 debugLog(
                     `[CharacterIdService] Stored character ID using writeExtensionField for character at index ${characterIndex}`,
                     null,
@@ -92,10 +93,10 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
 
 /**
  * Gets the character ID from a character object without creating one
- * @param {any} character - The character object
+ * @param character - The character object
  * @returns {string|null} The character ID or null if not found
  */
-export function getCharacterId(character: any): string | null {
+export function getCharacterId(character: Character): string | null {
     try {
         if (!character) {
             return null;
@@ -118,10 +119,10 @@ export function getCharacterId(character: any): string | null {
 
 /**
  * Finds a character by their character ID
- * @param {string} characterId - The character ID to search for
- * @returns {any|null} The character object or null if not found
+ * @param characterId - The character ID to search for
+ * @returns The character object or null if not found
  */
-export function findCharacterById(characterId: string): any | null {
+export function findCharacterById(characterId: string): Character | null {
     try {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
@@ -198,7 +199,7 @@ export async function migrateAllCharacters(): Promise<number> {
 
         for (let i = 0; i < context.characters.length; i++) {
             const character = context.characters[i];
-            const characterName = character.name || 'Unnamed Character';
+            const characterName = ('name' in character ? character.name : character.data?.name) || 'Unnamed Character';
             const existingId = getCharacterId(character);
 
             debugLog(`[CharacterIdService] Checking character "${characterName}" for existing ID...`, null, 'debug');
@@ -215,7 +216,7 @@ export async function migrateAllCharacters(): Promise<number> {
                 );
 
                 if (context.writeExtensionField) {
-                    await context.writeExtensionField(i, 'character_id', newCharacterId);
+                    await context.writeExtensionField(i.toString(), 'character_id', newCharacterId);
                     debugLog(
                         `[CharacterIdService] Successfully migrated character "${characterName}" using writeExtensionField`,
                         null,
@@ -231,10 +232,11 @@ export async function migrateAllCharacters(): Promise<number> {
                     if (!character.data) {
                         character.data = {};
                     }
-                    if (!character.data.extensions) {
-                        character.data.extensions = {};
+                    const charData = character.data as any;
+                    if (!charData.extensions) {
+                        charData.extensions = {};
                     }
-                    character.data.extensions.character_id = newCharacterId;
+                    charData.extensions.character_id = newCharacterId;
                     debugLog(
                         `[CharacterIdService] Successfully migrated character "${characterName}" using fallback method`,
                         null,

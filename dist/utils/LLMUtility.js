@@ -138,7 +138,7 @@ export class LLMUtility {
                 try {
                     let result;
                     if (context && context.generateRaw) {
-                        result = yield context.generateRaw(prompt, systemPrompt);
+                        result = yield context.generateRaw(prompt, { systemPrompt });
                     }
                     else if (context && context.generateQuietPrompt) {
                         result = yield context.generateQuietPrompt(prompt);
@@ -214,7 +214,7 @@ export class LLMUtility {
             debugLog('[LLMUtility] ConnectionManagerRequestService.sendRequest not available, falling back to legacy method', null, 'warn');
             const generationFunc = (genContext) => __awaiter(this, void 0, void 0, function* () {
                 if (genContext && genContext.generateRaw) {
-                    return genContext.generateRaw(prompt, systemPrompt);
+                    return genContext.generateRaw(prompt, { systemPrompt });
                 }
                 else if (genContext && genContext.generateQuietPrompt) {
                     return genContext.generateQuietPrompt(prompt);

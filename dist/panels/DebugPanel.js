@@ -115,7 +115,7 @@ export class DebugPanel {
             dragElementWithSave(this.domElement, 'outfit-debug-panel');
             // Initialize resizing with appropriate min/max dimensions
             setTimeout(() => {
-                resizeElement($(this.domElement), 'outfit-debug-panel');
+                resizeElement(this.domElement, 'outfit-debug-panel');
             }, 10); // Small delay to ensure panel is rendered first
             (_a = this.domElement.querySelector('#outfit-debug-close')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => this.hide());
         }
@@ -865,12 +865,13 @@ export class DebugPanel {
      * Resets panel positions
      */
     resetPanelPositions() {
+        var _a, _b;
         try {
-            if (window.botOutfitPanel) {
+            if ((_a = window.botOutfitPanel) === null || _a === void 0 ? void 0 : _a.domElement) {
                 window.botOutfitPanel.domElement.style.top = '100px';
                 window.botOutfitPanel.domElement.style.left = '20px';
             }
-            if (window.userOutfitPanel) {
+            if ((_b = window.userOutfitPanel) === null || _b === void 0 ? void 0 : _b.domElement) {
                 window.userOutfitPanel.domElement.style.top = '100px';
                 window.userOutfitPanel.domElement.style.right = '20px';
             }
@@ -982,7 +983,7 @@ export class DebugPanel {
         }
         else {
             for (const [charId, charData] of Object.entries(botInstances)) {
-                const charName = getCharacterInfoById(charId, CharacterInfoType.Name);
+                const charName = String(getCharacterInfoById(charId, CharacterInfoType.Name) || 'Unknown');
                 instancesHtml += `<h5>Character: ${charName} (${charId})</h5>`;
                 for (const [instId, instData] of Object.entries(charData)) {
                     const currentInstanceId = state.currentOutfitInstanceId;

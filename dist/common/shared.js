@@ -1,4 +1,3 @@
-// Function to make an element draggable with position saving
 export function dragElementWithSave(element, storageKey) {
     if (!element) {
         return;
