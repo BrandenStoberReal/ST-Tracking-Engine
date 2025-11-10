@@ -20,7 +20,7 @@ import { debugLog } from '../logging/DebugLogger.js';
 function processSingleCommand(command, botManager) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const commandRegex = /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\(?:\"([^\"]*\)\"|)\)$/;
+            const commandRegex = /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\(?:"([^"]*\)"|)\)$/;
             const match = command.match(commandRegex);
             if (!match) {
                 throw new Error(`Invalid command format: ${command}`);

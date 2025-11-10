@@ -7,9 +7,7 @@ export function dragElementWithSave(element: HTMLElement, storageKey: string): v
     if (!$element || $element.length === 0) {
         return;
     }
-    let pos1 = 0,
-        pos2 = 0,
-        pos3 = 0,
+    let pos3 = 0,
         pos4 = 0;
     let initialX = 0,
         initialY = 0; // Track initial position when drag starts

@@ -453,11 +453,11 @@ class CustomMacroService {
     }
 }
 export const customMacroSystem = new CustomMacroService();
-export const updateMacroCacheOnOutfitChange = (outfitType, characterId, instanceId, slotName) => {
+export const updateMacroCacheOnOutfitChange = (_outfitType, _characterId, _instanceId, _slotName) => {
     customMacroSystem.clearCache();
 };
 export const invalidateSpecificMacroCaches = (outfitType, characterId, instanceId, slotName) => {
-    for (const [key, entry] of customMacroSystem.macroValueCache.entries()) {
+    for (const [key, _entry] of customMacroSystem.macroValueCache.entries()) {
         if (key.includes(characterId) && key.includes(instanceId) && key.includes(slotName)) {
             customMacroSystem.macroValueCache.delete(key);
         }

@@ -104,7 +104,6 @@ class ConnectionProfileHelper {
         }
 
         try {
-            const storeState = outfitStore.getState();
             return null;
         } catch (error) {
             debugLog('Could not access store for profiles:', error, 'warn');
@@ -123,7 +122,6 @@ class ConnectionProfileHelper {
         }
 
         try {
-            const storeState = outfitStore.getState();
             return [];
         } catch (error) {
             debugLog('Could not access store for profiles:', error, 'warn');

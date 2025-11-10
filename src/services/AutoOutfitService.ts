@@ -54,61 +54,77 @@ export class AutoOutfitService {
     }
 
     getDefaultPrompt(): string {
-        return `You are a sophisticated outfit management AI. Your task is to analyze conversation snippets and identify any changes to a character's clothing or accessories. Based on your analysis, you must output a series of commands to update the character's outfit accordingly.\n\n**CONTEXT**\nCurrent outfit for {{char}}:\n- Headwear: {{char_headwear}}\n- Topwear: {{char_topwear}}\n- Top Underwear: {{char_topunderwear}}\n- Bottomwear: {{char_bottomwear}}\n- Bottom Underwear: {{char_bottomunderwear}}\n- Footwear: {{char_footwear}}\n- Foot Underwear: {{char_footunderwear}}\n- Accessories:\n  - Head: {{char_head-accessory}}\n  - Ears: {{char_ears-accessory}}\n  - Eyes: {{char_eyes-accessory}}\n  - Mouth: {{char_mouth-accessory}}\n  - Neck: {{char_neck-accessory}}\n  - Body: {{char_body-accessory}}\n  - Arms: {{char_arms-accessory}}\n  - Hands: {{char_hands-accessory}}\n  - Waist: {{char_waist-accessory}}\n  - Bottom: {{char_bottom-accessory}}\n  - Legs: {{char_legs-accessory}}\n  - Foot: {{char_foot-accessory}}\n\n**TASK**\nBased on the provided conversation, generate a sequence of commands to reflect any and all changes to the character's outfit.\n\n**COMMANDS**\nYou have the following commands at your disposal:\n- \`outfit-system_wear_<slot>(\"item name\")\
-- \`outfit-system_remove_<slot>()\
-- \`outfit-system_change_<slot>(\"new item name\")\
-- \`outfit-system_replace_<slot>(\"new item name\")\
-- \`outfit-system_unequip_<slot>()\
-\n**SLOTS**\n- Clothing: \
-headwear\
-, \
-topwear\
-, \
-topunderwear\
-, \
-bottomwear\
-, \
-bottomunderwear\
-, \
-footwear\
-, \
-footunderwear\
-\n- Accessories: \
-head-accessory\
-, \
-ear-accessory\
-, \
-eyes-accessory\
-, \
-mouth-accessory\
-, \
-neck-accessory\
-, \
-body-accessory\
-, \
-arms-accessory\
-, \
-hands-accessory\
-, \
-waist-accessory\
-, \
-bottom-accessory\
-, \
-legs-accessory\
-, \
-foot-accessory\
-\n**INSTRUCTIONS**\n- Only output commands for explicit clothing changes.\n- If no changes are detected, output only \
-[none]\
-.\n- Do not include any explanations or conversational text in your output.\n- Ensure that the item names are enclosed in double quotes.\n\n**EXAMPLES**\n- **User:** I'm feeling a bit cold.\n  **{{char}}:** I'll put on my favorite sweater.\n  **Output:**\n  \
-outfit-system_wear_topwear(\"Favorite Sweater\")\
-\n- **User:** Your shoes are untied.\n  **{{char}}:** Oh, thanks for letting me know. I'll take them off and tie them properly.\n  **Output:**\n  \
-outfit-system_remove_footwear()\
-\n- **User:** That's a nice hat.\n  **{{char}}:** Thanks! It's new. I'll take it off for a moment to show you.\n  **Output:**\n  \
-outfit-system_unequip_headwear()\
-\n- **User:** I like your shirt.\n  **{{char}}:** Thanks! I think I'll unbutton it a bit.\n  **Output:**\n  \
-outfit-system_change_topwear(\"Shirt (unbuttoned)\")\
-\n- **User:** It's getting warm in here.\n  **{{char}}:** I agree. I'll take off my jacket and put on this t-shirt instead.\n  **Output:**\n  \
-outfit-system_replace_topwear(\"T-shirt\")\
+        return `You are a sophisticated outfit management AI. Your task is to analyze conversation snippets and identify any changes to a character's clothing or accessories. Based on your analysis, you must output a series of commands to update the character's outfit accordingly.
+
+**CONTEXT**
+Current outfit for {{char}}:
+- Headwear: {{char_headwear}}
+- Topwear: {{char_topwear}}
+- Top Underwear: {{char_topunderwear}}
+- Bottomwear: {{char_bottomwear}}
+- Bottom Underwear: {{char_bottomunderwear}}
+- Footwear: {{char_footwear}}
+- Foot Underwear: {{char_footunderwear}}
+- Accessories:
+  - Head: {{char_head-accessory}}
+  - Ears: {{char_ears-accessory}}
+  - Eyes: {{char_eyes-accessory}}
+  - Mouth: {{char_mouth-accessory}}
+  - Neck: {{char_neck-accessory}}
+  - Body: {{char_body-accessory}}
+  - Arms: {{char_arms-accessory}}
+  - Hands: {{char_hands-accessory}}
+  - Waist: {{char_waist-accessory}}
+  - Bottom: {{char_bottom-accessory}}
+  - Legs: {{char_legs-accessory}}
+  - Foot: {{char_foot-accessory}}
+
+**TASK**
+Based on the provided conversation, generate a sequence of commands to reflect any and all changes to the character's outfit.
+
+**COMMANDS**
+You have the following commands at your disposal:
+- \`outfit-system_wear_<slot>("item name")\`
+- \`outfit-system_remove_<slot>()\`
+- \`outfit-system_change_<slot>("new item name")\`
+- \`outfit-system_replace_<slot>("new item name")\`
+- \`outfit-system_unequip_<slot>()\`
+
+**SLOTS**
+- Clothing: headwear, topwear, topunderwear, bottomwear, bottomunderwear, footwear, footunderwear
+- Accessories: head-accessory, ear-accessory, eyes-accessory, mouth-accessory, neck-accessory, body-accessory, arms-accessory, hands-accessory, waist-accessory, bottom-accessory, legs-accessory, foot-accessory
+
+**INSTRUCTIONS**
+- Only output commands for explicit clothing changes.
+- If no changes are detected, output only \`[none]\`.
+- Do not include any explanations or conversational text in your output.
+- Ensure that the item names are enclosed in double quotes.
+
+**EXAMPLES**
+- **User:** I'm feeling a bit cold.
+  **{{char}}:** I'll put on my favorite sweater.
+  **Output:**
+  \`outfit-system_wear_topwear("Favorite Sweater")\`
+
+- **User:** Your shoes are untied.
+  **{{char}}:** Oh, thanks for letting me know. I'll take them off and tie them properly.
+  **Output:**
+  \`outfit-system_remove_footwear()\`
+
+- **User:** That's a nice hat.
+  **{{char}}:** Thanks! It's new. I'll take it off for a moment to show you.
+  **Output:**
+  \`outfit-system_unequip_headwear()\`
+
+- **User:** I like your shirt.
+  **{{char}}:** Thanks! I think I'll unbutton it a bit.
+  **Output:**
+  \`outfit-system_change_topwear("Shirt (unbuttoned)")\`
+
+- **User:** It's getting warm in here.
+  **{{char}}:** I agree. I'll take off my jacket and put on this t-shirt instead.
+  **Output:**
+  \`outfit-system_replace_topwear("T-shirt")\`
 `;
     }
 
@@ -433,7 +449,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
         }
 
         const commandRegex =
-            /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\((?:\"([^\"]*)\"|)\)$/;
+            /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\((?:"([^"]*)"|)\)$/;
         const match = command.match(commandRegex);
 
         if (!match) {

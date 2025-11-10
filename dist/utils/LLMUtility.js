@@ -98,7 +98,6 @@ class ConnectionProfileHelper {
             return window.extension_settings.connectionManager.profiles.find((p) => p.id === profileId);
         }
         try {
-            const storeState = outfitStore.getState();
             return null;
         }
         catch (error) {
@@ -115,7 +114,6 @@ class ConnectionProfileHelper {
             return window.extension_settings.connectionManager.profiles;
         }
         try {
-            const storeState = outfitStore.getState();
             return [];
         }
         catch (error) {

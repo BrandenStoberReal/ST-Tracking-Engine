@@ -13,8 +13,7 @@ declare const window: any;
  */
 async function processSingleCommand(command: string, botManager: any): Promise<void> {
     try {
-        const commandRegex =
-            /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\(?:\"([^\"]*\)\"|)\)$/;
+        const commandRegex = /^outfit-system_(wear|remove|change|replace|unequip)_([a-zA-Z0-9_-]+)\(?:"([^"]*\)"|)\)$/;
         const match = command.match(commandRegex);
 
         if (!match) {
