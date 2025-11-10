@@ -1,9 +1,9 @@
-import { outfitStore } from '../common/Store';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
-import { debugLog } from '../logging/DebugLogger';
-import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService';
-import { getCharacterOutfitData } from './CharacterOutfitService';
-import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
+import {outfitStore} from '../common/Store';
+import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
+import {debugLog} from '../logging/DebugLogger';
+import {findCharacterById, getOrCreateCharacterId} from './CharacterIdService';
+import {getCharacterOutfitData} from './CharacterOutfitService';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension

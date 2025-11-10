@@ -1,4 +1,4 @@
-import { debugLog } from '../logging/DebugLogger';
+import {debugLog} from '../logging/DebugLogger';
 
 /**
  * Utility functions for Outfit Tracker Extension

@@ -1,5 +1,5 @@
-import { deepMerge } from '../utils/utilities';
-import { StorageService } from '../services/StorageService';
+import {deepMerge} from '../utils/utilities';
+import {StorageService} from '../services/StorageService';
 
 const DATA_VERSION = '1.0.0';
 

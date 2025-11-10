@@ -1,4 +1,4 @@
-import { debugLog } from '../logging/DebugLogger';
+import {debugLog} from '../logging/DebugLogger';
 
 // Define extension-specific events
 export const EXTENSION_EVENTS = {

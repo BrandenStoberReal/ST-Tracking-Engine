@@ -1,11 +1,11 @@
-import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
-import { customMacroSystem } from './CustomMacroService';
-import { outfitStore } from '../common/Store';
-import { generateMessageHash } from '../utils/utilities';
-import { NewBotOutfitManager } from '../managers/NewBotOutfitManager';
-import { NewUserOutfitManager } from '../managers/NewUserOutfitManager';
-import { AutoOutfitService } from './AutoOutfitService';
-import { debugLog } from '../logging/DebugLogger';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import {customMacroSystem} from './CustomMacroService';
+import {outfitStore} from '../common/Store';
+import {generateMessageHash} from '../utils/utilities';
+import {NewBotOutfitManager} from '../managers/NewBotOutfitManager';
+import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
+import {AutoOutfitService} from './AutoOutfitService';
+import {debugLog} from '../logging/DebugLogger';
 
 interface EventServiceContext {
     botManager: NewBotOutfitManager;

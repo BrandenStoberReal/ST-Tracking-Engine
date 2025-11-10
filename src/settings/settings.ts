@@ -1,5 +1,5 @@
-import { DEFAULT_SETTINGS } from '../config/constants';
-import { debugLog } from '../logging/DebugLogger';
+import {DEFAULT_SETTINGS} from '../config/constants';
+import {debugLog} from '../logging/DebugLogger';
 
 export function initSettings(autoOutfitSystem: any, AutoOutfitSystemClass: any, context: any): void {
     const settings = context.extensionSettings;

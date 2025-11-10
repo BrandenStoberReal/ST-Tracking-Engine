@@ -1,7 +1,7 @@
-import { generateInstanceIdFromText } from '../utils/utilities';
-import { outfitStore } from '../common/Store';
-import { ALL_SLOTS } from '../config/constants';
-import { debugLog } from '../logging/DebugLogger';
+import {generateInstanceIdFromText} from '../utils/utilities';
+import {outfitStore} from '../common/Store';
+import {ALL_SLOTS} from '../config/constants';
+import {debugLog} from '../logging/DebugLogger';
 
 class MacroProcessor {
     allSlots: string[];

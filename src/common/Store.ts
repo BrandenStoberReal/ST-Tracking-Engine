@@ -1,8 +1,8 @@
-import { DEFAULT_SETTINGS } from '../config/constants';
-import { deepClone } from '../utils/utilities';
-import { DataManager } from '../managers/DataManager';
-import { debugLog } from '../logging/DebugLogger';
-import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
+import {DEFAULT_SETTINGS} from '../config/constants';
+import {deepClone} from '../utils/utilities';
+import {DataManager} from '../managers/DataManager';
+import {debugLog} from '../logging/DebugLogger';
+import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
 
 interface OutfitData {
     [key: string]: string;

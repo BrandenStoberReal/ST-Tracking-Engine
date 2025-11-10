@@ -1,5 +1,5 @@
-import { outfitStore } from '../common/Store';
-import { debugLog } from '../logging/DebugLogger';
+import {outfitStore} from '../common/Store';
+import {debugLog} from '../logging/DebugLogger';
 
 interface IDummyAutoOutfitSystem {
     name: string;

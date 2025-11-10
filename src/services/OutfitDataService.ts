@@ -1,7 +1,7 @@
-import { ALL_SLOTS } from '../config/constants';
-import { DataManager } from '../managers/DataManager';
-import { outfitStore } from '../common/Store';
-import { debugLog } from '../logging/DebugLogger';
+import {ALL_SLOTS} from '../config/constants';
+import {DataManager} from '../managers/DataManager';
+import {outfitStore} from '../common/Store';
+import {debugLog} from '../logging/DebugLogger';
 
 class OutfitDataService {
     dataManager: DataManager;

@@ -1,7 +1,7 @@
-import { LLMUtility } from '../utils/LLMUtility';
-import { extractCommands } from '../processors/StringProcessor';
-import { findCharacterById } from './CharacterIdService';
-import { debugLog } from '../logging/DebugLogger';
+import {LLMUtility} from '../utils/LLMUtility';
+import {extractCommands} from '../processors/StringProcessor';
+import {findCharacterById} from './CharacterIdService';
+import {debugLog} from '../logging/DebugLogger';
 
 declare const window: any;
 
