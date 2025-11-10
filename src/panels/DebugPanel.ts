@@ -923,7 +923,9 @@ export class DebugPanel {
                 const limit = Math.round(mem.jsHeapSizeLimit / 1024 / 1024);
                 return `${used}MB / ${total}MB (Limit: ${limit}MB)`;
             }
-        } catch {}
+        } catch {
+            // Do nothing and ignore the error
+        }
         return 'Not available';
     }
 
@@ -1714,7 +1716,7 @@ export class DebugPanel {
     /**
      * Updates tabs that need real-time data based on store changes
      */
-    private updateRealTimeTabs(newState: any): void {
+    private updateRealTimeTabs(_newState: any): void {
         if (!this.isVisible) return;
 
         // Note: Real-time updates are handled by intervals in startRealTimeUpdates()
@@ -2056,7 +2058,6 @@ export class DebugPanel {
         const userInstanceCount = Object.keys(state.userInstances).length;
 
         // Only recalculate storage size every 30 seconds to reduce performance impact
-        let estimatedStorageSize: string;
         const now = Date.now();
         if (now - this.lastStateStringifyTime > 30000) {
             // 30 seconds
@@ -2064,7 +2065,7 @@ export class DebugPanel {
             this.lastStorageSize = new Blob([stateStr]).size / 1024;
             this.lastStateStringifyTime = now;
         }
-        estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
+        const estimatedStorageSize: string = `${this.lastStorageSize.toFixed(2)} KB`;
 
         const updateTime = new Date().toLocaleTimeString();
 
