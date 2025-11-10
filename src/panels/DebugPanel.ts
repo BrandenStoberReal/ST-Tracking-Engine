@@ -1,11 +1,11 @@
-import { dragElementWithSave, resizeElement } from '../common/shared';
-import { outfitStore } from '../common/Store';
-import { customMacroSystem } from '../services/CustomMacroService';
-import { debugLogger } from '../logging/DebugLogger';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
-import { extensionEventBus } from '../core/events';
+import {dragElementWithSave, resizeElement} from '../common/shared';
+import {outfitStore} from '../common/Store';
+import {customMacroSystem} from '../services/CustomMacroService';
+import {debugLogger} from '../logging/DebugLogger';
+import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
+import {extensionEventBus} from '../core/events';
 
-import { getCharacterOutfitData } from '../services/CharacterOutfitService';
+import {getCharacterOutfitData} from '../services/CharacterOutfitService';
 
 interface OutfitData {
     [key: string]: string;

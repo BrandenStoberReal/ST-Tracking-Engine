@@ -788,7 +788,9 @@ export class DebugPanel {
                 return `${used}MB / ${total}MB (Limit: ${limit}MB)`;
             }
         }
-        catch (_a) { }
+        catch (_a) {
+            // Do nothing and ignore the error
+        }
         return 'Not available';
     }
     /**
@@ -1490,7 +1492,7 @@ export class DebugPanel {
     /**
      * Updates tabs that need real-time data based on store changes
      */
-    updateRealTimeTabs(newState) {
+    updateRealTimeTabs(_newState) {
         if (!this.isVisible)
             return;
         // Note: Real-time updates are handled by intervals in startRealTimeUpdates()
@@ -1790,7 +1792,6 @@ export class DebugPanel {
         }, 0);
         const userInstanceCount = Object.keys(state.userInstances).length;
         // Only recalculate storage size every 30 seconds to reduce performance impact
-        let estimatedStorageSize;
         const now = Date.now();
         if (now - this.lastStateStringifyTime > 30000) {
             // 30 seconds
@@ -1798,7 +1799,7 @@ export class DebugPanel {
             this.lastStorageSize = new Blob([stateStr]).size / 1024;
             this.lastStateStringifyTime = now;
         }
-        estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
+        const estimatedStorageSize = `${this.lastStorageSize.toFixed(2)} KB`;
         const updateTime = new Date().toLocaleTimeString();
         // Update performance info
         let infoHtml = `<div><strong>Total Bot Instances:</strong> ${botInstanceCount}</div>`;
