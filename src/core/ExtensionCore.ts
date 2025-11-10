@@ -1,23 +1,23 @@
-import {updateForCurrentCharacter} from '../services/CharacterService';
-import {generateOutfitFromLLM, importOutfitFromCharacterCard} from '../services/LLMService';
-import {customMacroSystem} from '../services/CustomMacroService';
-import {extension_api} from '../common/shared';
-import {outfitStore} from '../common/Store';
-import {NewBotOutfitManager} from '../managers/NewBotOutfitManager';
-import {BotOutfitPanel} from '../panels/BotOutfitPanel';
-import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
-import {UserOutfitPanel} from '../panels/UserOutfitPanel';
-import {DebugPanel} from '../panels/DebugPanel';
-import {setupEventListeners} from '../services/EventService';
-import {registerOutfitCommands} from '../commands/OutfitCommands';
-import {createSettingsUI} from '../settings/SettingsUI';
-import {initSettings} from '../settings/settings';
-import {ACCESSORY_SLOTS, ALL_SLOTS, CLOTHING_SLOTS} from '../config/constants';
-import {StorageService} from '../services/StorageService';
-import {DataManager} from '../managers/DataManager';
-import {OutfitDataService} from '../services/OutfitDataService';
-import {macroProcessor} from '../processors/MacroProcessor';
-import {debugLog} from '../logging/DebugLogger';
+import { updateForCurrentCharacter } from '../services/CharacterService';
+import { generateOutfitFromLLM, importOutfitFromCharacterCard } from '../services/LLMService';
+import { customMacroSystem } from '../services/CustomMacroService';
+import { extension_api } from '../common/shared';
+import { outfitStore } from '../common/Store';
+import { NewBotOutfitManager } from '../managers/NewBotOutfitManager';
+import { BotOutfitPanel } from '../panels/BotOutfitPanel';
+import { NewUserOutfitManager } from '../managers/NewUserOutfitManager';
+import { UserOutfitPanel } from '../panels/UserOutfitPanel';
+import { DebugPanel } from '../panels/DebugPanel';
+import { setupEventListeners } from '../services/EventService';
+import { registerOutfitCommands } from '../commands/OutfitCommands';
+import { createSettingsUI } from '../settings/SettingsUI';
+import { initSettings } from '../settings/settings';
+import { ACCESSORY_SLOTS, ALL_SLOTS, CLOTHING_SLOTS } from '../config/constants';
+import { StorageService } from '../services/StorageService';
+import { DataManager } from '../managers/DataManager';
+import { OutfitDataService } from '../services/OutfitDataService';
+import { macroProcessor } from '../processors/MacroProcessor';
+import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
 
@@ -39,8 +39,7 @@ async function loadAutoOutfitSystem(): Promise<void> {
     } catch (error) {
         debugLog('[OutfitTracker] Failed to load AutoOutfitSystem:', error, 'error');
         debugLog('Failed to load AutoOutfitSystem, using dummy class', error, 'error');
-        AutoOutfitSystem = class DummyAutoOutfitSystem {
-        };
+        AutoOutfitSystem = class DummyAutoOutfitSystem {};
     }
 }
 
@@ -94,8 +93,8 @@ function setupApi(
     window.wipeAllOutfits = () => outfitDataService.wipeAllOutfits(); // Make it directly accessible globally
 
     // Attach services to window for debug panel
-    window.characterService = {updateForCurrentCharacter};
-    window.llmService = {generateOutfitFromLLM, importOutfitFromCharacterCard};
+    window.characterService = { updateForCurrentCharacter };
+    window.llmService = { generateOutfitFromLLM, importOutfitFromCharacterCard };
     window.eventService = eventService;
     window.storageService = storageService;
     window.dataManager = dataManager;
@@ -104,10 +103,10 @@ function setupApi(
     extension_api.getOutfitExtensionStatus = () => ({
         core: true,
         autoOutfit: autoOutfitSystem?.getStatus?.() ?? false,
-        botPanel: {isVisible: botPanel?.isVisible},
-        userPanel: {isVisible: userPanel?.isVisible},
+        botPanel: { isVisible: botPanel?.isVisible },
+        userPanel: { isVisible: userPanel?.isVisible },
         events: true,
-        managers: {bot: Boolean(botManager), user: Boolean(userManager)},
+        managers: { bot: Boolean(botManager), user: Boolean(userManager) },
     });
 
     // Register character-specific macros when the API is set up
@@ -237,10 +236,10 @@ function isMobileDevice(): boolean {
                 name: 'Outfit Info',
                 send_date: new Date().toISOString(),
                 mes: outfitInfoString,
-                extra: {outfit_injection: true},
+                extra: { outfit_injection: true },
             };
 
-            debugLog('Injecting outfit information into chat', {outfitInfoString}, 'info');
+            debugLog('Injecting outfit information into chat', { outfitInfoString }, 'info');
 
             // Insert the outfit information before the last message in the chat
             // This ensures it's included in the context without disrupting the conversation flow
@@ -273,7 +272,7 @@ export async function initializeExtension(): Promise<void> {
     }
 
     const storageService = new StorageService(
-        (data: any) => STContext.saveSettingsDebounced({outfit_tracker: data}),
+        (data: any) => STContext.saveSettingsDebounced({ outfit_tracker: data }),
         () => STContext.extensionSettings.outfit_tracker
     );
 
@@ -295,20 +294,20 @@ export async function initializeExtension(): Promise<void> {
     const botManager = new NewBotOutfitManager(ALL_SLOTS);
     const userManager = new NewUserOutfitManager(ALL_SLOTS);
 
-    debugLog('Outfit managers created', {botManager, userManager}, 'info');
+    debugLog('Outfit managers created', { botManager, userManager }, 'info');
 
     const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) =>
-        STContext.saveSettingsDebounced({outfit_tracker: data})
+        STContext.saveSettingsDebounced({ outfit_tracker: data })
     );
     const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: any) =>
-        STContext.saveSettingsDebounced({outfit_tracker: data})
+        STContext.saveSettingsDebounced({ outfit_tracker: data })
     );
 
-    debugLog('Outfit panels created', {botPanel, userPanel}, 'info');
+    debugLog('Outfit panels created', { botPanel, userPanel }, 'info');
 
     const autoOutfitSystem = new AutoOutfitSystem(botManager);
 
-    debugLog('Auto outfit system created', {autoOutfitSystem}, 'info');
+    debugLog('Auto outfit system created', { autoOutfitSystem }, 'info');
 
     // Set global references for the interceptor function to access
     window.botOutfitPanel = botPanel;

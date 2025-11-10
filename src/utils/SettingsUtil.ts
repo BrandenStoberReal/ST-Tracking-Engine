@@ -1,4 +1,4 @@
-import {debugLog} from '../logging/DebugLogger';
+import { debugLog } from '../logging/DebugLogger';
 
 /**
  * Utility functions for safely accessing extension settings
@@ -21,8 +21,8 @@ export function getSettingValue(key: string, defaultValue: any = undefined): any
         const context = (window as any).SillyTavern?.getContext
             ? (window as any).SillyTavern.getContext()
             : (window as any).getContext
-                ? (window as any).getContext()
-                : null;
+              ? (window as any).getContext()
+              : null;
 
         if (context && typeof context === 'function') {
             const settings = context().extensionSettings;

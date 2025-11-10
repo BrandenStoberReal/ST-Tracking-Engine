@@ -1,8 +1,8 @@
-import {ALL_SLOTS} from '../config/constants';
-import {debugLog} from '../logging/DebugLogger';
-import {findCharacterById, getCharacterId} from './CharacterIdService';
-import {outfitStore} from '../common/Store';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { ALL_SLOTS } from '../config/constants';
+import { debugLog } from '../logging/DebugLogger';
+import { findCharacterById, getCharacterId } from './CharacterIdService';
+import { outfitStore } from '../common/Store';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 /**
  * CharacterOutfitService - Handles embedding outfit presets in character card extensions
@@ -27,8 +27,8 @@ function getSTContext(): any {
     return window.SillyTavern?.getContext
         ? window.SillyTavern.getContext()
         : window.getContext
-            ? window.getContext()
-            : null;
+          ? window.getContext()
+          : null;
 }
 
 /**
@@ -342,7 +342,7 @@ export async function migrateDefaultOutfitsToCharacterCards(): Promise<number> {
                 if (typeof presetName !== 'string') continue;
 
                 // Get the preset data from extension storage
-                const {bot: presets} = outfitStore.getPresets(characterId, instanceId);
+                const { bot: presets } = outfitStore.getPresets(characterId, instanceId);
                 if (!presets || !presets[presetName]) {
                     debugLog(
                         `[CharacterOutfitService] Preset "${presetName}" not found for character ${characterId}, instance ${instanceId}`,

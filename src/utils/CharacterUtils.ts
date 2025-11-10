@@ -1,5 +1,5 @@
-import {debugLog} from '../logging/DebugLogger';
-import {getCharacterId, getOrCreateCharacterId} from '../services/CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
+import { getCharacterId, getOrCreateCharacterId } from '../services/CharacterIdService';
 
 export const CharacterInfoType = {
     Name: 'CharName',
@@ -39,8 +39,8 @@ export function getCharacterInfoById(charId: string, infoType: CharacterInfoType
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.characters) {
             const character = context.characters[charId];
@@ -145,8 +145,8 @@ export function getCharacters(): any[] | null {
     const context = window.SillyTavern?.getContext
         ? window.SillyTavern.getContext()
         : window.getContext
-            ? window.getContext()
-            : null;
+          ? window.getContext()
+          : null;
 
     if (context && context.characters) {
         debugLog('Character array fetched successfully.', null, 'info');
@@ -184,8 +184,8 @@ export async function getCharacterUniqueIdByIndex(charId: string): Promise<strin
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.characters) {
             const character = context.characters[charId];
@@ -218,8 +218,8 @@ export async function getCurrentCharacterUniqueId(): Promise<string | null> {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.characterId !== undefined && context.characterId !== null) {
             return await getCharacterUniqueIdByIndex(context.characterId.toString());

@@ -1,7 +1,7 @@
-import {OutfitManager} from './OutfitManager';
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { OutfitManager } from './OutfitManager';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 export class NewUserOutfitManager extends OutfitManager {
     constructor(slots: string[]) {
@@ -101,7 +101,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] Invalid instance ID: ${actualInstanceId}`;
         }
 
-        const {user: presets} = outfitStore.getPresets('user', actualInstanceId);
+        const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
 
         if (!presets || !presets[presetName]) {
             return `[Outfit System] Preset "${presetName}" not found for user instance ${actualInstanceId}.`;
@@ -144,7 +144,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] Invalid instance ID: ${actualInstanceId}`;
         }
 
-        const {user: presets} = outfitStore.getPresets('user', actualInstanceId);
+        const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
 
         if (!presets || !presets[presetName]) {
             return `[Outfit System] Preset "${presetName}" not found for user instance ${actualInstanceId}.`;
@@ -181,7 +181,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return [];
         }
 
-        const {user: presets} = outfitStore.getPresets('user', actualInstanceId);
+        const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
 
         if (!presets) {
             return [];
@@ -206,7 +206,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] No default outfit set for user (instance: ${actualInstanceId}).`;
         }
 
-        const {user: presets} = outfitStore.getPresets('user', actualInstanceId);
+        const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
 
         if (!presets || !presets[defaultPresetName]) {
             return `[Outfit System] Default preset "${defaultPresetName}" not found for user (instance: ${actualInstanceId}).`;
@@ -258,7 +258,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] Invalid instance ID: ${actualInstanceId}`;
         }
 
-        const {user: presets} = outfitStore.getPresets('user', actualInstanceId);
+        const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
 
         if (!presets || !presets[presetName]) {
             return `[Outfit System] Preset "${presetName}" does not exist for user (instance: ${actualInstanceId}). Cannot overwrite.`;
@@ -376,7 +376,7 @@ export class NewUserOutfitManager extends OutfitManager {
             return `[Outfit System] Invalid instance ID: ${actualInstanceId}`;
         }
 
-        const {user: presets} = outfitStore.getPresets('user', actualInstanceId);
+        const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
 
         if (!presets || !presets[presetName]) {
             return `[Outfit System] Preset "${presetName}" does not exist for user instance ${actualInstanceId}. Cannot set as default.`;
@@ -384,7 +384,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         // Store the default preset name in settings instead of creating a duplicate preset
         const state = outfitStore.getState();
-        const defaultUserPresets = {...(state.settings.defaultUserPresets || {})};
+        const defaultUserPresets = { ...(state.settings.defaultUserPresets || {}) };
         defaultUserPresets[actualInstanceId] = presetName;
         outfitStore.setSetting('defaultUserPresets', defaultUserPresets);
 
@@ -421,7 +421,7 @@ export class NewUserOutfitManager extends OutfitManager {
 
         // Clear the default preset setting
         const state = outfitStore.getState();
-        const updatedDefaultUserPresets = {...(state.settings.defaultUserPresets || {})};
+        const updatedDefaultUserPresets = { ...(state.settings.defaultUserPresets || {}) };
         delete updatedDefaultUserPresets[actualInstanceId];
         outfitStore.setSetting('defaultUserPresets', updatedDefaultUserPresets);
 

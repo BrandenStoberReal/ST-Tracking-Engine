@@ -1,9 +1,9 @@
-import {dragElementWithSave, resizeElement} from '../common/shared';
-import {formatSlotName as utilsFormatSlotName} from '../utils/utilities';
-import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { dragElementWithSave, resizeElement } from '../common/shared';
+import { formatSlotName as utilsFormatSlotName } from '../utils/utilities';
+import { areSystemMessagesEnabled } from '../utils/SettingsUtil';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 declare const window: any;
 declare const toastr: any;
@@ -112,8 +112,8 @@ export class UserOutfitPanel {
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
 
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)
@@ -523,11 +523,11 @@ export class UserOutfitPanel {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.eventSource && context.event_types) {
-            const {eventSource, event_types} = context;
+            const { eventSource, event_types } = context;
 
             // Listen for chat-related events that might affect outfit data
             this.eventListeners.push(() =>

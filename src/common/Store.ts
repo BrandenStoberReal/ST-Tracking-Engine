@@ -1,8 +1,8 @@
-import {DEFAULT_SETTINGS} from '../config/constants';
-import {deepClone} from '../utils/utilities';
-import {DataManager} from '../managers/DataManager';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { DEFAULT_SETTINGS } from '../config/constants';
+import { deepClone } from '../utils/utilities';
+import { DataManager } from '../managers/DataManager';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 interface OutfitData {
     [key: string]: string;
@@ -123,10 +123,10 @@ class OutfitStore {
                 user: {},
             },
             panelSettings: {
-                botPanelColors: {...DEFAULT_SETTINGS.botPanelColors},
-                userPanelColors: {...DEFAULT_SETTINGS.userPanelColors},
+                botPanelColors: { ...DEFAULT_SETTINGS.botPanelColors },
+                userPanelColors: { ...DEFAULT_SETTINGS.userPanelColors },
             },
-            settings: {...DEFAULT_SETTINGS},
+            settings: { ...DEFAULT_SETTINGS },
             currentCharacterId: null,
             currentChatId: null,
             currentOutfitInstanceId: null,
@@ -166,7 +166,7 @@ class OutfitStore {
     }
 
     setState(updates: Partial<State>): void {
-        this.state = {...this.state, ...updates};
+        this.state = { ...this.state, ...updates };
         this.notifyListeners();
     }
 
@@ -194,7 +194,7 @@ class OutfitStore {
         }
         const instanceCreated = !this.state.botInstances[characterId][instanceId];
         if (instanceCreated) {
-            this.state.botInstances[characterId][instanceId] = {bot: {}, user: {}};
+            this.state.botInstances[characterId][instanceId] = { bot: {}, user: {} };
             // Emit instance created event
             extensionEventBus.emit(EXTENSION_EVENTS.INSTANCE_CREATED, {
                 instanceId: instanceId,
@@ -208,7 +208,7 @@ class OutfitStore {
         const promptInjectionEnabled = existingInstanceData?.promptInjectionEnabled;
 
         this.state.botInstances[characterId][instanceId] = {
-            bot: {...outfitData},
+            bot: { ...outfitData },
             user: this.state.botInstances[characterId][instanceId].user || {},
             promptInjectionEnabled,
         };
@@ -238,7 +238,7 @@ class OutfitStore {
         }
 
         // Create the new instance data with both outfit data and settings
-        const updatedInstanceData = {...outfitData};
+        const updatedInstanceData = { ...outfitData };
         if (promptInjectionEnabled !== undefined) {
             (updatedInstanceData as any).promptInjectionEnabled = promptInjectionEnabled;
         }
@@ -316,7 +316,7 @@ class OutfitStore {
             if (!botPresets[key]) {
                 botPresets[key] = {};
             }
-            botPresets[key][presetName] = {...outfitData};
+            botPresets[key][presetName] = { ...outfitData };
             this.state.presets.bot = botPresets;
         } else {
             const key = instanceId || 'default';
@@ -325,7 +325,7 @@ class OutfitStore {
             if (!userPresets[key]) {
                 userPresets[key] = {};
             }
-            userPresets[key][presetName] = {...outfitData};
+            userPresets[key][presetName] = { ...outfitData };
             this.state.presets.user = userPresets;
         }
         this.notifyListeners();
@@ -520,9 +520,9 @@ class OutfitStore {
         if (!this.dataManager) {
             return;
         }
-        const {botInstances, userInstances, presets, settings} = this.state;
+        const { botInstances, userInstances, presets, settings } = this.state;
 
-        this.dataManager.saveOutfitData({botInstances, userInstances, presets});
+        this.dataManager.saveOutfitData({ botInstances, userInstances, presets });
         this.dataManager.saveSettings(settings);
     }
 
@@ -530,14 +530,14 @@ class OutfitStore {
         if (!this.dataManager) {
             return;
         }
-        const {botInstances, userInstances, presets} = this.dataManager.loadOutfitData();
+        const { botInstances, userInstances, presets } = this.dataManager.loadOutfitData();
         const settings = this.dataManager.loadSettings();
 
-        this.setState({botInstances, userInstances, presets, settings});
+        this.setState({ botInstances, userInstances, presets, settings });
 
         // Emit an event when outfit data is loaded to allow UI refresh
         import('../core/events')
-            .then(({extensionEventBus, EXTENSION_EVENTS}) => {
+            .then(({ extensionEventBus, EXTENSION_EVENTS }) => {
                 extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
             })
             .catch((error) => debugLog('Error in store operation', error, 'error'));
@@ -644,7 +644,7 @@ class OutfitStore {
 
 const outfitStore = new OutfitStore();
 
-export {outfitStore};
+export { outfitStore };
 
 export const getStoreState = (): State => {
     return outfitStore.getState();

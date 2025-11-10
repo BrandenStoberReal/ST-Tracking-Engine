@@ -1,5 +1,5 @@
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
 
 declare global {
     interface Window {
@@ -144,8 +144,8 @@ export class LLMUtility {
             context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
         }
 
         let attempt = 0;
@@ -199,8 +199,8 @@ export class LLMUtility {
             context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
         }
 
         // If no profile specified, use the default generation method

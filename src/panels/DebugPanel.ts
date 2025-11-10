@@ -1,11 +1,11 @@
-import {dragElementWithSave, resizeElement} from '../common/shared';
-import {outfitStore} from '../common/Store';
-import {customMacroSystem} from '../services/CustomMacroService';
-import {debugLogger} from '../logging/DebugLogger';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {extensionEventBus} from '../core/events';
+import { dragElementWithSave, resizeElement } from '../common/shared';
+import { outfitStore } from '../common/Store';
+import { customMacroSystem } from '../services/CustomMacroService';
+import { debugLogger } from '../logging/DebugLogger';
+import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { extensionEventBus } from '../core/events';
 
-import {getCharacterOutfitData} from '../services/CharacterOutfitService';
+import { getCharacterOutfitData } from '../services/CharacterOutfitService';
 
 interface OutfitData {
     [key: string]: string;
@@ -42,8 +42,7 @@ export class DebugPanel {
     private lastStorageSize: number = 0; // Cache storage size calculation
     private lastStateStringifyTime: number = 0; // Track when we last did expensive stringify operations
 
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * Creates the debug panel DOM element and sets up its basic functionality
@@ -924,8 +923,7 @@ export class DebugPanel {
                 const limit = Math.round(mem.jsHeapSizeLimit / 1024 / 1024);
                 return `${used}MB / ${total}MB (Limit: ${limit}MB)`;
             }
-        } catch {
-        }
+        } catch {}
         return 'Not available';
     }
 
@@ -1051,13 +1049,13 @@ export class DebugPanel {
                     debugMode: false,
                     autoOutfitPrompt: '',
                     autoOutfitConnectionProfile: null,
-                    botPanelColors: {primary: '#6a4fc1', border: '#8a7fdb', shadow: '#6a4fc1'},
-                    userPanelColors: {primary: '#1a78d1', border: '#5da6f0', shadow: '#1a78d1'},
+                    botPanelColors: { primary: '#6a4fc1', border: '#8a7fdb', shadow: '#6a4fc1' },
+                    userPanelColors: { primary: '#1a78d1', border: '#5da6f0', shadow: '#1a78d1' },
                     defaultBotPresets: {},
                     defaultUserPresets: {},
                 };
 
-                outfitStore.setState({settings: defaultSettings});
+                outfitStore.setState({ settings: defaultSettings });
                 outfitStore.saveState();
 
                 toastr.success('Settings reset to defaults!', 'Debug Panel');
@@ -1800,7 +1798,7 @@ export class DebugPanel {
         const logContent = logLines.join('\n\n') + '\n';
 
         // Create and download the file
-        const blob = new Blob([logContent], {type: 'text/plain;charset=utf-8'});
+        const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement('a');

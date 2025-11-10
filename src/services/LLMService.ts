@@ -1,7 +1,7 @@
-import {LLMUtility} from '../utils/LLMUtility';
-import {extractCommands} from '../processors/StringProcessor';
-import {findCharacterById} from './CharacterIdService';
-import {debugLog} from '../logging/DebugLogger';
+import { LLMUtility } from '../utils/LLMUtility';
+import { extractCommands } from '../processors/StringProcessor';
+import { findCharacterById } from './CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
 
@@ -62,8 +62,8 @@ export async function generateOutfitFromLLM(options: { prompt: string }): Promis
             window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null
+                  ? window.getContext()
+                  : null
         );
 
         return response;
@@ -87,8 +87,8 @@ export async function importOutfitFromCharacterCard(): Promise<{
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         // Try to get character using the new character ID system first
         let character = null;

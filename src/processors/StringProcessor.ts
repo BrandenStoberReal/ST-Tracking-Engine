@@ -81,26 +81,26 @@ function findNextCommand(text: string, startIndex: number): { command: string | 
     const actionEnd = text.indexOf('_', actionStart);
 
     if (actionEnd === -1) {
-        return {command: null, nextIndex: patternIndex + 1};
+        return { command: null, nextIndex: patternIndex + 1 };
     }
 
     const action = text.substring(actionStart, actionEnd);
 
     if (!['wear', 'remove', 'change'].includes(action)) {
-        return {command: null, nextIndex: patternIndex + 1};
+        return { command: null, nextIndex: patternIndex + 1 };
     }
 
     const slotStart = actionEnd + 1;
     const slotEnd = text.indexOf('(', slotStart);
 
     if (slotEnd === -1) {
-        return {command: null, nextIndex: patternIndex + 1};
+        return { command: null, nextIndex: patternIndex + 1 };
     }
 
     const slot = text.substring(slotStart, slotEnd);
 
     if (!_isValidSlotName(slot)) {
-        return {command: null, nextIndex: patternIndex + 1};
+        return { command: null, nextIndex: patternIndex + 1 };
     }
 
     const parenStart = slotEnd;
@@ -130,12 +130,12 @@ function findNextCommand(text: string, startIndex: number): { command: string | 
     }
 
     if (parenEnd === -1) {
-        return {command: null, nextIndex: patternIndex + 1};
+        return { command: null, nextIndex: patternIndex + 1 };
     }
 
     const fullCommand = text.substring(patternIndex, parenEnd + 1);
 
-    return {command: fullCommand, nextIndex: parenEnd + 1};
+    return { command: fullCommand, nextIndex: parenEnd + 1 };
 }
 
 export function extractCommands(text: string): string[] {

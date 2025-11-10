@@ -1,5 +1,5 @@
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
 
 interface IDummyAutoOutfitSystem {
     name: string;
@@ -26,7 +26,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
     const MODULE_NAME = 'outfit_tracker';
 
     const storeState = outfitStore.getState();
-    const settings = {outfit_tracker: storeState.settings};
+    const settings = { outfit_tracker: storeState.settings };
     const saveSettingsFn = context?.saveSettingsDebounced || window.saveSettingsDebounced;
     const hasAutoSystem = AutoOutfitSystem.name !== 'DummyAutoOutfitSystem';
 
@@ -41,8 +41,8 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
             if (context?.ConnectionManagerRequestService?.getSupportedProfiles) {
                 const profiles = await context.ConnectionManagerRequestService.getSupportedProfiles();
                 return profiles.map((profile: any) => ({
@@ -456,8 +456,8 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 const context = window.SillyTavern?.getContext
                     ? window.SillyTavern.getContext()
                     : window.getContext
-                        ? window.getContext()
-                        : null;
+                      ? window.getContext()
+                      : null;
 
                 if (context && context.eventSource) {
                     $('#status-events').removeClass('status-loading').addClass('status-active').text('Active');
@@ -1245,7 +1245,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
         // Create and show the debug panel
         // Create a global reference to the debug panel if it doesn't exist
         if (!window.outfitDebugPanel) {
-            const {DebugPanel} = await import('../panels/DebugPanel');
+            const { DebugPanel } = await import('../panels/DebugPanel');
 
             window.outfitDebugPanel = new DebugPanel();
         }

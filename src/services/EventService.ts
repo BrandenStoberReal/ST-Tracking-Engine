@@ -1,11 +1,11 @@
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
-import {customMacroSystem} from './CustomMacroService';
-import {outfitStore} from '../common/Store';
-import {generateMessageHash} from '../utils/utilities';
-import {NewBotOutfitManager} from '../managers/NewBotOutfitManager';
-import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
-import {AutoOutfitService} from './AutoOutfitService';
-import {debugLog} from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
+import { customMacroSystem } from './CustomMacroService';
+import { outfitStore } from '../common/Store';
+import { generateMessageHash } from '../utils/utilities';
+import { NewBotOutfitManager } from '../managers/NewBotOutfitManager';
+import { NewUserOutfitManager } from '../managers/NewUserOutfitManager';
+import { AutoOutfitService } from './AutoOutfitService';
+import { debugLog } from '../logging/DebugLogger';
 
 interface EventServiceContext {
     botManager: NewBotOutfitManager;
@@ -71,7 +71,7 @@ class EventService {
             debugLog('[EventService] Context is null, cannot setup event listeners', null, 'warn');
             return;
         }
-        const {eventSource, event_types} = this.context;
+        const { eventSource, event_types } = this.context;
 
         eventSource.on(event_types.APP_READY, () => this.handleAppReady());
         eventSource.on(event_types.CHAT_CHANGED, () => this.handleChatChange());
@@ -147,11 +147,11 @@ class EventService {
             const currentUserInstanceId = this.userManager.getOutfitInstanceId();
 
             if (currentBotInstanceId && this.botManager.characterId) {
-                const botOutfitData = {...this.botManager.getCurrentOutfit()};
+                const botOutfitData = { ...this.botManager.getCurrentOutfit() };
                 outfitStore.setBotOutfit(this.botManager.characterId, currentBotInstanceId, botOutfitData);
             }
             if (currentUserInstanceId) {
-                const userOutfitData = {...this.userManager.getCurrentOutfit()};
+                const userOutfitData = { ...this.userManager.getCurrentOutfit() };
                 outfitStore.setUserOutfit(currentUserInstanceId, userOutfitData);
             }
 
@@ -186,11 +186,11 @@ class EventService {
             const oldUserInstanceId = this.userManager.getOutfitInstanceId();
 
             if (oldBotInstanceId && oldBotCharacterId) {
-                const oldBotOutfitData = {...this.botManager.getCurrentOutfit()};
+                const oldBotOutfitData = { ...this.botManager.getCurrentOutfit() };
                 outfitStore.setBotOutfit(oldBotCharacterId, oldBotInstanceId, oldBotOutfitData);
             }
             if (oldUserInstanceId) {
-                const oldUserOutfitData = {...this.userManager.getCurrentOutfit()};
+                const oldUserOutfitData = { ...this.userManager.getCurrentOutfit() };
                 outfitStore.setUserOutfit(oldUserInstanceId, oldUserOutfitData);
             }
 
@@ -344,13 +344,13 @@ class EventService {
             const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
 
             if (botOutfitInstanceId) {
-                const botOutfitData = {...this.botManager.getCurrentOutfit()};
+                const botOutfitData = { ...this.botManager.getCurrentOutfit() };
                 if (this.botManager.characterId) {
                     outfitStore.setBotOutfit(this.botManager.characterId, botOutfitInstanceId, botOutfitData);
                 }
             }
             if (userOutfitInstanceId) {
-                const userOutfitData = {...this.userManager.getCurrentOutfit()};
+                const userOutfitData = { ...this.userManager.getCurrentOutfit() };
                 outfitStore.setUserOutfit(userOutfitInstanceId, userOutfitData);
             }
 

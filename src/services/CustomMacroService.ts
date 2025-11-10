@@ -1,8 +1,8 @@
-import {outfitStore} from '../common/Store';
-import {ACCESSORY_SLOTS, CLOTHING_SLOTS} from '../config/constants';
-import {getCharacters} from '../utils/CharacterUtils';
-import {getCharacterId} from './CharacterIdService';
-import {debugLog} from '../logging/DebugLogger';
+import { outfitStore } from '../common/Store';
+import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants';
+import { getCharacters } from '../utils/CharacterUtils';
+import { getCharacterId } from './CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
 
@@ -139,8 +139,8 @@ class CustomMacroService {
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
 
             if (context && context.chat) {
                 for (let i = context.chat.length - 1; i >= 0; i--) {
@@ -176,8 +176,8 @@ class CustomMacroService {
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
             const characters = getCharacters();
             let charId: any = null;
 
@@ -318,8 +318,8 @@ class CustomMacroService {
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
 
             if (context && context.chat) {
                 for (let i = context.chat.length - 1; i >= 0; i--) {
@@ -487,8 +487,8 @@ class CustomMacroService {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
         const currentCharacterId = context?.characterId || 'unknown';
         const currentInstanceId = outfitStore.getCurrentInstanceId() || 'unknown';
         return `${macroType}_${slotName}_${characterName || 'null'}_${currentCharacterId}_${currentInstanceId}`;

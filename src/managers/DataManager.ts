@@ -1,5 +1,5 @@
-import {deepMerge} from '../utils/utilities';
-import {StorageService} from '../services/StorageService';
+import { deepMerge } from '../utils/utilities';
+import { StorageService } from '../services/StorageService';
 
 const DATA_VERSION = '1.0.0';
 
@@ -116,7 +116,7 @@ class DataManager {
     }
 
     saveSettings(settings: any): void {
-        this.save({settings});
+        this.save({ settings });
     }
 
     loadSettings(): any {
@@ -134,4 +134,4 @@ class DataManager {
     }
 }
 
-export {DataManager};
+export { DataManager };

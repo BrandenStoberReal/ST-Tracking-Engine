@@ -1,13 +1,13 @@
-import {dragElementWithSave, resizeElement} from '../common/shared';
-import {extractCommands} from '../processors/StringProcessor';
-import {LLMUtility} from '../utils/LLMUtility';
-import {formatSlotName} from '../utils/utilities';
-import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
-import {outfitStore} from '../common/Store';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {findCharacterById} from '../services/CharacterIdService';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { dragElementWithSave, resizeElement } from '../common/shared';
+import { extractCommands } from '../processors/StringProcessor';
+import { LLMUtility } from '../utils/LLMUtility';
+import { formatSlotName } from '../utils/utilities';
+import { areSystemMessagesEnabled } from '../utils/SettingsUtil';
+import { outfitStore } from '../common/Store';
+import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { findCharacterById } from '../services/CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 declare const window: any;
 declare const toastr: any;
@@ -119,8 +119,8 @@ export class BotOutfitPanel {
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
             let characterName = null;
 
             // Try to get character name using the new character ID system first
@@ -450,8 +450,8 @@ export class BotOutfitPanel {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         // Try to get character using the new character ID system first
         let character = null;
@@ -524,8 +524,8 @@ export class BotOutfitPanel {
                 window.SillyTavern?.getContext
                     ? window.SillyTavern.getContext()
                     : window.getContext
-                        ? window.getContext()
-                        : null,
+                      ? window.getContext()
+                      : null,
                 connectionProfile
             );
         } catch (error) {
@@ -817,11 +817,11 @@ export class BotOutfitPanel {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.eventSource && context.event_types) {
-            const {eventSource, event_types} = context;
+            const { eventSource, event_types } = context;
 
             // Listen for chat-related events that might affect outfit data
             this.eventListeners.push(() =>

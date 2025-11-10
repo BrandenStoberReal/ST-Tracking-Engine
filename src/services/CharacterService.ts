@@ -1,9 +1,9 @@
-import {outfitStore} from '../common/Store';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {debugLog} from '../logging/DebugLogger';
-import {findCharacterById, getOrCreateCharacterId} from './CharacterIdService';
-import {getCharacterOutfitData} from './CharacterOutfitService';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { outfitStore } from '../common/Store';
+import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { debugLog } from '../logging/DebugLogger';
+import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService';
+import { getCharacterOutfitData } from './CharacterOutfitService';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 /**
  * CharacterService - Handles character updates for the Outfit Tracker extension
@@ -21,8 +21,8 @@ function refreshMacroProcessing() {
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
 
             if (context && context.chat) {
                 const visibleMessages = Array.from(document.querySelectorAll('#chat .mes'));
@@ -116,12 +116,12 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
 
         // Save the current outfits to their current instances before changing character
         if (oldBotInstanceId && botManager.characterId) {
-            const oldBotOutfitData = {...botManager.getCurrentOutfit()};
+            const oldBotOutfitData = { ...botManager.getCurrentOutfit() };
 
             outfitStore.setBotOutfit(botManager.characterId, oldBotInstanceId, oldBotOutfitData);
         }
         if (oldUserInstanceId) {
-            const oldUserOutfitData = {...userManager.getCurrentOutfit()};
+            const oldUserOutfitData = { ...userManager.getCurrentOutfit() };
 
             outfitStore.setUserOutfit(oldUserInstanceId, oldUserOutfitData);
         }
@@ -130,8 +130,8 @@ export async function updateForCurrentCharacter(botManager: any, userManager: an
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
         const charIndex = context.characterId;
         let characterUniqueId = null;
         let characterName = null;

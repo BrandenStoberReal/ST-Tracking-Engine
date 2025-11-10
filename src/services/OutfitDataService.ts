@@ -1,7 +1,7 @@
-import {ALL_SLOTS} from '../config/constants';
-import {DataManager} from '../managers/DataManager';
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
+import { ALL_SLOTS } from '../config/constants';
+import { DataManager } from '../managers/DataManager';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
 
 class OutfitDataService {
     dataManager: DataManager;
@@ -24,7 +24,7 @@ class OutfitDataService {
                     delete globalVars[key];
                 });
 
-                this.dataManager.save({variables: {global: globalVars}});
+                this.dataManager.save({ variables: { global: globalVars } });
                 debugLog(`[OutfitTracker] Removed ${outfitVars.length} outfit-related global variables`);
             }
         } catch (error) {
@@ -150,10 +150,10 @@ class OutfitDataService {
                 // Try to call the save function directly with empty data to ensure it gets saved
                 if (typeof STContext.saveSettings === 'function') {
                     debugLog('[OutfitDataService] Using immediate save function');
-                    STContext.saveSettings({outfit_tracker: emptyOutfitTrackerData});
+                    STContext.saveSettings({ outfit_tracker: emptyOutfitTrackerData });
                 } else if (typeof STContext.saveSettingsDebounced === 'function') {
                     debugLog('[OutfitDataService] Using debounced save function');
-                    STContext.saveSettingsDebounced({outfit_tracker: emptyOutfitTrackerData});
+                    STContext.saveSettingsDebounced({ outfit_tracker: emptyOutfitTrackerData });
                 } else {
                     debugLog('[OutfitDataService] No save function found on STContext', null, 'error');
                     // Fallback: try to use the direct storage service save
@@ -211,4 +211,4 @@ class OutfitDataService {
     }
 }
 
-export {OutfitDataService};
+export { OutfitDataService };

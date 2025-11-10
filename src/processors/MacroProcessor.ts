@@ -1,7 +1,7 @@
-import {generateInstanceIdFromText} from '../utils/utilities';
-import {outfitStore} from '../common/Store';
-import {ALL_SLOTS} from '../config/constants';
-import {debugLog} from '../logging/DebugLogger';
+import { generateInstanceIdFromText } from '../utils/utilities';
+import { outfitStore } from '../common/Store';
+import { ALL_SLOTS } from '../config/constants';
+import { debugLog } from '../logging/DebugLogger';
 
 class MacroProcessor {
     allSlots: string[];
@@ -28,8 +28,8 @@ class MacroProcessor {
                 (window.SillyTavern?.getContext
                     ? window.SillyTavern.getContext()
                     : window.getContext
-                        ? window.getContext()
-                        : null);
+                      ? window.getContext()
+                      : null);
 
             if (!ctx || !ctx.chat) {
                 return;

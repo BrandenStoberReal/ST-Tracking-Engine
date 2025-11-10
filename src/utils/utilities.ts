@@ -1,4 +1,4 @@
-import {debugLog} from '../logging/DebugLogger';
+import { debugLog } from '../logging/DebugLogger';
 
 /**
  * Utility functions for Outfit Tracker Extension
@@ -133,7 +133,7 @@ export function deepClone<T>(obj: T): T {
  * @returns {object} A new object that is the deep merge of target and source
  */
 export function deepMerge<T extends object, U extends object>(target: T, source: U): T & U {
-    const output = {...target} as T & U;
+    const output = { ...target } as T & U;
 
     if (target && typeof target === 'object' && source && typeof source === 'object') {
         Object.keys(source).forEach((key) => {

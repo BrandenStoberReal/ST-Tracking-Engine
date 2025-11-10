@@ -1,5 +1,5 @@
-import {DEFAULT_SETTINGS} from '../config/constants';
-import {debugLog} from '../logging/DebugLogger';
+import { DEFAULT_SETTINGS } from '../config/constants';
+import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
 
@@ -8,7 +8,7 @@ export function initSettings(autoOutfitSystem: any, AutoOutfitSystemClass: any, 
     const MODULE_NAME = 'outfit_tracker';
 
     if (!settings[MODULE_NAME]) {
-        settings[MODULE_NAME] = {...DEFAULT_SETTINGS};
+        settings[MODULE_NAME] = { ...DEFAULT_SETTINGS };
     }
 
     for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {

@@ -1,5 +1,5 @@
-import {generateGUID} from '../utils/utilities';
-import {debugLog} from '../logging/DebugLogger';
+import { generateGUID } from '../utils/utilities';
+import { debugLog } from '../logging/DebugLogger';
 
 /**
  * CharacterIdService - Manages character ID generation and assignment
@@ -35,8 +35,8 @@ export async function getOrCreateCharacterId(character: any): Promise<string> {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.writeExtensionField) {
             // Find the character index in the characters array
@@ -126,8 +126,8 @@ export function findCharacterById(characterId: string): any | null {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.characters) {
             for (const character of context.characters) {
@@ -154,8 +154,8 @@ export async function getCurrentCharacterId(): Promise<string | null> {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (context && context.characterId !== undefined && context.characterId !== null) {
             const character = context.characters[context.characterId];
@@ -180,8 +180,8 @@ export async function migrateAllCharacters(): Promise<number> {
         const context = window.SillyTavern?.getContext
             ? window.SillyTavern.getContext()
             : window.getContext
-                ? window.getContext()
-                : null;
+              ? window.getContext()
+              : null;
 
         if (!context || !context.characters) {
             debugLog('[CharacterIdService] No characters found for migration', null, 'warn');

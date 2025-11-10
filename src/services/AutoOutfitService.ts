@@ -1,9 +1,9 @@
-import {extractCommands} from '../processors/StringProcessor';
-import {generateOutfitFromLLM} from './LLMService';
-import {customMacroSystem} from './CustomMacroService';
-import {outfitStore} from '../common/Store';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {debugLog} from '../logging/DebugLogger';
+import { extractCommands } from '../processors/StringProcessor';
+import { generateOutfitFromLLM } from './LLMService';
+import { customMacroSystem } from './CustomMacroService';
+import { outfitStore } from '../common/Store';
+import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
 declare const toastr: any;
@@ -141,15 +141,15 @@ outfit-system_replace_topwear(\"T-shirt\")\
             const context = window.SillyTavern?.getContext
                 ? window.SillyTavern.getContext()
                 : window.getContext
-                    ? window.getContext()
-                    : null;
+                  ? window.getContext()
+                  : null;
 
             if (!context || !context.eventSource || !context.event_types) {
                 debugLog('[AutoOutfitSystem] Context not ready for event listeners', null, 'error');
                 return;
             }
 
-            const {eventSource, event_types} = context;
+            const { eventSource, event_types } = context;
 
             this.eventHandler = (data: any) => {
                 if (this.isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
@@ -177,8 +177,8 @@ outfit-system_replace_topwear(\"T-shirt\")\
                 const context = window.SillyTavern?.getContext
                     ? window.SillyTavern.getContext()
                     : window.getContext
-                        ? window.getContext()
-                        : null;
+                      ? window.getContext()
+                      : null;
 
                 if (context && context.eventSource && context.event_types) {
                     context.eventSource.off(context.event_types.MESSAGE_RECEIVED, this.eventHandler);
@@ -269,7 +269,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
         debugLog('[AutoOutfitSystem] Generating outfit commands with LLMService...');
 
         try {
-            const result = await generateOutfitFromLLM({prompt: promptText});
+            const result = await generateOutfitFromLLM({ prompt: promptText });
 
             this.llmOutput = result; // Store the LLM output
             debugLog('[AutoOutfitSystem] Generated result:', result);
@@ -332,7 +332,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
                 const confidence = this.calculateConfidenceScore(command);
 
                 if (confidence < 0.7) {
-                    lowConfidenceCommands.push({command, confidence});
+                    lowConfidenceCommands.push({ command, confidence });
                     continue;
                 }
 
@@ -341,10 +341,10 @@ outfit-system_replace_topwear(\"T-shirt\")\
                 if (result.success) {
                     successfulCommands.push(result);
                 } else {
-                    failedCommands.push({command, error: result.error});
+                    failedCommands.push({ command, error: result.error });
                 }
             } catch (error: any) {
-                failedCommands.push({command, error: error.message});
+                failedCommands.push({ command, error: error.message });
                 debugLog(`Error processing command "${command}":`, error, 'error');
             }
         }
@@ -392,7 +392,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
         }
 
         let score = 0;
-        const {action, slot, value} = parsed;
+        const { action, slot, value } = parsed;
 
         score += 0.5;
 
@@ -509,7 +509,7 @@ outfit-system_replace_topwear(\"T-shirt\")\
                 throw new Error(`Invalid command format: ${command}`);
             }
 
-            const {action, slot, value} = parsedCommand;
+            const { action, slot, value } = parsedCommand;
             const cleanValue = value !== undefined ? this.replaceAll(value, '"', '').trim() : '';
 
             debugLog(`[AutoOutfitSystem] Processing: ${action} ${slot} "${cleanValue}"`);

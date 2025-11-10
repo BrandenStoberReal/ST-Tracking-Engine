@@ -1,7 +1,7 @@
-import {ALL_SLOTS} from '../config/constants';
-import {invalidateSpecificMacroCaches} from '../services/CustomMacroService';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { ALL_SLOTS } from '../config/constants';
+import { invalidateSpecificMacroCaches } from '../services/CustomMacroService';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 export abstract class OutfitManager {
     slots: string[];
@@ -56,7 +56,7 @@ export abstract class OutfitManager {
     }
 
     getCurrentOutfit(): { [key: string]: string } {
-        return {...this.currentValues};
+        return { ...this.currentValues };
     }
 
     setOutfit(outfitData: { [key: string]: string }): void {
