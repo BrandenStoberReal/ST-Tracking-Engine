@@ -118,7 +118,7 @@ export class NewBotOutfitManager extends OutfitManager {
 
     savePreset(presetName: string, instanceId: string | null = null): string {
         if (!presetName || typeof presetName !== 'string' || presetName.trim() === '') {
-            debugLog('[NewBotOutfitManager] Invalid preset name provided', null, 'error');
+            debugLog('Invalid preset name provided', null, 'error', 'BotOutfitManager');
             return '[Outfit System] Invalid preset name provided.';
         }
 
@@ -359,7 +359,7 @@ export class NewBotOutfitManager extends OutfitManager {
 
     overwritePreset(presetName: string, instanceId: string | null = null): string {
         if (!presetName || typeof presetName !== 'string' || presetName.trim() === '') {
-            debugLog('[NewBotOutfitManager] Invalid preset name provided', null, 'error');
+            debugLog('Invalid preset name provided', null, 'error', 'BotOutfitManager');
             return '[Outfit System] Invalid preset name provided.';
         }
 
@@ -569,7 +569,7 @@ export class NewBotOutfitManager extends OutfitManager {
 
     loadOutfitFromInstanceId(instanceId: string): { [key: string]: string } {
         if (!this.characterId || !instanceId) {
-            debugLog('[NewBotOutfitManager] Cannot load outfit - missing characterId or instanceId', null, 'warn');
+            debugLog('Cannot load outfit - missing characterId or instanceId', null, 'warn', 'BotOutfitManager');
             const defaultOutfit: { [key: string]: string } = {};
             this.slots.forEach((slot) => {
                 defaultOutfit[slot] = 'None';
@@ -582,7 +582,7 @@ export class NewBotOutfitManager extends OutfitManager {
 
     saveOutfitToInstanceId(outfitData: { [key: string]: string }, instanceId: string): void {
         if (!this.characterId || !instanceId) {
-            debugLog('[NewBotOutfitManager] Cannot save outfit - missing characterId or instanceId', null, 'warn');
+            debugLog('Cannot save outfit - missing characterId or instanceId', null, 'warn', 'BotOutfitManager');
             return;
         }
 

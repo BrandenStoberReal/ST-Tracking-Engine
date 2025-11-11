@@ -34,12 +34,12 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                 name: 'outfit-bot',
                 callback: function (args) {
                     return __awaiter(this, void 0, void 0, function* () {
-                        debugLog('Bot Outfit command triggered');
+                        debugLog('Bot Outfit command triggered', 'OutfitCommands');
                         if (window.botOutfitPanel) {
                             window.botOutfitPanel.toggle();
                         }
                         else {
-                            debugLog('[OutfitTracker] Bot outfit panel not available', null, 'error');
+                            debugLog('Bot outfit panel not available', null, 'error', 'OutfitCommands');
                             if (!(args === null || args === void 0 ? void 0 : args.quiet)) {
                                 toastr.error('Bot outfit panel not available', 'Outfit System');
                             }
@@ -91,12 +91,12 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                 name: 'outfit-user',
                 callback: function (args) {
                     return __awaiter(this, void 0, void 0, function* () {
-                        debugLog('User Outfit command triggered');
+                        debugLog('User Outfit command triggered', 'OutfitCommands');
                         if (window.userOutfitPanel) {
                             window.userOutfitPanel.toggle();
                         }
                         else {
-                            debugLog('[OutfitTracker] User outfit panel not available', null, 'error');
+                            debugLog('User outfit panel not available', null, 'error', 'OutfitCommands');
                             if (!(args === null || args === void 0 ? void 0 : args.quiet)) {
                                 toastr.error('User outfit panel not available', 'Outfit System');
                             }
@@ -463,7 +463,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return success;
                         }
                         catch (error) {
-                            debugLog('Error switching outfit:', error, 'error');
+                            debugLog('Error switching outfit:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error switching to "${outfitName}" outfit.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -521,7 +521,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return result.message;
                         }
                         catch (error) {
-                            debugLog('Error importing outfit from character card:', error, 'error');
+                            debugLog('Error importing outfit from character card:', error, 'error', 'OutfitCommands');
                             const errorMessage = `Error importing outfit: ${error instanceof Error ? error.message : String(error)}`;
                             if (!isQuiet) {
                                 toastr.error(errorMessage, 'Outfit Import');
@@ -607,7 +607,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error setting outfit item:', error, 'error');
+                            debugLog('Error setting outfit item:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error setting ${slot} to ${item}.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -675,7 +675,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error removing outfit item:', error, 'error');
+                            debugLog('Error removing outfit item:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error removing ${slot}.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -754,7 +754,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error changing outfit item:', error, 'error');
+                            debugLog('Error changing outfit item:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error changing ${slot} to ${item}.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -834,7 +834,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error setting user outfit item:', error, 'error');
+                            debugLog('Error setting user outfit item:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error setting user ${slot} to ${item}.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -902,7 +902,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error removing user outfit item:', error, 'error');
+                            debugLog('Error removing user outfit item:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error removing user ${slot}.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -981,7 +981,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error changing user outfit item:', error, 'error');
+                            debugLog('Error changing user outfit item:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error changing user ${slot} to ${item}.`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1050,7 +1050,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error saving outfit preset:', error, 'error');
+                            debugLog('Error saving outfit preset:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error saving outfit preset "${presetName}".`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1118,7 +1118,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error deleting outfit preset:', error, 'error');
+                            debugLog('Error deleting outfit preset:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error deleting outfit preset "${presetName}".`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1186,7 +1186,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error saving user outfit preset:', error, 'error');
+                            debugLog('Error saving user outfit preset:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error saving user outfit preset "${presetName}".`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1254,7 +1254,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error deleting user outfit preset:', error, 'error');
+                            debugLog('Error deleting user outfit preset:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error deleting user outfit preset "${presetName}".`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1329,7 +1329,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error listing outfits:', error, 'error');
+                            debugLog('Error listing outfits:', error, 'error', 'OutfitCommands');
                             const error_msg = 'Error listing outfit information.';
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1388,7 +1388,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error overwriting outfit preset:', error, 'error');
+                            debugLog('Error overwriting outfit preset:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error overwriting outfit preset "${presetName}".`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');
@@ -1462,7 +1462,7 @@ export function registerOutfitCommands(botManager, userManager, autoOutfitSystem
                             return message;
                         }
                         catch (error) {
-                            debugLog('Error overwriting user outfit preset:', error, 'error');
+                            debugLog('Error overwriting user outfit preset:', error, 'error', 'OutfitCommands');
                             const error_msg = `Error overwriting user outfit preset "${presetName}".`;
                             if (!isQuiet) {
                                 toastr.error(error_msg, 'Outfit System');

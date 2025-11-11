@@ -11,9 +11,9 @@ export function getCharacters() {
             ? window.getContext()
             : null;
     if (context && context.characters) {
-        debugLog('Character array fetched successfully.', null, 'info');
+        debugLog('Character array fetched successfully.', null, 'info', 'CharacterUtils');
         return context.characters;
     }
-    debugLog('Resolving character array failed.', null, 'error');
+    debugLog('Resolving character array failed.', null, 'error', 'CharacterUtils');
     return null;
 }

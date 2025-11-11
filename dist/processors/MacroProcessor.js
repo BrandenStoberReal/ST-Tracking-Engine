@@ -69,19 +69,19 @@ class MacroProcessor {
                     }
                     // Use the unified message scrubber for consistent processing
                     const processedMessage = scrubMessageForInstanceId(firstBotMessage.mes, undefined, outfitValues);
-                    debugLog('[OutfitTracker] Instance ID generation debug:');
-                    debugLog('[OutfitTracker] Original message text:', firstBotMessage.mes);
+                    debugLog('Instance ID generation debug:', 'MacroProcessor');
+                    debugLog('Original message text:', firstBotMessage.mes, 'MacroProcessor');
                     debugLog('[OutfitTracker] Processed message text (macros and outfit values cleaned):', processedMessage);
                     // Show the unique character ID being used for debugging
-                    debugLog('[OutfitTracker] Unique character ID used for instance calculation:', uniqueCharacterId);
-                    debugLog('[OutfitTracker] Outfit values removed:', outfitValues);
+                    debugLog('Unique character ID used for instance calculation:', uniqueCharacterId, 'MacroProcessor');
+                    debugLog('Outfit values removed:', outfitValues, 'MacroProcessor');
                     // Generate instance ID from the processed message with outfit values removed for consistent ID calculation
                     const instanceId = yield generateInstanceIdFromText(processedMessage, []);
-                    debugLog('[OutfitTracker] Generated instance ID:', instanceId);
+                    debugLog('Generated instance ID:', instanceId, 'MacroProcessor');
                     // Only update the instance ID if it's different from the current one
                     // This prevents unnecessary updates that could cause flip-flopping
                     const currentInstanceId = outfitStore.getCurrentInstanceId();
-                    debugLog('[OutfitTracker] Current instance ID:', currentInstanceId);
+                    debugLog('Current instance ID:', currentInstanceId, 'MacroProcessor');
                     if (currentInstanceId !== instanceId) {
                         debugLog('[OutfitTracker] Instance ID changed from', {
                             from: currentInstanceId,
@@ -100,25 +100,25 @@ class MacroProcessor {
                         }
                     }
                     else {
-                        debugLog('[OutfitTracker] Instance ID unchanged - no update needed');
+                        debugLog('Instance ID unchanged - no update needed', 'MacroProcessor');
                     }
                 }
             }
             catch (error) {
-                debugLog('[OutfitTracker] Error processing macros in first message:', error, 'error');
+                debugLog('Error processing macros in first message:', error, 'error', 'MacroProcessor');
             }
         });
     }
     getAllOutfitValuesForCharacter(uniqueCharacterId) {
         var _a, _b;
         if (!uniqueCharacterId) {
-            debugLog('[OutfitTracker] getAllOutfitValuesForCharacter called with no uniqueCharacterId');
+            debugLog('getAllOutfitValuesForCharacter called with no uniqueCharacterId', 'MacroProcessor');
             return [];
         }
         const state = outfitStore.getState();
         const outfitValues = new Set();
-        debugLog('[OutfitTracker] Collecting outfit values for character:', uniqueCharacterId);
-        debugLog('[OutfitTracker] Current state instance ID:', state.currentOutfitInstanceId);
+        debugLog('Collecting outfit values for character:', uniqueCharacterId, 'MacroProcessor');
+        debugLog('Current state instance ID:', state.currentOutfitInstanceId, 'MacroProcessor');
         // Get all outfit values from all bot instances for this character (including "None")
         if (state.botInstances && state.botInstances[uniqueCharacterId]) {
             debugLog('[OutfitTracker] Found bot instances for character:', Object.keys(state.botInstances[uniqueCharacterId]));
@@ -127,7 +127,7 @@ class MacroProcessor {
                     Object.values(instanceData.bot).forEach((value) => {
                         if (value !== undefined && value !== null && typeof value === 'string') {
                             outfitValues.add(value);
-                            debugLog('[OutfitTracker] Added outfit value from instance:', value);
+                            debugLog('Added outfit value from instance:', value, 'MacroProcessor');
                         }
                     });
                 }
@@ -144,7 +144,7 @@ class MacroProcessor {
                                 Object.values(preset).forEach((value) => {
                                     if (value !== undefined && value !== null && typeof value === 'string') {
                                         outfitValues.add(value);
-                                        debugLog('[OutfitTracker] Added preset value:', value);
+                                        debugLog('Added preset value:', value, 'MacroProcessor');
                                     }
                                 });
                             }
@@ -160,12 +160,12 @@ class MacroProcessor {
             Object.values(currentOutfit).forEach((value) => {
                 if (value !== undefined && value !== null && typeof value === 'string') {
                     outfitValues.add(value);
-                    debugLog('[OutfitTracker] Added current outfit value:', value);
+                    debugLog('Added current outfit value:', value, 'MacroProcessor');
                 }
             });
         }
         const allValues = Array.from(outfitValues);
-        debugLog('[OutfitTracker] All collected outfit values:', allValues);
+        debugLog('All collected outfit values:', allValues, 'MacroProcessor');
         return allValues;
     }
     isAlphaNumericWithUnderscores(str) {

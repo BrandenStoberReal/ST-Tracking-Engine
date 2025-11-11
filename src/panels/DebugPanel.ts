@@ -317,31 +317,60 @@ export class DebugPanel {
     /**
      * Parses and highlights service names in log messages
      */
-    private highlightServiceNames(message: string): string {
-        // Common service names to highlight
-        const servicePatterns = [
-            { pattern: /\[CustomMacroService\]/g, class: 'service-custom-macro' },
-            { pattern: /\[EventService\]/g, class: 'service-event' },
-            { pattern: /\[CharacterService\]/g, class: 'service-character' },
-            { pattern: /\[LLMService\]/g, class: 'service-llm' },
-            { pattern: /\[StorageService\]/g, class: 'service-storage' },
-            { pattern: /\[AutoOutfitService\]/g, class: 'service-auto-outfit' },
-            { pattern: /\[CharacterOutfitService\]/g, class: 'service-character-outfit' },
-            { pattern: /\[CharacterIdService\]/g, class: 'service-character-id' },
-            { pattern: /\[OutfitDataService\]/g, class: 'service-outfit-data' },
-            { pattern: /\[OutfitTracker\]/g, class: 'service-outfit-tracker' },
-            { pattern: /\[OutfitTracker Debug\]/g, class: 'service-outfit-tracker-debug' },
-        ];
-
+    private highlightServiceNames(message: string, source?: string): string {
         let highlightedMessage = message;
-        for (const { pattern, class: className } of servicePatterns) {
-            highlightedMessage = highlightedMessage.replace(
-                pattern,
-                `<span class="service-name ${className}">$&</span>`
-            );
+
+        // If source is provided, add service highlighting at the beginning
+        if (source) {
+            const serviceClass = this.getServiceClass(source);
+            const serviceLabel = `<span class="service-name ${serviceClass}">[${source}]</span> `;
+            highlightedMessage = serviceLabel + highlightedMessage;
+        } else {
+            // Fallback to parsing message text for backward compatibility
+            const servicePatterns = [
+                { pattern: /\[CustomMacroService\]/g, class: 'service-custom-macro' },
+                { pattern: /\[EventService\]/g, class: 'service-event' },
+                { pattern: /\[CharacterService\]/g, class: 'service-character' },
+                { pattern: /\[LLMService\]/g, class: 'service-llm' },
+                { pattern: /\[StorageService\]/g, class: 'service-storage' },
+                { pattern: /\[AutoOutfitService\]/g, class: 'service-auto-outfit' },
+                { pattern: /\[CharacterOutfitService\]/g, class: 'service-character-outfit' },
+                { pattern: /\[CharacterIdService\]/g, class: 'service-character-id' },
+                { pattern: /\[OutfitDataService\]/g, class: 'service-outfit-data' },
+                { pattern: /\[OutfitTracker\]/g, class: 'service-outfit-tracker' },
+                { pattern: /\[OutfitTracker Debug\]/g, class: 'service-outfit-tracker-debug' },
+            ];
+
+            for (const { pattern, class: className } of servicePatterns) {
+                highlightedMessage = highlightedMessage.replace(
+                    pattern,
+                    `<span class="service-name ${className}">$&</span>`
+                );
+            }
         }
 
         return highlightedMessage;
+    }
+
+    /**
+     * Gets the CSS class for a service name
+     */
+    private getServiceClass(serviceName: string): string {
+        const serviceClassMap: { [key: string]: string } = {
+            CustomMacroService: 'service-custom-macro',
+            EventService: 'service-event',
+            CharacterService: 'service-character',
+            LLMService: 'service-llm',
+            StorageService: 'service-storage',
+            AutoOutfitService: 'service-auto-outfit',
+            CharacterOutfitService: 'service-character-outfit',
+            CharacterIdService: 'service-character-id',
+            OutfitDataService: 'service-outfit-data',
+            OutfitTracker: 'service-outfit-tracker',
+            'OutfitTracker Debug': 'service-outfit-tracker-debug',
+        };
+
+        return serviceClassMap[serviceName] || 'service-generic';
     }
 
     /**
@@ -395,7 +424,7 @@ export class DebugPanel {
                     const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
                     const countDisplay = group.count > 1 ? ` <span class="log-count">(${group.count}x)</span>` : '';
 
-                    const highlightedMessage = this.highlightServiceNames(log.message);
+                    const highlightedMessage = this.highlightServiceNames(log.message, log.source);
 
                     if (hasData) {
                         return `

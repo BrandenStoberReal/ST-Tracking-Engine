@@ -61,7 +61,12 @@ export abstract class OutfitManager {
 
     setOutfit(outfitData: { [key: string]: string }): void {
         if (!outfitData || typeof outfitData !== 'object') {
-            debugLog(`[${this.constructor.name}] Invalid outfit data provided to setOutfit`, null, 'warn');
+            debugLog(
+                `[${this.constructor.name}] Invalid outfit data provided to setOutfit`,
+                null,
+                'warn',
+                'OutfitManager'
+            );
             return;
         }
 
@@ -85,7 +90,12 @@ export abstract class OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId;
 
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[${this.constructor.name}] Cannot load outfit - missing characterId or instanceId`, null, 'warn');
+            debugLog(
+                `[${this.constructor.name}] Cannot load outfit - missing characterId or instanceId`,
+                null,
+                'warn',
+                'OutfitManager'
+            );
             this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
@@ -103,7 +113,12 @@ export abstract class OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId;
 
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[${this.constructor.name}] Cannot save outfit - missing characterId or instanceId`, null, 'warn');
+            debugLog(
+                `[${this.constructor.name}] Cannot save outfit - missing characterId or instanceId`,
+                null,
+                'warn',
+                'OutfitManager'
+            );
             return;
         }
 
@@ -120,7 +135,7 @@ export abstract class OutfitManager {
 
     async setOutfitItem(slot: string, value: string): Promise<string | null> {
         if (!this.slots.includes(slot)) {
-            debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error');
+            debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
             return null;
         }
 
@@ -181,7 +196,7 @@ export abstract class OutfitManager {
 
     async changeOutfitItem(slot: string): Promise<string | null> {
         if (!this.slots.includes(slot)) {
-            debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error');
+            debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
             return null;
         }
 

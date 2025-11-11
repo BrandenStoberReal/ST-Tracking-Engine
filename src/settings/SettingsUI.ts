@@ -34,7 +34,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 }));
             }
         } catch (error) {
-            debugLog('[SettingsUI] Error fetching connection profiles:', error, 'error');
+            debugLog('Error fetching connection profiles:', error, 'error', 'SettingsUI');
         }
         return [];
     }
@@ -58,7 +58,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             const optionsHtml = generateProfileOptions(profiles);
             $('#outfit-connection-profile').html(optionsHtml);
         } catch (error) {
-            debugLog('[SettingsUI] Error populating connection profiles:', error, 'error');
+            debugLog('Error populating connection profiles:', error, 'error', 'SettingsUI');
         }
     }
 
@@ -458,7 +458,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                     $('#status-managers').removeClass('status-loading').addClass('status-inactive').text('Inactive');
                 }
             } catch (error) {
-                debugLog('[OutfitTracker] Error in fallback status check:', error, 'error');
+                debugLog('Error in fallback status check:', error, 'error', 'SettingsUI');
 
                 // Set all statuses to error state
                 $('#status-core').removeClass('status-loading').addClass('status-error').text('Error');
@@ -1276,7 +1276,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                     toastr.warning('No output data returned from the system.', 'No Data');
                 }
             } catch (error: any) {
-                debugLog('Error during outfit processing:', error, 'error');
+                debugLog('Error during outfit processing:', error, 'error', 'SettingsUI');
                 $('#outfit-llm-output').val(`Error: ${error.message}`);
                 $('#outfit-generated-commands').empty().append(`<li>Error: ${error.message}</li>`);
                 toastr.error(`Outfit processing failed: ${error.message}`, 'Processing Error');
@@ -1308,7 +1308,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 }
             }
         } catch (error) {
-            debugLog('Error initializing LLM output display:', error, 'error');
+            debugLog('Error initializing LLM output display:', error, 'error', 'SettingsUI');
         }
     }
 }

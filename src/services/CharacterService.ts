@@ -51,7 +51,7 @@ function refreshMacroProcessing() {
             }
         }
     } catch (error) {
-        debugLog('[OutfitTracker] Error refreshing macro processing:', error, 'error');
+        debugLog('Error refreshing macro processing:', error, 'error', 'CharacterService');
     }
 }
 
@@ -69,14 +69,14 @@ async function syncEmbeddedOutfitData(characterId: string): Promise<void> {
 
         // Sync default outfit
         if (embeddedData.defaultOutfit) {
-            debugLog(`[CharacterService] Syncing embedded default outfit for character ${characterId}`, null, 'info');
+            debugLog(`Syncing embedded default outfit for character ${characterId}`, null, 'info', 'CharacterService');
             // The default outfit is now embedded, so we don't need to sync it to settings
             // But we could potentially migrate old settings here if needed
         }
 
         // Sync presets
         if (embeddedData.presets) {
-            debugLog(`[CharacterService] Syncing embedded presets for character ${characterId}`, null, 'info');
+            debugLog(`Syncing embedded presets for character ${characterId}`, null, 'info', 'CharacterService');
             // For now, presets are loaded on-demand from character cards
             // We could sync them to extension storage if needed for performance
         }
@@ -89,7 +89,7 @@ async function syncEmbeddedOutfitData(characterId: string): Promise<void> {
             lastModified: embeddedData.lastModified,
         });
     } catch (error) {
-        debugLog('[CharacterService] Error syncing embedded outfit data:', error, 'error');
+        debugLog('Error syncing embedded outfit data:', error, 'error', 'CharacterService');
     }
 }
 
@@ -110,7 +110,7 @@ export async function updateForCurrentCharacter(
     userPanel: OutfitPanelAPI
 ) {
     if (isUpdating) {
-        debugLog('[OutfitTracker] Already updating for current character, skipping.', null, 'warn');
+        debugLog('Already updating for current character, skipping.', null, 'warn', 'CharacterService');
         return;
     }
     isUpdating = true;
@@ -196,9 +196,9 @@ export async function updateForCurrentCharacter(
             chatId: context?.chatId || null,
         });
 
-        debugLog('[OutfitTracker] Updated outfit managers for current character');
+        debugLog('Updated outfit managers for current character', 'CharacterService');
     } catch (error) {
-        debugLog('[OutfitTracker] Error updating for current character:', error, 'error');
+        debugLog('Error updating for current character:', error, 'error', 'CharacterService');
         throw error;
     } finally {
         isUpdating = false;

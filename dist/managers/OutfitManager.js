@@ -53,7 +53,7 @@ export class OutfitManager {
     }
     setOutfit(outfitData) {
         if (!outfitData || typeof outfitData !== 'object') {
-            debugLog(`[${this.constructor.name}] Invalid outfit data provided to setOutfit`, null, 'warn');
+            debugLog(`[${this.constructor.name}] Invalid outfit data provided to setOutfit`, null, 'warn', 'OutfitManager');
             return;
         }
         let changed = false;
@@ -70,7 +70,7 @@ export class OutfitManager {
     loadOutfit(instanceId = null) {
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[${this.constructor.name}] Cannot load outfit - missing characterId or instanceId`, null, 'warn');
+            debugLog(`[${this.constructor.name}] Cannot load outfit - missing characterId or instanceId`, null, 'warn', 'OutfitManager');
             this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
@@ -82,7 +82,7 @@ export class OutfitManager {
     saveOutfit(instanceId = null) {
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[${this.constructor.name}] Cannot save outfit - missing characterId or instanceId`, null, 'warn');
+            debugLog(`[${this.constructor.name}] Cannot save outfit - missing characterId or instanceId`, null, 'warn', 'OutfitManager');
             return;
         }
         const outfitData = {};
@@ -94,7 +94,7 @@ export class OutfitManager {
     setOutfitItem(slot, value) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.slots.includes(slot)) {
-                debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error');
+                debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
                 return null;
             }
             if (value === undefined || value === null || value === '') {
@@ -143,7 +143,7 @@ export class OutfitManager {
     changeOutfitItem(slot) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.slots.includes(slot)) {
-                debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error');
+                debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
                 return null;
             }
             const currentValue = this.currentValues[slot];

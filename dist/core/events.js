@@ -43,7 +43,7 @@ class ExtensionEventBus {
                     callback(data);
                 }
                 catch (error) {
-                    debugLog(`Error in event listener for ${event}:`, error, 'error');
+                    debugLog(`Error in event listener for ${event}:`, error, 'error', 'EventBus');
                 }
             });
         }

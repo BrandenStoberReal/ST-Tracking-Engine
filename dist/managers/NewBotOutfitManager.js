@@ -87,7 +87,7 @@ export class NewBotOutfitManager extends OutfitManager {
     }
     savePreset(presetName, instanceId = null) {
         if (!presetName || typeof presetName !== 'string' || presetName.trim() === '') {
-            debugLog('[NewBotOutfitManager] Invalid preset name provided', null, 'error');
+            debugLog('Invalid preset name provided', null, 'error', 'BotOutfitManager');
             return '[Outfit System] Invalid preset name provided.';
         }
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
@@ -276,7 +276,7 @@ export class NewBotOutfitManager extends OutfitManager {
     }
     overwritePreset(presetName, instanceId = null) {
         if (!presetName || typeof presetName !== 'string' || presetName.trim() === '') {
-            debugLog('[NewBotOutfitManager] Invalid preset name provided', null, 'error');
+            debugLog('Invalid preset name provided', null, 'error', 'BotOutfitManager');
             return '[Outfit System] Invalid preset name provided.';
         }
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
@@ -435,7 +435,7 @@ export class NewBotOutfitManager extends OutfitManager {
     }
     loadOutfitFromInstanceId(instanceId) {
         if (!this.characterId || !instanceId) {
-            debugLog('[NewBotOutfitManager] Cannot load outfit - missing characterId or instanceId', null, 'warn');
+            debugLog('Cannot load outfit - missing characterId or instanceId', null, 'warn', 'BotOutfitManager');
             const defaultOutfit = {};
             this.slots.forEach((slot) => {
                 defaultOutfit[slot] = 'None';
@@ -446,7 +446,7 @@ export class NewBotOutfitManager extends OutfitManager {
     }
     saveOutfitToInstanceId(outfitData, instanceId) {
         if (!this.characterId || !instanceId) {
-            debugLog('[NewBotOutfitManager] Cannot save outfit - missing characterId or instanceId', null, 'warn');
+            debugLog('Cannot save outfit - missing characterId or instanceId', null, 'warn', 'BotOutfitManager');
             return;
         }
         outfitStore.setBotOutfit(this.characterId, instanceId, outfitData);

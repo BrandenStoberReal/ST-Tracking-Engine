@@ -14,7 +14,7 @@ import { Character } from '../types';
 export async function getOrCreateCharacterId(character: Character): Promise<string> {
     try {
         if (!character) {
-            debugLog('[CharacterIdService] Character object is null or undefined', null, 'error');
+            debugLog('Character object is null or undefined', null, 'error', 'CharacterIdService');
             return generateGUID();
         }
 
@@ -23,14 +23,14 @@ export async function getOrCreateCharacterId(character: Character): Promise<stri
             const characterId = character.data.extensions.character_id;
 
             if (characterId && typeof characterId === 'string' && characterId.trim() !== '') {
-                debugLog(`[CharacterIdService] Found existing character ID: ${characterId}`, null, 'info');
+                debugLog(`Found existing character ID: ${characterId}`, null, 'info', 'CharacterIdService');
                 return characterId;
             }
         }
 
         // Generate new character ID
         const newCharacterId = generateGUID();
-        debugLog(`[CharacterIdService] Generated new character ID: ${newCharacterId}`, null, 'info');
+        debugLog(`Generated new character ID: ${newCharacterId}`, null, 'info', 'CharacterIdService');
 
         // Get the context and use writeExtensionField to store the character ID
         const context = window.SillyTavern?.getContext
@@ -86,7 +86,7 @@ export async function getOrCreateCharacterId(character: Character): Promise<stri
 
         return newCharacterId;
     } catch (error) {
-        debugLog('[CharacterIdService] Error getting or creating character ID:', error, 'error');
+        debugLog('Error getting or creating character ID:', error, 'error', 'CharacterIdService');
         return generateGUID();
     }
 }
@@ -112,7 +112,7 @@ export function getCharacterId(character: Character): string | null {
 
         return null;
     } catch (error) {
-        debugLog('[CharacterIdService] Error getting character ID:', error, 'error');
+        debugLog('Error getting character ID:', error, 'error', 'CharacterIdService');
         return null;
     }
 }
@@ -141,7 +141,7 @@ export function findCharacterById(characterId: string): Character | null {
 
         return null;
     } catch (error) {
-        debugLog('[CharacterIdService] Error finding character by ID:', error, 'error');
+        debugLog('Error finding character by ID:', error, 'error', 'CharacterIdService');
         return null;
     }
 }
@@ -167,7 +167,7 @@ export async function getCurrentCharacterId(): Promise<string | null> {
 
         return null;
     } catch (error) {
-        debugLog('[CharacterIdService] Error getting current character ID:', error, 'error');
+        debugLog('Error getting current character ID:', error, 'error', 'CharacterIdService');
         return null;
     }
 }
@@ -185,7 +185,7 @@ export async function migrateAllCharacters(): Promise<number> {
               : null;
 
         if (!context || !context.characters) {
-            debugLog('[CharacterIdService] No characters found for migration', null, 'warn');
+            debugLog('No characters found for migration', null, 'warn', 'CharacterIdService');
             return 0;
         }
 
@@ -206,7 +206,7 @@ export async function migrateAllCharacters(): Promise<number> {
             const characterName = ('name' in character ? character.name : character.data?.name) || 'Unnamed Character';
             const existingId = getCharacterId(character);
 
-            debugLog(`[CharacterIdService] Checking character "${characterName}" for existing ID...`, null, 'debug');
+            debugLog(`Checking character "${characterName}" for existing ID...`, null, 'debug', 'CharacterIdService');
 
             if (!existingId) {
                 const newCharacterId = generateGUID();
@@ -262,7 +262,7 @@ export async function migrateAllCharacters(): Promise<number> {
         );
         return migratedCount;
     } catch (error) {
-        debugLog('[CharacterIdService] Error during character migration:', error, 'error');
+        debugLog('Error during character migration:', error, 'error', 'CharacterIdService');
         return 0;
     }
 }

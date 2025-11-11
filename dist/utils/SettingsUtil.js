@@ -33,7 +33,7 @@ export function getSettingValue(key, defaultValue = undefined) {
     }
     catch (error) {
         // If all methods fail, return a safe default
-        debugLog('Could not access outfit tracker settings, using default behavior:', error, 'warn');
+        debugLog('Could not access outfit tracker settings, using default behavior:', error, 'warn', 'SettingsUtil');
         return defaultValue;
     }
 }

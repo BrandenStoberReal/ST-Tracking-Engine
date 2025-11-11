@@ -49,7 +49,7 @@ class OutfitStore {
                 listener(this.state);
             }
             catch (error) {
-                debugLog('Error in store listener:', error, 'error');
+                debugLog('Error in store listener:', error, 'error', 'Store');
             }
         });
     }
@@ -337,7 +337,7 @@ class OutfitStore {
             .then(({ extensionEventBus, EXTENSION_EVENTS }) => {
             extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
         })
-            .catch((error) => debugLog('Error in store operation', error, 'error'));
+            .catch((error) => debugLog('Error in store operation', error, 'error', 'Store'));
     }
     flush() {
         if (!this.dataManager) {

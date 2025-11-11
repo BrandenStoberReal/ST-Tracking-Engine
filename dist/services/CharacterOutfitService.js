@@ -37,7 +37,7 @@ export function getCharacterOutfitData(character) {
         return extensions['st-outfits'] || null;
     }
     catch (error) {
-        debugLog('[CharacterOutfitService] Error getting character outfit data:', error, 'error');
+        debugLog('Error getting character outfit data:', error, 'error', 'CharacterOutfitService');
         return null;
     }
 }
@@ -51,7 +51,7 @@ export function setCharacterOutfitData(character, outfitData) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!character) {
-                debugLog('[CharacterOutfitService] Character object is null or undefined', null, 'error');
+                debugLog('Character object is null or undefined', null, 'error', 'CharacterOutfitService');
                 return false;
             }
             // Ensure character has data and extensions
@@ -85,7 +85,7 @@ export function setCharacterOutfitData(character, outfitData) {
             return true;
         }
         catch (error) {
-            debugLog('[CharacterOutfitService] Error setting character outfit data:', error, 'error');
+            debugLog('Error setting character outfit data:', error, 'error', 'CharacterOutfitService');
             return false;
         }
     });
@@ -118,7 +118,7 @@ export function setCharacterDefaultOutfit(character, defaultOutfit) {
             return yield setCharacterOutfitData(character, outfitData);
         }
         catch (error) {
-            debugLog('[CharacterOutfitService] Error setting character default outfit:', error, 'error');
+            debugLog('Error setting character default outfit:', error, 'error', 'CharacterOutfitService');
             return false;
         }
     });
@@ -155,7 +155,7 @@ export function setCharacterPreset(character, presetName, presetData) {
             return yield setCharacterOutfitData(character, outfitData);
         }
         catch (error) {
-            debugLog('[CharacterOutfitService] Error setting character preset:', error, 'error');
+            debugLog('Error setting character preset:', error, 'error', 'CharacterOutfitService');
             return false;
         }
     });
@@ -177,7 +177,7 @@ export function deleteCharacterPreset(character, presetName) {
             return yield setCharacterOutfitData(character, outfitData);
         }
         catch (error) {
-            debugLog('[CharacterOutfitService] Error deleting character preset:', error, 'error');
+            debugLog('Error deleting character preset:', error, 'error', 'CharacterOutfitService');
             return false;
         }
     });
@@ -267,13 +267,13 @@ export function migrateDefaultOutfitsToCharacterCards() {
         try {
             const context = getSTContext();
             if (!context || !context.characters) {
-                debugLog('[CharacterOutfitService] No characters available for migration', null, 'warn');
+                debugLog('No characters available for migration', null, 'warn', 'CharacterOutfitService');
                 return 0;
             }
             const settings = outfitStore.getState().settings;
             const defaultBotPresets = settings.defaultBotPresets || {};
             let migratedCount = 0;
-            debugLog(`[CharacterOutfitService] Starting migration of default outfits to character cards`, null, 'info');
+            debugLog(`Starting migration of default outfits to character cards`, null, 'info', 'CharacterOutfitService');
             for (let i = 0; i < context.characters.length; i++) {
                 const character = context.characters[i];
                 const characterId = getCharacterId(character);
@@ -316,7 +316,7 @@ export function migrateDefaultOutfitsToCharacterCards() {
             return migratedCount;
         }
         catch (error) {
-            debugLog('[CharacterOutfitService] Error during default outfit migration:', error, 'error');
+            debugLog('Error during default outfit migration:', error, 'error', 'CharacterOutfitService');
             return 0;
         }
     });

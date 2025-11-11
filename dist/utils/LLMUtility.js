@@ -31,7 +31,7 @@ class ConnectionProfileHelper {
                 }
             }
             catch (error) {
-                debugLog(`[LLMUtility] Error during generation with connection profile ${profileId}:`, error, 'error');
+                debugLog(`Error during generation with connection profile ${profileId}:`, error, 'error', 'LLMUtility');
                 throw error;
             }
             finally {
@@ -61,11 +61,11 @@ class ConnectionProfileHelper {
                     yield window.SlashCommandParser.commands['profile'].callback({}, profileId);
                 }
                 else {
-                    debugLog('[LLMUtility] Could not apply connection profile, no implementation found.', null, 'warn');
+                    debugLog('Could not apply connection profile, no implementation found.', null, 'warn', 'LLMUtility');
                 }
             }
             catch (error) {
-                debugLog(`[LLMUtility] Failed to apply connection profile ${profileId}:`, error, 'error');
+                debugLog(`Failed to apply connection profile ${profileId}:`, error, 'error', 'LLMUtility');
             }
         });
     }
@@ -82,7 +82,7 @@ class ConnectionProfileHelper {
             return ((_c = storeState.settings) === null || _c === void 0 ? void 0 : _c.autoOutfitConnectionProfile) || null;
         }
         catch (error) {
-            debugLog('Could not access store for connection profile:', error, 'warn');
+            debugLog('Could not access store for connection profile:', error, 'warn', 'LLMUtility');
         }
         return null;
     }
@@ -101,7 +101,7 @@ class ConnectionProfileHelper {
             return null;
         }
         catch (error) {
-            debugLog('Could not access store for profiles:', error, 'warn');
+            debugLog('Could not access store for profiles:', error, 'warn', 'LLMUtility');
         }
         return null;
     }
@@ -117,7 +117,7 @@ class ConnectionProfileHelper {
             return [];
         }
         catch (error) {
-            debugLog('Could not access store for profiles:', error, 'warn');
+            debugLog('Could not access store for profiles:', error, 'warn', 'LLMUtility');
         }
         return [];
     }
@@ -157,7 +157,7 @@ export class LLMUtility {
                     return result;
                 }
                 catch (error) {
-                    debugLog(`[LLMUtility] Generation attempt ${attempt + 1}/${maxRetries} failed:`, error, 'error');
+                    debugLog(`Generation attempt ${attempt + 1}/${maxRetries} failed:`, error, 'error', 'LLMUtility');
                     attempt++;
                     if (attempt >= maxRetries) {
                         throw new Error(`Generation failed after ${maxRetries} attempts: ${error.message}`);
@@ -228,8 +228,8 @@ export class LLMUtility {
                 return yield this.generateWithRetry(prompt, systemPrompt, context, maxRetries);
             }
             catch (error) {
-                debugLog(`[LLMUtility] Profile generation with ${profile !== null && profile !== void 0 ? profile : 'null'} failed:`, error, 'error');
-                debugLog('[LLMUtility] Falling back to default generation after profile failures...');
+                debugLog(`Profile generation with ${profile !== null && profile !== void 0 ? profile : 'null'} failed:`, error, 'error', 'LLMUtility');
+                debugLog('Falling back to default generation after profile failures...', 'LLMUtility');
                 return this.generateWithRetry(prompt, systemPrompt, context, maxRetries);
             }
         });

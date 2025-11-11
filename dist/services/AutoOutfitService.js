@@ -112,26 +112,26 @@ You have the following commands at your disposal:
                     ? window.getContext()
                     : null;
             if (!context || !context.eventSource || !context.event_types) {
-                debugLog('[AutoOutfitSystem] Context not ready for event listeners', null, 'error');
+                debugLog('Context not ready for event listeners', null, 'error', 'AutoOutfitService');
                 return;
             }
             const { eventSource, event_types } = context;
             this.eventHandler = (data) => {
                 if (this._isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
-                    debugLog('[AutoOutfitSystem] New AI message received, processing...');
+                    debugLog('New AI message received, processing...', 'AutoOutfitService');
                     setTimeout(() => {
                         this.processOutfitCommands().catch((error) => {
-                            debugLog('Auto outfit processing failed:', error, 'error');
+                            debugLog('Auto outfit processing failed:', error, 'error', 'AutoOutfitService');
                             this.consecutiveFailures++;
                         });
                     }, 1000);
                 }
             };
             eventSource.on(event_types.MESSAGE_RECEIVED, this.eventHandler);
-            debugLog('[AutoOutfitSystem] Event listener registered for MESSAGE_RECEIVED');
+            debugLog('Event listener registered for MESSAGE_RECEIVED', 'AutoOutfitService');
         }
         catch (error) {
-            debugLog('[AutoOutfitSystem] Failed to set up event listeners:', error, 'error');
+            debugLog('Failed to set up event listeners:', error, 'error', 'AutoOutfitService');
         }
     }
     removeEventListeners() {
@@ -147,17 +147,17 @@ You have the following commands at your disposal:
                     context.eventSource.off(context.event_types.MESSAGE_RECEIVED, this.eventHandler);
                 }
                 this.eventHandler = null;
-                debugLog('[AutoOutfitSystem] Event listener removed');
+                debugLog('Event listener removed', 'AutoOutfitService');
             }
         }
         catch (error) {
-            debugLog('[AutoOutfitSystem] Failed to remove event listeners:', error, 'error');
+            debugLog('Failed to remove event listeners:', error, 'error', 'AutoOutfitService');
         }
     }
     markAppInitialized() {
         if (!this.appInitialized) {
             this.appInitialized = true;
-            debugLog('[AutoOutfitSystem] App marked as initialized - will now process new AI messages');
+            debugLog('App marked as initialized - will now process new AI messages', 'AutoOutfitService');
         }
     }
     processOutfitCommands() {
@@ -168,11 +168,11 @@ You have the following commands at your disposal:
                 return;
             }
             if (this.isProcessing) {
-                debugLog('[AutoOutfitSystem] Already processing, skipping');
+                debugLog('Already processing, skipping', 'AutoOutfitService');
                 return;
             }
             if (!this.outfitManager || !this.outfitManager.setCharacter) {
-                debugLog('[AutoOutfitSystem] Outfit manager not properly initialized', null, 'error');
+                debugLog('Outfit manager not properly initialized', null, 'error', 'AutoOutfitService');
                 return;
             }
             this.isProcessing = true;
@@ -182,7 +182,7 @@ You have the following commands at your disposal:
                 this.lastSuccessfulProcessing = new Date();
             }
             catch (error) {
-                debugLog('Outfit command processing failed after retries:', error, 'error');
+                debugLog('Outfit command processing failed after retries:', error, 'error', 'AutoOutfitService');
                 this.consecutiveFailures++;
                 this.showPopup(`Outfit check failed ${this.consecutiveFailures} time(s).`, 'error');
             }
@@ -222,26 +222,26 @@ You have the following commands at your disposal:
             }
             const processedSystemPrompt = this.replaceMacrosInPrompt(this.systemPrompt);
             const promptText = `${processedSystemPrompt}\n\nRecent Messages:\n${recentMessages}\n\nOutput:`;
-            debugLog('[AutoOutfitSystem] Generating outfit commands with LLMService...');
+            debugLog('Generating outfit commands with LLMService...', 'AutoOutfitService');
             try {
                 const result = yield generateOutfitFromLLM({ prompt: promptText });
                 this.llmOutput = result; // Store the LLM output
-                debugLog('[AutoOutfitSystem] Generated result:', result);
+                debugLog('Generated result:', result, 'AutoOutfitService');
                 const commands = this.parseGeneratedText(result);
                 this.generatedCommands = commands; // Store the generated commands
                 if (commands.length > 0) {
-                    debugLog(`[AutoOutfitSystem] Found ${commands.length} commands, processing...`);
+                    debugLog(`Found ${commands.length} commands, processing...`, 'AutoOutfitService');
                     yield this.processCommandBatch(commands);
                 }
                 else {
-                    debugLog('[AutoOutfitSystem] No outfit commands found in response');
+                    debugLog('No outfit commands found in response', 'AutoOutfitService');
                     if (result.trim() !== '[none]') {
                         this.showPopup('LLM could not parse any clothing data from the character.', 'warning');
                     }
                 }
             }
             catch (error) {
-                debugLog('[AutoOutfitSystem] Generation failed:', error, 'error');
+                debugLog('Generation failed:', error, 'error', 'AutoOutfitService');
                 throw error;
             }
         });
@@ -260,17 +260,17 @@ You have the following commands at your disposal:
             return [];
         }
         const commands = extractCommands(text);
-        debugLog(`[AutoOutfitSystem] Found ${commands.length} commands:`, commands);
+        debugLog(`Found ${commands.length} commands:`, commands, 'AutoOutfitService');
         return commands;
     }
     processCommandBatch(commands) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             if (!commands || commands.length === 0) {
-                debugLog('[AutoOutfitSystem] No commands to process');
+                debugLog('No commands to process', 'AutoOutfitService');
                 return;
             }
-            debugLog(`[AutoOutfitSystem] Processing batch of ${commands.length} commands`);
+            debugLog(`Processing batch of ${commands.length} commands`, 'AutoOutfitService');
             const successfulCommands = [];
             const failedCommands = [];
             const lowConfidenceCommands = [];
@@ -291,7 +291,7 @@ You have the following commands at your disposal:
                 }
                 catch (error) {
                     failedCommands.push({ command, error: error.message });
-                    debugLog(`Error processing command "${command}":`, error, 'error');
+                    debugLog(`Error processing command "${command}":`, error, 'error', 'AutoOutfitService');
                 }
             }
             if (successfulCommands.length > 0) {
@@ -308,7 +308,7 @@ You have the following commands at your disposal:
                 }
             }
             if (failedCommands.length > 0) {
-                debugLog(`[AutoOutfitSystem] ${failedCommands.length} commands failed:`, failedCommands, 'warn');
+                debugLog(`${failedCommands.length} commands failed:`, failedCommands, 'warn', 'AutoOutfitService');
             }
             if (lowConfidenceCommands.length > 0) {
                 debugLog(`[AutoOutfitSystem] ${lowConfidenceCommands.length} commands with low confidence were ignored:`, lowConfidenceCommands, 'warn');
@@ -349,7 +349,7 @@ You have the following commands at your disposal:
             return 'Character';
         }
         catch (error) {
-            debugLog('Error getting active character name:', error, 'error');
+            debugLog('Error getting active character name:', error, 'error', 'AutoOutfitService');
             return 'Character';
         }
     }
@@ -409,7 +409,7 @@ You have the following commands at your disposal:
                 }
                 const { action, slot, value } = parsedCommand;
                 const cleanValue = value !== undefined ? this.replaceAll(value, '"', '').trim() : '';
-                debugLog(`[AutoOutfitSystem] Processing: ${action} ${slot} "${cleanValue}"`);
+                debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, 'AutoOutfitService');
                 const message = yield this.executeCommand(action, slot, cleanValue);
                 return {
                     success: true,
@@ -456,10 +456,10 @@ You have the following commands at your disposal:
                     const outfitInstanceId = window.botOutfitPanel.outfitManager.getOutfitInstanceId();
                     window.botOutfitPanel.outfitManager.loadOutfit(outfitInstanceId);
                     window.botOutfitPanel.renderContent();
-                    debugLog('[AutoOutfitSystem] Outfit panel updated');
+                    debugLog('Outfit panel updated', 'AutoOutfitService');
                 }
                 catch (error) {
-                    debugLog('Failed to update outfit panel:', error, 'error');
+                    debugLog('Failed to update outfit panel:', error, 'error', 'AutoOutfitService');
                 }
             }, 500);
         }
@@ -484,7 +484,7 @@ You have the following commands at your disposal:
                 .join('\n');
         }
         catch (error) {
-            debugLog('Error getting last messages:', error, 'error');
+            debugLog('Error getting last messages:', error, 'error', 'AutoOutfitService');
             return '';
         }
     }
@@ -499,7 +499,7 @@ You have the following commands at your disposal:
             }
         }
         catch (error) {
-            debugLog('Failed to show popup:', error, 'error');
+            debugLog('Failed to show popup:', error, 'error', 'AutoOutfitService');
         }
     }
     delay(ms) {

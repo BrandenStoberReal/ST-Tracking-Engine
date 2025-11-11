@@ -55,14 +55,14 @@ export function initSettings(autoOutfitSystem: any, AutoOutfitSystemClass: any, 
     }
 
     if (settings[MODULE_NAME].presets) {
-        debugLog('[OutfitTracker] Loading presets from settings', null, 'info');
+        debugLog('Loading presets from settings', null, 'info', 'Settings');
     }
 
     if (settings[MODULE_NAME].instances) {
-        debugLog('[OutfitTracker] Loading bot instances from settings', null, 'info');
+        debugLog('Loading bot instances from settings', null, 'info', 'Settings');
     }
 
     if (settings[MODULE_NAME].user_instances) {
-        debugLog('[OutfitTracker] Loading user instances from settings', null, 'info');
+        debugLog('Loading user instances from settings', null, 'info', 'Settings');
     }
 }

@@ -36,7 +36,7 @@ export function getSettingValue(key: string, defaultValue: unknown = undefined):
         return (window as any).extension_settings?.outfit_tracker?.[key];
     } catch (error) {
         // If all methods fail, return a safe default
-        debugLog('Could not access outfit tracker settings, using default behavior:', error, 'warn');
+        debugLog('Could not access outfit tracker settings, using default behavior:', error, 'warn', 'SettingsUtil');
         return defaultValue;
     }
 }

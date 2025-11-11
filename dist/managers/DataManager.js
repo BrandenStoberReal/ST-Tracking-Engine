@@ -36,7 +36,7 @@ class DataManager {
         if (!this.data)
             return;
         if (!this.data.version || this.data.version < this.version) {
-            debugLog(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`, null, 'info');
+            debugLog(`Migrating data from version ${this.data.version} to ${this.version}`, null, 'info', 'DataManager');
             // Migration: Convert 'default' presets to settings-based default preset names
             if (this.data.presets) {
                 const settings = this.data.settings || Object.assign({}, DEFAULT_SETTINGS);

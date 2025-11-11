@@ -5,7 +5,7 @@ import { LogEntry } from '../types';
 const logs: LogEntry[] = [];
 const MAX_LOGS = 1000;
 
-function addLogToStorage(message: string, data: unknown, level: string = 'log'): void {
+function addLogToStorage(message: string, data: unknown, level: string = 'log', source?: string): void {
     const timestamp = new Date().toISOString();
 
     logs.push({
@@ -13,6 +13,7 @@ function addLogToStorage(message: string, data: unknown, level: string = 'log'):
         message,
         data,
         level,
+        source,
         formattedMessage: `[OutfitTracker Debug - ${timestamp}] ${message}`,
     });
 
@@ -21,7 +22,7 @@ function addLogToStorage(message: string, data: unknown, level: string = 'log'):
     }
 }
 
-export function debugLog(message: string, data?: any, level: string = 'log'): void {
+export function debugLog(message: string, data?: any, level: string = 'log', source?: string): void {
     const storeState = outfitStore.getState();
     const debugMode = storeState?.settings?.debugMode;
 
@@ -48,17 +49,17 @@ export function debugLog(message: string, data?: any, level: string = 'log'): vo
                 break;
         }
 
-        addLogToStorage(message, data, level);
+        addLogToStorage(message, data, level, source);
     }
 }
 
-export function forceDebugLog(message: string, data?: any): void {
+export function forceDebugLog(message: string, data?: any, source?: string): void {
     const timestamp = new Date().toISOString();
     const formattedMessage = `[OutfitTracker Debug - ${timestamp}] ${message}`;
 
     console.log(formattedMessage, data !== undefined ? data : '');
 
-    addLogToStorage(message, data, 'log');
+    addLogToStorage(message, data, 'log', source);
 }
 
 export function getLogs(): LogEntry[] {

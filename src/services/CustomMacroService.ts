@@ -107,10 +107,10 @@ class CustomMacroService {
      * Gets the slot value using instance-aware resolution (for direct text replacement)
      */
     getInstanceAwareSlotValue(macroType: string, slotName: string, charNameParam: string | null = null): string {
-        debugLog(`[CustomMacroService] getInstanceAwareSlotValue called for ${macroType}_${slotName}`, null, 'debug');
+        debugLog(`getInstanceAwareSlotValue called for ${macroType}_${slotName}`, null, 'debug', 'CustomMacroService');
 
         if (!this.allSlots.includes(slotName)) {
-            debugLog(`[CustomMacroService] Invalid slot name: ${slotName}`, null, 'debug');
+            debugLog(`Invalid slot name: ${slotName}`, null, 'debug', 'CustomMacroService');
             return 'None';
         }
 
@@ -132,7 +132,7 @@ class CustomMacroService {
             return fallbackValue;
         }
 
-        debugLog(`[CustomMacroService] Using instance ID ${instanceId} for ${macroType}_${slotName}`, null, 'debug');
+        debugLog(`Using instance ID ${instanceId} for ${macroType}_${slotName}`, null, 'debug', 'CustomMacroService');
 
         // Get the value directly from the outfit store using the resolved instance ID
         try {
@@ -146,13 +146,13 @@ class CustomMacroService {
                 );
                 const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
                 const value = outfitData[slotName] || 'None';
-                debugLog(`[CustomMacroService] Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug');
+                debugLog(`Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug', 'CustomMacroService');
                 return value;
             } else if (macroType === 'user') {
-                debugLog(`[CustomMacroService] Looking up user outfit for instance ${instanceId}`, null, 'debug');
+                debugLog(`Looking up user outfit for instance ${instanceId}`, null, 'debug', 'CustomMacroService');
                 const outfitData = outfitStore.getUserOutfit(instanceId);
                 const value = outfitData[slotName] || 'None';
-                debugLog(`[CustomMacroService] Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug');
+                debugLog(`Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug', 'CustomMacroService');
                 return value;
             }
         } catch (error) {
@@ -183,10 +183,10 @@ class CustomMacroService {
      * Gets the value from the appropriate instance-specific macro
      */
     getPointerMacroValue(macroType: string, slotName: string): string {
-        debugLog(`[CustomMacroService] getPointerMacroValue called for ${macroType}_${slotName}`, null, 'debug');
+        debugLog(`getPointerMacroValue called for ${macroType}_${slotName}`, null, 'debug', 'CustomMacroService');
 
         if (!this.allSlots.includes(slotName)) {
-            debugLog(`[CustomMacroService] Invalid slot name: ${slotName}`, null, 'debug');
+            debugLog(`Invalid slot name: ${slotName}`, null, 'debug', 'CustomMacroService');
             return 'None';
         }
 
@@ -202,7 +202,7 @@ class CustomMacroService {
             return 'None';
         }
 
-        debugLog(`[CustomMacroService] Using instance ID ${instanceId} for ${macroType}_${slotName}`, null, 'debug');
+        debugLog(`Using instance ID ${instanceId} for ${macroType}_${slotName}`, null, 'debug', 'CustomMacroService');
 
         // Get the value directly from the outfit store using the resolved instance ID
         try {
@@ -216,13 +216,13 @@ class CustomMacroService {
                 );
                 const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
                 const value = outfitData[slotName] || 'None';
-                debugLog(`[CustomMacroService] Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug');
+                debugLog(`Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug', 'CustomMacroService');
                 return value;
             } else if (macroType === 'user') {
-                debugLog(`[CustomMacroService] Looking up user outfit for instance ${instanceId}`, null, 'debug');
+                debugLog(`Looking up user outfit for instance ${instanceId}`, null, 'debug', 'CustomMacroService');
                 const outfitData = outfitStore.getUserOutfit(instanceId);
                 const value = outfitData[slotName] || 'None';
-                debugLog(`[CustomMacroService] Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug');
+                debugLog(`Retrieved ${macroType}_${slotName} = '${value}'`, null, 'debug', 'CustomMacroService');
                 return value;
             }
         } catch (error) {
@@ -253,16 +253,16 @@ class CustomMacroService {
      * Gets the appropriate instance ID for the current context
      */
     getInstanceIdForCurrentContext(): string | null {
-        debugLog('[CustomMacroService] getInstanceIdForCurrentContext called', null, 'debug');
+        debugLog('getInstanceIdForCurrentContext called', null, 'debug', 'CustomMacroService');
 
         // First priority: Check if we already have a current instance ID from the store
         const currentInstanceId = outfitStore.getCurrentInstanceId();
         if (currentInstanceId) {
-            debugLog(`[CustomMacroService] Using existing current instance ID: ${currentInstanceId}`, null, 'debug');
+            debugLog(`Using existing current instance ID: ${currentInstanceId}`, null, 'debug', 'CustomMacroService');
             return currentInstanceId;
         }
 
-        debugLog('[CustomMacroService] No existing current instance ID, calculating from chat', null, 'debug');
+        debugLog('No existing current instance ID, calculating from chat', null, 'debug', 'CustomMacroService');
 
         // Calculate instance ID directly from current chat context and cache it
         // Use the same logic as OutfitTracker to ensure consistency
@@ -272,7 +272,12 @@ class CustomMacroService {
                 // Find the first bot message
                 const firstBotMessage = ctx.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
                 if (firstBotMessage) {
-                    debugLog(`[CustomMacroService] Found first bot message for instance ID calculation`, null, 'debug');
+                    debugLog(
+                        `Found first bot message for instance ID calculation`,
+                        null,
+                        'debug',
+                        'CustomMacroService'
+                    );
                     // Calculate instance ID directly from the message content
                     const instanceId = this.calculateInstanceIdFromMessage(firstBotMessage.mes);
                     if (instanceId) {
@@ -288,19 +293,19 @@ class CustomMacroService {
                         }
                         return instanceId;
                     } else {
-                        debugLog('[CustomMacroService] Failed to calculate instance ID from message', null, 'debug');
+                        debugLog('Failed to calculate instance ID from message', null, 'debug', 'CustomMacroService');
                     }
                 } else {
-                    debugLog('[CustomMacroService] No first bot message found in chat', null, 'debug');
+                    debugLog('No first bot message found in chat', null, 'debug', 'CustomMacroService');
                 }
             } else {
-                debugLog('[CustomMacroService] No chat context available for instance ID calculation', null, 'debug');
+                debugLog('No chat context available for instance ID calculation', null, 'debug', 'CustomMacroService');
             }
         } catch (error) {
-            debugLog('[CustomMacroService] Error calculating instance ID from chat:', error, 'debug');
+            debugLog('Error calculating instance ID from chat:', error, 'debug', 'CustomMacroService');
         }
 
-        debugLog('[CustomMacroService] Could not determine instance ID from any source', null, 'debug');
+        debugLog('Could not determine instance ID from any source', null, 'debug', 'CustomMacroService');
         return null;
     }
 
@@ -325,11 +330,11 @@ class CustomMacroService {
 
             // Use the simple synchronous hash function for consistency
             const instanceId = this.generateInstanceIdFromTextSimple(processedMessage);
-            debugLog(`[CustomMacroService] Generated instance ID: ${instanceId}`, null, 'debug');
+            debugLog(`Generated instance ID: ${instanceId}`, null, 'debug', 'CustomMacroService');
 
             return instanceId;
         } catch (error) {
-            debugLog('[CustomMacroService] Error calculating instance ID from message:', error, 'error');
+            debugLog('Error calculating instance ID from message:', error, 'error', 'CustomMacroService');
             return null;
         }
     }
@@ -408,7 +413,7 @@ class CustomMacroService {
 
             return typeof window.name2 !== 'undefined' ? window.name2 : 'Character';
         } catch (error) {
-            debugLog('Error getting character name:', error, 'error');
+            debugLog('Error getting character name:', error, 'error', 'CustomMacroService');
             return 'Character';
         }
     }
@@ -420,7 +425,7 @@ class CustomMacroService {
 
         // First check if the outfit system is fully initialized
         if (!this._isSystemReady()) {
-            debugLog('[CustomMacroService] System not ready, deferring macro value', null, 'debug');
+            debugLog('System not ready, deferring macro value', null, 'debug', 'CustomMacroService');
             return 'None';
         }
 
@@ -573,7 +578,7 @@ class CustomMacroService {
                 return result;
             }
         } catch (error) {
-            debugLog('Error getting slot value:', error, 'error');
+            debugLog('Error getting slot value:', error, 'error', 'CustomMacroService');
         }
 
         const result = 'None';
@@ -656,14 +661,14 @@ class CustomMacroService {
 
             return false;
         } catch (error) {
-            debugLog('[CustomMacroService] Error checking outfit data availability:', error, 'error');
+            debugLog('Error checking outfit data availability:', error, 'error', 'CustomMacroService');
             return false;
         }
     }
 
     clearCache(): void {
         this.macroValueCache.clear();
-        debugLog('[CustomMacroService] Macro cache cleared', null, 'debug');
+        debugLog('Macro cache cleared', null, 'debug', 'CustomMacroService');
         // Note: We don't clear registeredMacros here as they should persist across cache clears
         // Only clear when explicitly deregistering
     }
@@ -705,7 +710,7 @@ class CustomMacroService {
 
             return typeof window.name1 !== 'undefined' ? window.name1 : 'User';
         } catch (error) {
-            debugLog('Error getting user name:', error, 'error');
+            debugLog('Error getting user name:', error, 'error', 'CustomMacroService');
             return 'User';
         }
     }
@@ -728,7 +733,7 @@ class CustomMacroService {
             const macroContent = text.substring(openIdx + 2, closeIdx);
             const fullMatch = `{{${macroContent}}}`;
 
-            debugLog(`[CustomMacroService] Parsing macro: ${fullMatch}`, null, 'debug');
+            debugLog(`Parsing macro: ${fullMatch}`, null, 'debug', 'CustomMacroService');
 
             const parts = macroContent.split('_');
             let macroType: string = '';
@@ -854,7 +859,7 @@ class CustomMacroService {
 
             return outfitInfo;
         } catch (error) {
-            debugLog('[CustomMacroSystem] Error generating outfit info string:', error, 'error');
+            debugLog('Error generating outfit info string:', error, 'error', 'CustomMacroService');
             return '';
         }
     }
@@ -867,12 +872,12 @@ class CustomMacroService {
         );
 
         if (!text || typeof text !== 'string') {
-            debugLog('[CustomMacroService] replaceMacrosInText: invalid input, returning as-is', null, 'debug');
+            debugLog('replaceMacrosInText: invalid input, returning as-is', null, 'debug', 'CustomMacroService');
             return text;
         }
 
         const macros = this.extractCustomMacros(text);
-        debugLog(`[CustomMacroService] Found ${macros.length} macros in text`, null, 'debug');
+        debugLog(`Found ${macros.length} macros in text`, null, 'debug', 'CustomMacroService');
 
         let result = text;
 
@@ -892,7 +897,7 @@ class CustomMacroService {
                     ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type
                 );
 
-                debugLog(`[CustomMacroService] Macro ${macro.fullMatch} has data: ${hasData}`, null, 'debug');
+                debugLog(`Macro ${macro.fullMatch} has data: ${hasData}`, null, 'debug', 'CustomMacroService');
 
                 if (hasData) {
                     // Only replace if we have actual data (not just "None")
@@ -902,7 +907,7 @@ class CustomMacroService {
                         ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type
                     );
 
-                    debugLog(`[CustomMacroService] Replacing ${macro.fullMatch} with '${replacement}'`, null, 'debug');
+                    debugLog(`Replacing ${macro.fullMatch} with '${replacement}'`, null, 'debug', 'CustomMacroService');
 
                     result =
                         result.substring(0, macro.startIndex) +

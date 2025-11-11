@@ -28,7 +28,7 @@ function processSingleCommand(command, botManager) {
             }
             const [, action, slot, value] = match;
             const cleanValue = value || '';
-            debugLog(`[LLMService] Processing: ${action} ${slot} "${cleanValue}"`);
+            debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, 'LLMService');
             let finalAction = action;
             if (action === 'replace') {
                 finalAction = 'change';
@@ -42,7 +42,7 @@ function processSingleCommand(command, botManager) {
             }
         }
         catch (error) {
-            debugLog('Error processing single command:', error, 'error');
+            debugLog('Error processing single command:', error, 'error', 'LLMService');
             throw error;
         }
     });
@@ -70,7 +70,7 @@ export function generateOutfitFromLLM(options) {
             return response;
         }
         catch (error) {
-            debugLog('Error generating outfit from LLM:', error, 'error');
+            debugLog('Error generating outfit from LLM:', error, 'error', 'LLMService');
             throw error;
         }
     });
@@ -133,7 +133,7 @@ export function importOutfitFromCharacterCard() {
             const commands = extractCommands(response);
             // Process the commands to update the current bot outfit
             if (commands && commands.length > 0) {
-                debugLog(`[LLMService] Found ${commands.length} outfit commands to process:`, commands);
+                debugLog(`Found ${commands.length} outfit commands to process:`, commands, 'LLMService');
                 // Get the global bot outfit manager from window if available
                 if (window.botOutfitPanel && window.botOutfitPanel.outfitManager) {
                     const botManager = window.botOutfitPanel.outfitManager;
@@ -143,7 +143,7 @@ export function importOutfitFromCharacterCard() {
                             yield processSingleCommand(command, botManager);
                         }
                         catch (cmdError) {
-                            debugLog(`Error processing command "${command}":`, cmdError, 'error');
+                            debugLog(`Error processing command "${command}":`, cmdError, 'error', 'LLMService');
                         }
                     }
                     // Save the updated outfit
@@ -155,11 +155,11 @@ export function importOutfitFromCharacterCard() {
                     }
                 }
                 else {
-                    debugLog('[LLMService] Bot outfit manager not available to apply imported outfits', null, 'warn');
+                    debugLog('Bot outfit manager not available to apply imported outfits', null, 'warn', 'LLMService');
                 }
             }
             else {
-                debugLog('[LLMService] No outfit commands found in response');
+                debugLog('No outfit commands found in response', 'LLMService');
             }
             return {
                 message: `Imported outfit information from ${characterName || 'the character'}. Found and applied ${commands.length} outfit items.`, // Corrected escaping for \'
@@ -168,7 +168,7 @@ export function importOutfitFromCharacterCard() {
             };
         }
         catch (error) {
-            debugLog('Error importing outfit from character card:', error, 'error');
+            debugLog('Error importing outfit from character card:', error, 'error', 'LLMService');
             const errorMessage = error instanceof Error ? error.message : String(error);
             return {
                 message: `Error importing outfit: ${errorMessage}`,

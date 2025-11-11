@@ -130,7 +130,7 @@ export class UserOutfitPanel {
             }
             return '';
         } catch (error) {
-            debugLog('Could not get first message text for hash generation:', error, 'warn');
+            debugLog('Could not get first message text for hash generation:', error, 'warn', 'UserOutfitPanel');
             return '';
         }
     }

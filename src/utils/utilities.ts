@@ -80,7 +80,7 @@ export function safeGet(obj: unknown, path: string, defaultValue: unknown = null
     try {
         return path.split('.').reduce((acc, key) => acc && (acc as any)[key], obj) || defaultValue;
     } catch (error) {
-        debugLog(`Error in safeGet for path "${path}":`, error, 'error');
+        debugLog(`Error in safeGet for path "${path}":`, error, 'error', 'Utilities');
         return defaultValue;
     }
 }
@@ -337,7 +337,12 @@ export async function generateInstanceIdFromText(
                 .join('')
                 .substring(0, 16);
         } catch (err) {
-            debugLog('Crypto API failed, falling back to simple hash for instance ID generation', err, 'warn');
+            debugLog(
+                'Crypto API failed, falling back to simple hash for instance ID generation',
+                err,
+                'warn',
+                'Utilities'
+            );
             return generateInstanceIdFromTextSimple(normalizedText);
         }
     } else {

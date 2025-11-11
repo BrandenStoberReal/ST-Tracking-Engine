@@ -71,7 +71,7 @@ class EventService {
 
     setupSillyTavernEventListeners(): void {
         if (!this.context) {
-            debugLog('[EventService] Context is null, cannot setup event listeners', null, 'warn');
+            debugLog('Context is null, cannot setup event listeners', null, 'warn', 'EventService');
             return;
         }
         const { eventSource, event_types } = this.context as any;
@@ -92,7 +92,7 @@ class EventService {
     }
 
     handleAppReady(): void {
-        debugLog('[OutfitTracker] App ready, marking auto outfit system as initialized');
+        debugLog('App ready, marking auto outfit system as initialized', 'EventService');
         if (this.autoOutfitSystem) {
             this.autoOutfitSystem.markAppInitialized();
         }
@@ -124,7 +124,7 @@ class EventService {
                     customMacroSystem.clearCache();
                     // Note: Macro registration is handled by handleAppReady on startup and handleInstanceCreated for new instances
                 } else {
-                    debugLog('[OutfitTracker] CHAT_CHANGED event fired but first message unchanged - skipping update');
+                    debugLog('CHAT_CHANGED event fired but first message unchanged - skipping update', 'EventService');
                 }
             } else {
                 this.currentFirstMessageHash = null;
@@ -152,7 +152,7 @@ class EventService {
         const aiMessages = chat.filter((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length === 1 && !data.is_user) {
-            debugLog('[OutfitTracker] First AI message received, updating outfit instance.');
+            debugLog('First AI message received, updating outfit instance.', 'EventService');
             const firstBotMessage = aiMessages[0];
             this.currentFirstMessageHash = this.generateMessageHash(firstBotMessage.mes);
 
@@ -177,7 +177,7 @@ class EventService {
         if (!this.context) {
             return;
         }
-        debugLog(`[OutfitTracker] MESSAGE_SWIPED event fired with index: ${index}`);
+        debugLog(`MESSAGE_SWIPED event fired with index: ${index}`, 'EventService');
         const chat = this.context.chat;
 
         if (!chat || index < 0 || index >= chat.length) {
@@ -190,7 +190,7 @@ class EventService {
         const aiMessages = chat.filter((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
-            debugLog('[OutfitTracker] First message was swiped, updating outfit instance.');
+            debugLog('First message was swiped, updating outfit instance.', 'EventService');
 
             const firstBotMessage = aiMessages[0];
             if (firstBotMessage) {
@@ -227,7 +227,7 @@ class EventService {
     }
 
     handleOutfitDataLoaded(): void {
-        debugLog('[OutfitTracker] Outfit data loaded, refreshing macros and UI');
+        debugLog('Outfit data loaded, refreshing macros and UI', 'EventService');
 
         // Clear macro cache to ensure fresh data
         customMacroSystem.clearCache();
@@ -253,10 +253,10 @@ class EventService {
             } else {
                 // Alternative: trigger a small change that might cause refresh
                 // This might require accessing the chat container directly
-                debugLog('[OutfitTracker] Could not find redrawCurrentChat function, UI may need manual refresh');
+                debugLog('Could not find redrawCurrentChat function, UI may need manual refresh', 'EventService');
             }
         } catch (error) {
-            debugLog('[OutfitTracker] Error trying to refresh UI:', error);
+            debugLog('Error trying to refresh UI:', error, 'EventService');
         }
     }
 
@@ -322,22 +322,22 @@ class EventService {
                 window.customMacroSystem.getCurrentSlotValue('user', slot);
             });
 
-            debugLog('[EventService] Pre-populated macro cache after character change', null, 'info');
+            debugLog('Pre-populated macro cache after character change', null, 'info', 'EventService');
         } catch (error) {
-            debugLog('[EventService] Error pre-populating macro cache:', error, 'error');
+            debugLog('Error pre-populating macro cache:', error, 'error', 'EventService');
         }
     }
 
     overrideResetChat(): void {
         if (typeof (window as any).restartLLM !== 'function') {
-            debugLog('[OutfitTracker] window.restartLLM not found. Cannot override chat reset.', null, 'warn');
+            debugLog('window.restartLLM not found. Cannot override chat reset.', null, 'warn', 'EventService');
             return;
         }
 
         const originalRestart = (window as any).restartLLM;
 
         (window as any).restartLLM = async (...args: any[]) => {
-            debugLog('[OutfitTracker] Chat reset triggered (restartLLM).');
+            debugLog('Chat reset triggered (restartLLM)', null, 'log', 'EventService');
 
             outfitStore.flush();
 
@@ -391,7 +391,7 @@ class EventService {
                 }
             }
 
-            debugLog('[OutfitTracker] Restored outfits after chat reset.');
+            debugLog('Restored outfits after chat reset.', 'EventService');
 
             extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
 
@@ -414,7 +414,7 @@ class EventService {
 
     overrideClearChat(): void {
         if (typeof (window as any).clearChat !== 'function') {
-            debugLog('[OutfitTracker] window.clearChat not found. Cannot override chat clear.', null, 'warn');
+            debugLog('window.clearChat not found. Cannot override chat clear.', null, 'warn', 'EventService');
             return;
         }
 
@@ -477,7 +477,7 @@ class EventService {
                 }
             }
 
-            debugLog('[OutfitTracker] Restored outfits after chat clear.');
+            debugLog('Restored outfits after chat clear.', 'EventService');
 
             extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
         };

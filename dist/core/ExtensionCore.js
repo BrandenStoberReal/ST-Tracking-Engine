@@ -36,14 +36,14 @@ let AutoOutfitSystem;
 function loadAutoOutfitSystem() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            debugLog('Attempting to load AutoOutfitSystem module', null, 'debug');
+            debugLog('Attempting to load AutoOutfitSystem module', null, 'debug', 'ExtensionCore');
             const autoOutfitModule = yield import('../services/AutoOutfitService.js');
             AutoOutfitSystem = autoOutfitModule.AutoOutfitService;
-            debugLog('AutoOutfitSystem module loaded successfully', null, 'info');
+            debugLog('AutoOutfitSystem module loaded successfully', null, 'info', 'ExtensionCore');
         }
         catch (error) {
-            debugLog('[OutfitTracker] Failed to load AutoOutfitSystem:', error, 'error');
-            debugLog('Failed to load AutoOutfitSystem, using dummy class', error, 'error');
+            debugLog('Failed to load AutoOutfitSystem:', error, 'error', 'ExtensionCore');
+            debugLog('Failed to load AutoOutfitSystem, using dummy class', error, 'error', 'ExtensionCore');
             AutoOutfitSystem = class DummyAutoOutfitSystem {
                 constructor() {
                     this.isEnabled = false;
@@ -159,7 +159,7 @@ function setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem
         const STContext = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
         if (STContext) {
             // Character-specific macros removed - only universal macros (char_*, user_*) are used
-            debugLog('[ExtensionCore] Macros refreshed manually', null, 'info');
+            debugLog('Macros refreshed manually', null, 'info', 'ExtensionCore');
         }
     };
     // Create and set up the debug panel
@@ -227,12 +227,12 @@ window.outfitTrackerInterceptor = function (chat) {
             }
             // If both bot and user have prompt injection disabled, skip entirely
             if (!botManager.getPromptInjectionEnabled() && !userManager.getPromptInjectionEnabled()) {
-                debugLog('Prompt injection is disabled for both bot and user', null, 'info');
+                debugLog('Prompt injection is disabled for both bot and user', null, 'info', 'ExtensionCore');
                 return;
             }
             // Check if prompt injection is disabled for this bot instance
             if (!botManager.getPromptInjectionEnabled()) {
-                debugLog('Prompt injection is disabled for this bot instance', null, 'info');
+                debugLog('Prompt injection is disabled for this bot instance', null, 'info', 'ExtensionCore');
             }
             // Generate outfit information string using the custom macro system
             const outfitInfoString = customMacroSystem.generateOutfitInfoString(botManager, userManager);
@@ -247,18 +247,18 @@ window.outfitTrackerInterceptor = function (chat) {
                     mes: outfitInfoString,
                     extra: { outfit_injection: true },
                 };
-                debugLog('Injecting outfit information into chat', { outfitInfoString }, 'info');
+                debugLog('Injecting outfit information into chat', { outfitInfoString }, 'info', 'ExtensionCore');
                 // Insert the outfit information before the last message in the chat
                 // This ensures it's included in the context without disrupting the conversation flow
                 chat.splice(chat.length - 1, 0, outfitInjection);
             }
             else {
-                debugLog('No outfit information to inject', null, 'debug');
+                debugLog('No outfit information to inject', null, 'debug', 'ExtensionCore');
             }
         }
         catch (error) {
-            debugLog('[OutfitTracker] Error in interceptor:', error, 'error');
-            debugLog('Error in interceptor', error, 'error');
+            debugLog('Error in interceptor:', error, 'error', 'ExtensionCore');
+            debugLog('Error in interceptor', error, 'error', 'ExtensionCore');
         }
     });
 };
@@ -273,10 +273,10 @@ export function initializeExtension() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
         yield loadAutoOutfitSystem();
-        debugLog('Starting extension initialization', null, 'info');
+        debugLog('Starting extension initialization', null, 'info', 'ExtensionCore');
         const stContext = ((_b = (_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) === null || _b === void 0 ? void 0 : _b.call(_a)) || ((_c = window.getContext) === null || _c === void 0 ? void 0 : _c.call(window));
         if (!stContext) {
-            debugLog('[OutfitTracker] Required SillyTavern context is not available.', null, 'error');
+            debugLog('Required SillyTavern context is not available.', null, 'error', 'ExtensionCore');
             throw new Error('Missing required SillyTavern globals.');
         }
         const storageService = new StorageService((data) => {
@@ -291,25 +291,25 @@ export function initializeExtension() {
         outfitStore.setDataManager(dataManager);
         // Load the stored state into the outfit store after initialization
         outfitStore.loadState();
-        debugLog('Data manager and outfit store initialized', null, 'info');
+        debugLog('Data manager and outfit store initialized', null, 'info', 'ExtensionCore');
         const outfitDataService = new OutfitDataService(dataManager);
         const settings = dataManager.loadSettings();
-        debugLog('Settings loaded', settings, 'info');
+        debugLog('Settings loaded', settings, 'info', 'ExtensionCore');
         const botManager = new NewBotOutfitManager(ALL_SLOTS);
         const userManager = new NewUserOutfitManager(ALL_SLOTS);
-        debugLog('Outfit managers created', { botManager, userManager }, 'info');
+        debugLog('Outfit managers created', { botManager, userManager }, 'info', 'ExtensionCore');
         const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS);
         const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS);
-        debugLog('Outfit panels created', { botPanel, userPanel }, 'info');
+        debugLog('Outfit panels created', { botPanel, userPanel }, 'info', 'ExtensionCore');
         const autoOutfitSystem = new AutoOutfitSystem(botManager);
-        debugLog('Auto outfit system created', { autoOutfitSystem }, 'info');
+        debugLog('Auto outfit system created', { autoOutfitSystem }, 'info', 'ExtensionCore');
         // Set global references for the interceptor function to access
         window.botOutfitPanel = botPanel;
         window.userOutfitPanel = userPanel;
         outfitStore.setPanelRef('bot', botPanel);
         outfitStore.setPanelRef('user', userPanel);
         outfitStore.setAutoOutfitSystem(autoOutfitSystem);
-        debugLog('Global references set', null, 'info');
+        debugLog('Global references set', null, 'info', 'ExtensionCore');
         const eventService = setupEventListeners({
             botManager,
             userManager,
@@ -324,10 +324,10 @@ export function initializeExtension() {
         initSettings(autoOutfitSystem, AutoOutfitSystem, stContext);
         customMacroSystem.registerMacros(stContext);
         createSettingsUI(AutoOutfitSystem, autoOutfitSystem, stContext);
-        debugLog('Extension components initialized', null, 'info');
-        debugLog('Event listeners set up', null, 'info');
+        debugLog('Extension components initialized', null, 'info', 'ExtensionCore');
+        debugLog('Event listeners set up', null, 'info', 'ExtensionCore');
         updatePanelStyles();
-        debugLog('Panel styles updated', null, 'info');
+        debugLog('Panel styles updated', null, 'info', 'ExtensionCore');
         if (settings.autoOpenBot && !isMobileDevice()) {
             setTimeout(() => botPanel.show(), 1000);
         }
@@ -335,6 +335,6 @@ export function initializeExtension() {
             setTimeout(() => userPanel.show(), 1000);
         }
         setTimeout(updatePanelStyles, 1500);
-        debugLog('Extension initialization completed', null, 'info');
+        debugLog('Extension initialization completed', null, 'info', 'ExtensionCore');
     });
 }
