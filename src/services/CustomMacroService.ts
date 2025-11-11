@@ -34,6 +34,13 @@ class CustomMacroService {
         this.macroValueCache = new Map<string, MacroCacheEntry>();
         this.cacheExpiryTime = 5 * 60 * 1000;
         this.registeredMacros = new Set<string>();
+        (this as any).lastCacheCleanup = Date.now();
+
+        debugLog(
+            `[CustomMacroService] Initialized with ${this.allSlots.length} slots: ${this.allSlots.join(', ')}`,
+            null,
+            'debug'
+        );
     }
 
     registerMacros(context: any): void {
@@ -434,6 +441,9 @@ class CustomMacroService {
             return 'None';
         }
 
+        // Periodic cache cleanup to prevent memory leaks
+        this._periodicCacheCleanup();
+
         const cacheKey = this._generateCacheKey(macroType, slotName, charNameParam);
         const cachedValue = this.macroValueCache.get(cacheKey);
 
@@ -735,6 +745,8 @@ class CustomMacroService {
             const macroContent = text.substring(openIdx + 2, closeIdx);
             const fullMatch = `{{${macroContent}}}`;
 
+            debugLog(`[CustomMacroService] Parsing macro: ${fullMatch}`, null, 'debug');
+
             const parts = macroContent.split('_');
             let macroType: string = '';
             let slot: string | null = null;
@@ -744,10 +756,25 @@ class CustomMacroService {
                 if (this.allSlots.includes(singlePart)) {
                     macroType = 'char';
                     slot = singlePart;
+                    debugLog(
+                        `[CustomMacroService] Single-part macro: ${singlePart} -> type: ${macroType}, slot: ${slot}`,
+                        null,
+                        'debug'
+                    );
                 } else if (['user', 'char', 'bot'].includes(singlePart)) {
                     macroType = singlePart;
                     slot = null;
+                    debugLog(
+                        `[CustomMacroService] Single-part macro: ${singlePart} -> type: ${macroType}, slot: null`,
+                        null,
+                        'debug'
+                    );
                 } else {
+                    debugLog(
+                        `[CustomMacroService] Skipping unrecognized single-part macro: ${singlePart}`,
+                        null,
+                        'debug'
+                    );
                     index = closeIdx + 2;
                     continue;
                 }
@@ -755,22 +782,48 @@ class CustomMacroService {
                 const potentialCharacterName = parts[0];
                 const potentialSlot = parts.slice(1).join('_');
 
+                debugLog(
+                    `[CustomMacroService] Multi-part macro: potential char: ${potentialCharacterName}, potential slot: ${potentialSlot}`,
+                    null,
+                    'debug'
+                );
+
                 if (this.allSlots.includes(potentialSlot)) {
                     macroType = potentialCharacterName;
                     slot = potentialSlot;
+                    debugLog(
+                        `[CustomMacroService] Direct match found: type: ${macroType}, slot: ${slot}`,
+                        null,
+                        'debug'
+                    );
                 } else {
                     slot = null; // Ensure slot is initialized
                     for (let i = 1; i < parts.length; i++) {
                         const prefix = parts.slice(0, i).join('_');
                         const suffix = parts.slice(i).join('_');
+                        debugLog(
+                            `[CustomMacroService] Trying split: prefix='${prefix}', suffix='${suffix}'`,
+                            null,
+                            'debug'
+                        );
                         if (this.allSlots.includes(suffix)) {
                             macroType = prefix;
                             slot = suffix;
+                            debugLog(
+                                `[CustomMacroService] Split match found: type: ${macroType}, slot: ${slot}`,
+                                null,
+                                'debug'
+                            );
                             break;
                         }
                     }
 
                     if (slot === null || !this.allSlots.includes(slot)) {
+                        debugLog(
+                            `[CustomMacroService] No valid slot found for macro: ${fullMatch}, skipping`,
+                            null,
+                            'debug'
+                        );
                         index = closeIdx + 2;
                         continue;
                     }
@@ -924,6 +977,18 @@ class CustomMacroService {
         }
 
         return true;
+    }
+
+    /**
+     * Clean up expired cache entries periodically
+     */
+    private _periodicCacheCleanup(): void {
+        const now = Date.now();
+        // Only run cleanup every 5 minutes to avoid performance impact
+        if (now - (this as any).lastCacheCleanup > 5 * 60 * 1000) {
+            this._cleanupExpiredCache();
+            (this as any).lastCacheCleanup = now;
+        }
     }
 
     private _setCache(cacheKey: string, value: string): void {
