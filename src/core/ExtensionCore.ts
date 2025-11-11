@@ -170,14 +170,8 @@ function setupApi(
         const STContext = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
 
         if (STContext) {
-            // Only refresh if system is ready
-            if (customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
-                customMacroSystem.deregisterCharacterSpecificMacros(STContext);
-                customMacroSystem.registerCharacterSpecificMacros(STContext);
-                debugLog('[ExtensionCore] Macros refreshed manually', null, 'info');
-            } else {
-                debugLog('[ExtensionCore] System not ready for macro refresh', null, 'warn');
-            }
+            // Character-specific macros removed - only universal macros (char_*, user_*) are used
+            debugLog('[ExtensionCore] Macros refreshed manually', null, 'info');
         }
     };
 

@@ -67,8 +67,6 @@ class EventService {
         }
         this.updateForCurrentCharacter();
         customMacroSystem.clearCache();
-        customMacroSystem.deregisterCharacterSpecificMacros(this.context);
-        customMacroSystem.registerCharacterSpecificMacros(this.context);
         // Show toast notification when instance macros are registered on app startup
         if (typeof toastr !== 'undefined') {
             toastr.success('Instance macros registered successfully!', 'Outfit System');
@@ -183,10 +181,7 @@ class EventService {
         // Clear macro cache to ensure fresh data
         customMacroSystem.clearCache();
         // Refresh the macro system to ensure it has the latest data
-        if (this.context) {
-            customMacroSystem.deregisterCharacterSpecificMacros(this.context);
-            customMacroSystem.registerCharacterSpecificMacros(this.context);
-        }
+        // Character-specific macros removed - only universal macros are used
         // Refresh all outfit panels to show updated values
         if (window.botOutfitPanel && typeof window.botOutfitPanel.renderContent === 'function') {
             window.botOutfitPanel.renderContent();

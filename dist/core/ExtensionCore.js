@@ -158,15 +158,8 @@ function setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem
         var _a;
         const STContext = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
         if (STContext) {
-            // Only refresh if system is ready
-            if (customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
-                customMacroSystem.deregisterCharacterSpecificMacros(STContext);
-                customMacroSystem.registerCharacterSpecificMacros(STContext);
-                debugLog('[ExtensionCore] Macros refreshed manually', null, 'info');
-            }
-            else {
-                debugLog('[ExtensionCore] System not ready for macro refresh', null, 'warn');
-            }
+            // Character-specific macros removed - only universal macros (char_*, user_*) are used
+            debugLog('[ExtensionCore] Macros refreshed manually', null, 'info');
         }
     };
     // Create and set up the debug panel
