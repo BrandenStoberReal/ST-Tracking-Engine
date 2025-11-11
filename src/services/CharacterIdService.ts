@@ -194,7 +194,11 @@ export async function migrateAllCharacters(): Promise<number> {
             null,
             'info'
         );
-        console.log(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`);
+        debugLog(
+            `[CharacterIdService] Found ${context.characters.length} characters to check for migration`,
+            null,
+            'info'
+        );
         let migratedCount = 0;
 
         for (let i = 0; i < context.characters.length; i++) {
@@ -210,9 +214,6 @@ export async function migrateAllCharacters(): Promise<number> {
                     `[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`,
                     null,
                     'info'
-                );
-                console.log(
-                    `[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`
                 );
 
                 if (context.writeExtensionField) {
@@ -258,9 +259,6 @@ export async function migrateAllCharacters(): Promise<number> {
             `[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`,
             null,
             'info'
-        );
-        console.log(
-            `[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`
         );
         return migratedCount;
     } catch (error) {

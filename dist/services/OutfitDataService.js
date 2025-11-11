@@ -57,11 +57,11 @@ class OutfitDataService {
                 });
                 const initialDataManagerState = this.dataManager.load();
                 debugLog('[OutfitDataService] Initial data manager state:', {
-                    instancesCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.instances)
-                        ? Object.keys(initialDataManagerState.instances).length
+                    botInstancesCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.botInstances)
+                        ? Object.keys(initialDataManagerState.botInstances).length
                         : 0,
-                    userInstancesCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.user_instances)
-                        ? Object.keys(initialDataManagerState.user_instances).length
+                    userInstancesCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.userInstances)
+                        ? Object.keys(initialDataManagerState.userInstances).length
                         : 0,
                     presetsCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.presets)
                         ? Object.keys(initialDataManagerState.presets).length
@@ -86,11 +86,11 @@ class OutfitDataService {
                 // Check data manager state after the direct save operation
                 const dataManagerAfterDirectSave = this.dataManager.load();
                 debugLog('[OutfitDataService] Data manager state after direct saveOutfitData:', {
-                    instancesCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.instances)
-                        ? Object.keys(dataManagerAfterDirectSave.instances).length
+                    botInstancesCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.botInstances)
+                        ? Object.keys(dataManagerAfterDirectSave.botInstances).length
                         : 0,
-                    userInstancesCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.user_instances)
-                        ? Object.keys(dataManagerAfterDirectSave.user_instances).length
+                    userInstancesCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.userInstances)
+                        ? Object.keys(dataManagerAfterDirectSave.userInstances).length
                         : 0,
                     presetsCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.presets)
                         ? Object.keys(dataManagerAfterDirectSave.presets).length

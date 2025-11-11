@@ -2,7 +2,7 @@ import { extractCommands } from '../processors/StringProcessor';
 import { generateOutfitFromLLM } from './LLMService';
 import { customMacroSystem } from './CustomMacroService';
 import { outfitStore } from '../common/Store';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+
 import { debugLog } from '../logging/DebugLogger';
 import { AutoOutfitSystemAPI, IAutoOutfitSystemStatus } from '../types';
 
@@ -404,9 +404,11 @@ You have the following commands at your disposal:
             const context = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
             const charId = context.this_chid;
 
-            if (charId !== undefined) {
-                const characterName = getCharacterInfoById(charId, CharacterInfoType.Name);
-                return String(characterName || 'Character');
+            if (charId !== undefined && context.characters) {
+                const character = context.characters[charId];
+                if (character) {
+                    return String(('name' in character ? character.name : character.data?.name) || 'Character');
+                }
             }
             return 'Character';
         } catch (error) {

@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { outfitStore } from '../common/Store.js';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService.js';
 import { getCharacterOutfitData } from './CharacterOutfitService.js';
@@ -105,7 +104,7 @@ let isUpdating = false;
  */
 export function updateForCurrentCharacter(botManager, userManager, botPanel, userPanel) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b;
         if (isUpdating) {
             debugLog('[OutfitTracker] Already updating for current character, skipping.', null, 'warn');
             return;
@@ -137,7 +136,7 @@ export function updateForCurrentCharacter(botManager, userManager, botPanel, use
                 const character = context.characters[charIndex];
                 if (character) {
                     characterUniqueId = yield getOrCreateCharacterId(character);
-                    characterName = getCharacterInfoById(charIndex.toString(), CharacterInfoType.Name);
+                    characterName = ('name' in character ? character.name : (_b = character.data) === null || _b === void 0 ? void 0 : _b.name) || 'Unknown';
                     if (characterName && characterUniqueId) {
                         botManager.setCharacter(String(characterName), characterUniqueId);
                         // Sync any embedded outfit data from the character card

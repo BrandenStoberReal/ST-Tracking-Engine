@@ -179,7 +179,7 @@ export function migrateAllCharacters() {
                 return 0;
             }
             debugLog(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`, null, 'info');
-            console.log(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`);
+            debugLog(`[CharacterIdService] Found ${context.characters.length} characters to check for migration`, null, 'info');
             let migratedCount = 0;
             for (let i = 0; i < context.characters.length; i++) {
                 const character = context.characters[i];
@@ -189,7 +189,6 @@ export function migrateAllCharacters() {
                 if (!existingId) {
                     const newCharacterId = generateGUID();
                     debugLog(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`, null, 'info');
-                    console.log(`[CharacterIdService] Generated new character ID for "${characterName}": ${newCharacterId}`);
                     if (context.writeExtensionField) {
                         yield context.writeExtensionField(i.toString(), 'character_id', newCharacterId);
                         debugLog(`[CharacterIdService] Successfully migrated character "${characterName}" using writeExtensionField`, null, 'info');
@@ -214,7 +213,6 @@ export function migrateAllCharacters() {
                 }
             }
             debugLog(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`, null, 'info');
-            console.log(`[CharacterIdService] Migration complete. ${migratedCount} characters migrated out of ${context.characters.length} total.`);
             return migratedCount;
         }
         catch (error) {

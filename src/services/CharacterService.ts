@@ -1,5 +1,5 @@
 import { outfitStore } from '../common/Store';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+
 import { debugLog } from '../logging/DebugLogger';
 import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService';
 import { getCharacterOutfitData } from './CharacterOutfitService';
@@ -147,7 +147,7 @@ export async function updateForCurrentCharacter(
             const character = context.characters[charIndex];
             if (character) {
                 characterUniqueId = await getOrCreateCharacterId(character);
-                characterName = getCharacterInfoById(charIndex.toString(), CharacterInfoType.Name);
+                characterName = ('name' in character ? character.name : character.data?.name) || 'Unknown';
 
                 if (characterName && characterUniqueId) {
                     botManager.setCharacter(String(characterName), characterUniqueId);

@@ -13,7 +13,6 @@ import { LLMUtility } from '../utils/LLMUtility.js';
 import { formatSlotName } from '../utils/utilities.js';
 import { areSystemMessagesEnabled } from '../utils/SettingsUtil.js';
 import { outfitStore } from '../common/Store.js';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { findCharacterById } from '../services/CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
@@ -94,7 +93,7 @@ export class BotOutfitPanel {
      * @returns {string} The text of the first AI message from the character
      */
     getFirstMessageText() {
-        var _a;
+        var _a, _b;
         try {
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
                 ? window.SillyTavern.getContext()
@@ -110,8 +109,15 @@ export class BotOutfitPanel {
                 }
             }
             // Fallback to old system if needed
-            if (!characterName && context && context.characterId !== undefined && context.characterId !== null) {
-                characterName = getCharacterInfoById(context.characterId.toString(), CharacterInfoType.Name);
+            if (!characterName &&
+                context &&
+                context.characterId !== undefined &&
+                context.characterId !== null &&
+                context.characters) {
+                const character = context.characters[context.characterId];
+                if (character) {
+                    characterName = ('name' in character ? character.name : (_b = character.data) === null || _b === void 0 ? void 0 : _b.name) || 'Unknown';
+                }
             }
             if (context && context.chat && Array.isArray(context.chat)) {
                 // Get the first AI message from the character (instance identifier)

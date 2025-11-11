@@ -124,15 +124,3 @@ You have the following commands at your disposal:
     defaultBotPresets: {},
     defaultUserPresets: {},
 });
-/**
- * Constants for outfit command types
- * @type {object}
- * @property {string} WEAR - Command to wear an item
- * @property {string} REMOVE - Command to remove an item
- * @property {string} CHANGE - Command to change an item
- */
-export const OUTFIT_COMMANDS = {
-    WEAR: 'wear',
-    REMOVE: 'remove',
-    CHANGE: 'change',
-};

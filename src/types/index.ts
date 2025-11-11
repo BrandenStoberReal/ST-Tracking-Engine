@@ -20,8 +20,7 @@ export interface FullOutfitData {
     presets: Presets;
     settings?: Settings;
     version?: string;
-    instances?: BotInstances; // Legacy property
-    user_instances?: UserInstances; // Legacy property
+
     variables?: Record<string, unknown>; // For macro variables
 }
 

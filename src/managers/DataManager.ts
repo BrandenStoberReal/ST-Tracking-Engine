@@ -2,6 +2,7 @@ import { deepMerge } from '../utils/utilities';
 import { StorageService } from '../services/StorageService';
 import { DEFAULT_SETTINGS } from '../config/constants';
 import { FullOutfitData, Settings } from '../types';
+import { debugLog } from '../logging/DebugLogger';
 
 const DATA_VERSION = '1.0.0';
 
@@ -34,7 +35,7 @@ class DataManager {
         if (!this.data) return;
 
         if (!this.data.version || this.data.version < this.version) {
-            console.log(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`);
+            debugLog(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`, null, 'info');
 
             // Migration: Convert 'default' presets to settings-based default preset names
             if (this.data.presets) {
@@ -117,8 +118,8 @@ class DataManager {
         const data = this.load();
 
         return {
-            botInstances: data?.botInstances || data?.instances || {},
-            userInstances: data?.userInstances || data?.user_instances || {},
+            botInstances: data?.botInstances || {},
+            userInstances: data?.userInstances || {},
             presets: data?.presets || { bot: {}, user: {} },
         };
     }

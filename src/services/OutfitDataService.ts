@@ -61,11 +61,11 @@ class OutfitDataService {
 
             const initialDataManagerState = this.dataManager.load();
             debugLog('[OutfitDataService] Initial data manager state:', {
-                instancesCount: initialDataManagerState?.instances
-                    ? Object.keys(initialDataManagerState.instances).length
+                botInstancesCount: initialDataManagerState?.botInstances
+                    ? Object.keys(initialDataManagerState.botInstances).length
                     : 0,
-                userInstancesCount: initialDataManagerState?.user_instances
-                    ? Object.keys(initialDataManagerState.user_instances).length
+                userInstancesCount: initialDataManagerState?.userInstances
+                    ? Object.keys(initialDataManagerState.userInstances).length
                     : 0,
                 presetsCount: initialDataManagerState?.presets
                     ? Object.keys(initialDataManagerState.presets).length
@@ -95,11 +95,11 @@ class OutfitDataService {
             // Check data manager state after the direct save operation
             const dataManagerAfterDirectSave = this.dataManager.load();
             debugLog('[OutfitDataService] Data manager state after direct saveOutfitData:', {
-                instancesCount: dataManagerAfterDirectSave?.instances
-                    ? Object.keys(dataManagerAfterDirectSave.instances).length
+                botInstancesCount: dataManagerAfterDirectSave?.botInstances
+                    ? Object.keys(dataManagerAfterDirectSave.botInstances).length
                     : 0,
-                userInstancesCount: dataManagerAfterDirectSave?.user_instances
-                    ? Object.keys(dataManagerAfterDirectSave.user_instances).length
+                userInstancesCount: dataManagerAfterDirectSave?.userInstances
+                    ? Object.keys(dataManagerAfterDirectSave.userInstances).length
                     : 0,
                 presetsCount: dataManagerAfterDirectSave?.presets
                     ? Object.keys(dataManagerAfterDirectSave.presets).length

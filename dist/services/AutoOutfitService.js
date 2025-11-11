@@ -11,7 +11,6 @@ import { extractCommands } from '../processors/StringProcessor.js';
 import { generateOutfitFromLLM } from './LLMService.js';
 import { customMacroSystem } from './CustomMacroService.js';
 import { outfitStore } from '../common/Store.js';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
 import { debugLog } from '../logging/DebugLogger.js';
 export class AutoOutfitService {
     get isEnabled() {
@@ -337,13 +336,15 @@ You have the following commands at your disposal:
         return Math.min(score, 1.0);
     }
     getActiveCharacterName() {
-        var _a;
+        var _a, _b;
         try {
             const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
             const charId = context.this_chid;
-            if (charId !== undefined) {
-                const characterName = getCharacterInfoById(charId, CharacterInfoType.Name);
-                return String(characterName || 'Character');
+            if (charId !== undefined && context.characters) {
+                const character = context.characters[charId];
+                if (character) {
+                    return String(('name' in character ? character.name : (_b = character.data) === null || _b === void 0 ? void 0 : _b.name) || 'Character');
+                }
             }
             return 'Character';
         }

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { deepMerge } from '../utils/utilities.js';
 import { DEFAULT_SETTINGS } from '../config/constants.js';
+import { debugLog } from '../logging/DebugLogger.js';
 const DATA_VERSION = '1.0.0';
 class DataManager {
     constructor(storageService) {
@@ -35,7 +36,7 @@ class DataManager {
         if (!this.data)
             return;
         if (!this.data.version || this.data.version < this.version) {
-            console.log(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`);
+            debugLog(`[DataManager] Migrating data from version ${this.data.version} to ${this.version}`, null, 'info');
             // Migration: Convert 'default' presets to settings-based default preset names
             if (this.data.presets) {
                 const settings = this.data.settings || Object.assign({}, DEFAULT_SETTINGS);
@@ -105,8 +106,8 @@ class DataManager {
     loadOutfitData() {
         const data = this.load();
         return {
-            botInstances: (data === null || data === void 0 ? void 0 : data.botInstances) || (data === null || data === void 0 ? void 0 : data.instances) || {},
-            userInstances: (data === null || data === void 0 ? void 0 : data.userInstances) || (data === null || data === void 0 ? void 0 : data.user_instances) || {},
+            botInstances: (data === null || data === void 0 ? void 0 : data.botInstances) || {},
+            userInstances: (data === null || data === void 0 ? void 0 : data.userInstances) || {},
             presets: (data === null || data === void 0 ? void 0 : data.presets) || { bot: {}, user: {} },
         };
     }

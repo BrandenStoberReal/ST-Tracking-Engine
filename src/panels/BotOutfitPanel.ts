@@ -4,7 +4,7 @@ import { LLMUtility } from '../utils/LLMUtility';
 import { formatSlotName } from '../utils/utilities';
 import { areSystemMessagesEnabled } from '../utils/SettingsUtil';
 import { outfitStore } from '../common/Store';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+
 import { findCharacterById } from '../services/CharacterIdService';
 import { debugLog } from '../logging/DebugLogger';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
@@ -145,8 +145,17 @@ export class BotOutfitPanel {
             }
 
             // Fallback to old system if needed
-            if (!characterName && context && context.characterId !== undefined && context.characterId !== null) {
-                characterName = getCharacterInfoById(context.characterId.toString(), CharacterInfoType.Name);
+            if (
+                !characterName &&
+                context &&
+                context.characterId !== undefined &&
+                context.characterId !== null &&
+                context.characters
+            ) {
+                const character = context.characters[context.characterId];
+                if (character) {
+                    characterName = ('name' in character ? character.name : character.data?.name) || 'Unknown';
+                }
             }
 
             if (context && context.chat && Array.isArray(context.chat)) {
