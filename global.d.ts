@@ -56,6 +56,7 @@ declare global {
         storageService?: StorageService;
         dataManager?: DataManager;
         outfitDataService: OutfitDataService;
+        macroProcessor: import('./src/processors/MacroProcessor').MacroProcessor;
         autoOutfitSystem: import('./src/types').AutoOutfitSystemAPI;
         connectionManager: {
             getSupportedProfiles: () => Promise<Array<any>>;

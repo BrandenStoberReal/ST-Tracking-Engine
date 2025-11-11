@@ -145,6 +145,7 @@ function setupApi(
     if (storageService) window.storageService = storageService as any;
     if (dataManager) window.dataManager = dataManager as any;
     window.outfitDataService = outfitDataService as any;
+    window.macroProcessor = macroProcessor;
 
     extension_api.getOutfitExtensionStatus = () => ({
         core: true,

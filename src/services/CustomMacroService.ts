@@ -3,6 +3,7 @@ import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants';
 import { getCharacters } from '../utils/CharacterUtils';
 import { getCharacterId } from './CharacterIdService';
 import { debugLog } from '../logging/DebugLogger';
+import type { ChatMessage } from '../types';
 
 declare const window: any;
 
@@ -179,15 +180,16 @@ class CustomMacroService {
             return 'None';
         }
 
-        // Get the current instance ID
-        const currentInstanceId = outfitStore.getCurrentInstanceId();
-        if (!currentInstanceId) {
-            debugLog('[CustomMacroService] No current instance ID for pointer macro', null, 'debug');
+        // Try to get instance ID from current context or message mapping
+        const instanceId = this.getInstanceIdForCurrentContext();
+
+        if (!instanceId) {
+            debugLog('[CustomMacroService] No instance ID found for pointer macro', null, 'debug');
             return 'None';
         }
 
         // Construct the instance-specific macro name
-        const instanceMacroName = `${macroType}_${slotName}_${currentInstanceId}`;
+        const instanceMacroName = `${macroType}_${slotName}_${instanceId}`;
 
         // Try to get the value from the registered macro
         const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
@@ -212,6 +214,56 @@ class CustomMacroService {
 
         // Fallback to direct lookup if macro not available
         return this.getCurrentSlotValue(macroType, slotName);
+    }
+
+    /**
+     * Gets the appropriate instance ID for the current context
+     */
+    getInstanceIdForCurrentContext(): string | null {
+        // First try the current instance ID
+        const currentInstanceId = outfitStore.getCurrentInstanceId();
+        if (currentInstanceId) {
+            return currentInstanceId;
+        }
+
+        // If no current instance, try to determine from chat context
+        try {
+            const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
+            if (ctx && ctx.chat && ctx.chat.length > 0) {
+                // Find the first bot message
+                const firstBotMessage = ctx.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
+                if (firstBotMessage && window.macroProcessor?.messageInstanceMap) {
+                    // Create a simple hash of the first message for lookup
+                    const simpleHash = window.macroProcessor?.createSimpleMessageHash(firstBotMessage.mes);
+                    const mappedInstanceId = window.macroProcessor.messageInstanceMap.get(simpleHash);
+                    if (mappedInstanceId) {
+                        debugLog(
+                            `[CustomMacroService] Found mapped instance ID ${mappedInstanceId} for message hash ${simpleHash}`,
+                            null,
+                            'debug'
+                        );
+                        return mappedInstanceId;
+                    }
+                }
+            }
+        } catch (error) {
+            debugLog('[CustomMacroService] Error determining instance ID from context:', error, 'error');
+        }
+
+        return null;
+    }
+
+    /**
+     * Creates a simple synchronous hash of a message for instance mapping
+     */
+    createSimpleMessageHash(message: string): string {
+        let hash = 0;
+        for (let i = 0; i < message.length; i++) {
+            const char = message.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return hash.toString();
     }
 
     deregisterMacros(context: any): void {

@@ -134,6 +134,7 @@ function setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem
     if (dataManager)
         window.dataManager = dataManager;
     window.outfitDataService = outfitDataService;
+    window.macroProcessor = macroProcessor;
     extension_api.getOutfitExtensionStatus = () => {
         var _a, _b;
         return ({
