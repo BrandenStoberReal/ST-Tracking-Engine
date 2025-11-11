@@ -99,9 +99,9 @@ class EventService {
         this.updateForCurrentCharacter();
         customMacroSystem.clearCache();
 
-        // Show toast notification when instance macros are registered on app startup
+        // Show toast notification when outfit system initializes on app startup
         if (typeof toastr !== 'undefined') {
-            toastr.success('Instance macros registered successfully!', 'Outfit System');
+            toastr.success('Outfit system initialized!', 'Outfit System');
         }
     }
 
