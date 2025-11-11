@@ -975,13 +975,53 @@ input:checked + .slider:before {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
 }
 
-/* Standardized controls container for debug tabs */
-.debug-controls {
+/* Debug filters and actions containers */
+.debug-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.debug-actions {
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
     flex-wrap: wrap;
     align-items: center;
+}
+
+/* Level filter styling */
+.level-filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.level-filter-label,
+.level-filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.level-filter-label {
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+}
+
+.level-filter-checkbox input[type='checkbox'] {
+    margin: 0;
 }
 
 /* Debug Panel Styles */

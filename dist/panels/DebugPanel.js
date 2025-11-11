@@ -353,19 +353,29 @@ export class DebugPanel {
             <div class="debug-search-container">
                 <input type="text" id="log-search" placeholder="Search logs...">
             </div>
-            <div class="debug-controls">
-                <select id="log-level-filter">
-                    <option value="all">All Levels</option>
-                    <option value="info">Info</option>
-                    <option value="warn">Warn</option>
-                    <option value="error">Error</option>
-                </select>
+            <div class="debug-filters">
+                <div id="log-level-filter" class="level-filter-container">
+                    <label class="level-filter-label">
+                        <input type="checkbox" id="level-all" checked> All Levels
+                    </label>
+                    <label class="level-filter-checkbox">
+                        <input type="checkbox" value="info" checked> Info
+                    </label>
+                    <label class="level-filter-checkbox">
+                        <input type="checkbox" value="warn" checked> Warn
+                    </label>
+                    <label class="level-filter-checkbox">
+                        <input type="checkbox" value="error" checked> Error
+                    </label>
+                </div>
                 <div id="log-service-filter" class="service-filter-container">
                     <label class="service-filter-label">
                         <input type="checkbox" id="service-all" checked> All Services
                     </label>
                     ${this.getServiceFilterCheckboxes()}
                 </div>
+            </div>
+            <div class="debug-actions">
                 <button id="expand-all-logs-btn" class="menu_button" title="Expand all log details">📖 Expand All</button>
                 <button id="collapse-all-logs-btn" class="menu_button" title="Collapse all log details">📕 Collapse All</button>
                 <button id="refresh-logs-btn" class="menu_button" title="Refresh logs">🔄 Refresh</button>
@@ -434,7 +444,8 @@ export class DebugPanel {
         logsHtml += '</div>';
         container.innerHTML = logsHtml;
         const searchInput = container.querySelector('#log-search');
-        const levelFilter = container.querySelector('#log-level-filter');
+        const levelFilterContainer = container.querySelector('#log-level-filter');
+        const levelAllCheckbox = container.querySelector('#level-all');
         const serviceFilterContainer = container.querySelector('#log-service-filter');
         const serviceAllCheckbox = container.querySelector('#service-all');
         const expandAllBtn = container.querySelector('#expand-all-logs-btn');
@@ -443,6 +454,13 @@ export class DebugPanel {
         const sortBtn = container.querySelector('#toggle-logs-sort');
         const exportBtn = container.querySelector('#export-logs-btn');
         const clearBtn = container.querySelector('#clear-logs-btn');
+        const getSelectedLevels = () => {
+            if (levelAllCheckbox.checked) {
+                return ['all'];
+            }
+            const checkboxes = levelFilterContainer.querySelectorAll('input[type="checkbox"]:checked:not(#level-all)');
+            return Array.from(checkboxes).map((cb) => cb.value);
+        };
         const getSelectedServices = () => {
             if (serviceAllCheckbox.checked) {
                 return ['all'];
@@ -454,14 +472,14 @@ export class DebugPanel {
         };
         const filterLogs = () => {
             const searchTerm = searchInput.value.toLowerCase();
-            const selectedLevel = levelFilter.value;
+            const selectedLevels = getSelectedLevels();
             const selectedServices = getSelectedServices();
             const logItems = container.querySelectorAll('.log-item');
             logItems.forEach((item) => {
                 const level = item.dataset.level;
                 const message = item.dataset.message;
                 const service = item.dataset.service;
-                const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
+                const isLevelMatch = selectedLevels.includes('all') || selectedLevels.includes(level || '');
                 const isServiceMatch = selectedServices.includes('all') || selectedServices.includes(service || '');
                 const isSearchMatch = message === null || message === void 0 ? void 0 : message.includes(searchTerm);
                 if (isLevelMatch && isServiceMatch && isSearchMatch) {
@@ -471,6 +489,29 @@ export class DebugPanel {
                     item.style.display = 'none';
                 }
             });
+        };
+        const handleLevelCheckboxChange = (event) => {
+            const target = event.target;
+            if (target.id === 'level-all') {
+                // If "All Levels" is checked/unchecked, update all other checkboxes
+                const checkboxes = levelFilterContainer.querySelectorAll('input[type="checkbox"]:not(#level-all)');
+                checkboxes.forEach((cb) => {
+                    cb.checked = target.checked;
+                });
+            }
+            else {
+                // If any individual level is unchecked, uncheck "All Levels"
+                if (!target.checked) {
+                    levelAllCheckbox.checked = false;
+                }
+                else {
+                    // If all individual levels are checked, check "All Levels"
+                    const checkboxes = levelFilterContainer.querySelectorAll('input[type="checkbox"]:not(#level-all)');
+                    const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+                    levelAllCheckbox.checked = allChecked;
+                }
+            }
+            filterLogs();
         };
         const handleServiceCheckboxChange = (event) => {
             const target = event.target;
@@ -496,7 +537,8 @@ export class DebugPanel {
             filterLogs();
         };
         searchInput.addEventListener('input', filterLogs);
-        levelFilter.addEventListener('change', filterLogs);
+        // Add event listeners for level checkboxes
+        levelFilterContainer.addEventListener('change', handleLevelCheckboxChange);
         // Add event listeners for service checkboxes
         serviceFilterContainer.addEventListener('change', handleServiceCheckboxChange);
         expandAllBtn.addEventListener('click', () => {
