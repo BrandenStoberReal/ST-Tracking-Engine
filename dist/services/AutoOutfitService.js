@@ -37,29 +37,6 @@ export class AutoOutfitService {
     getDefaultPrompt() {
         return `You are a sophisticated outfit management AI. Your task is to analyze conversation snippets and identify any changes to a character's clothing or accessories. Based on your analysis, you must output a series of commands to update the character's outfit accordingly.
 
-**CONTEXT**
-Current outfit for {{char}}:
-- Headwear: {{char_headwear}}
-- Topwear: {{char_topwear}}
-- Top Underwear: {{char_topunderwear}}
-- Bottomwear: {{char_bottomwear}}
-- Bottom Underwear: {{char_bottomunderwear}}
-- Footwear: {{char_footwear}}
-- Foot Underwear: {{char_footunderwear}}
-- Accessories:
-  - Head: {{char_head-accessory}}
-  - Ears: {{char_ears-accessory}}
-  - Eyes: {{char_eyes-accessory}}
-  - Mouth: {{char_mouth-accessory}}
-  - Neck: {{char_neck-accessory}}
-  - Body: {{char_body-accessory}}
-  - Arms: {{char_arms-accessory}}
-  - Hands: {{char_hands-accessory}}
-  - Waist: {{char_waist-accessory}}
-  - Bottom: {{char_bottom-accessory}}
-  - Legs: {{char_legs-accessory}}
-  - Foot: {{char_foot-accessory}}
-
 **TASK**
 Based on the provided conversation, generate a sequence of commands to reflect any and all changes to the character's outfit.
 
@@ -83,27 +60,27 @@ You have the following commands at your disposal:
 
 **EXAMPLES**
 - **User:** I'm feeling a bit cold.
-  **{{char}}:** I'll put on my favorite sweater.
+  **Character:** I'll put on my favorite sweater.
   **Output:**
   \`outfit-system_wear_topwear("Favorite Sweater")\`
 
 - **User:** Your shoes are untied.
-  **{{char}}:** Oh, thanks for letting me know. I'll take them off and tie them properly.
+  **Character:** Oh, thanks for letting me know. I'll take them off and tie them properly.
   **Output:**
   \`outfit-system_remove_footwear()\`
 
 - **User:** That's a nice hat.
-  **{{char}}:** Thanks! It's new. I'll take it off for a moment to show you.
+  **Character:** Thanks! It's new. I'll take it off for a moment to show you.
   **Output:**
   \`outfit-system_unequip_headwear()\`
 
 - **User:** I like your shirt.
-  **{{char}}:** Thanks! I think I'll unbutton it a bit.
+  **Character:** Thanks! I think I'll unbutton it a bit.
   **Output:**
   \`outfit-system_change_topwear("Shirt (unbuttoned)")\`
 
 - **User:** It's getting warm in here.
-  **{{char}}:** I agree. I'll take off my jacket and put on this t-shirt instead.
+  **Character:** I agree. I'll take off my jacket and put on this t-shirt instead.
   **Output:**
   \`outfit-system_replace_topwear("T-shirt")\`
 `;

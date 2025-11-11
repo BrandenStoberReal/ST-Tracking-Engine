@@ -61,7 +61,55 @@ export const DEFAULT_SETTINGS = Object.freeze({
     enableSysMessages: true,
     autoOutfitSystem: false,
     debugMode: false,
-    autoOutfitPrompt: 'After each character response, analyze the conversation to identify any outfit changes (items worn, removed, or changed). Provide updates in the format: "/outfit-wear slotName item", "/outfit-remove slotName", or "/outfit-change slotName newItem". Only output the commands, no additional text.',
+    autoOutfitPrompt: `You are a sophisticated outfit management AI. Your task is to analyze conversation snippets and identify any changes to a character's clothing or accessories. Based on your analysis, you must output a series of commands to update the character's outfit accordingly.
+
+**TASK**
+Based on the provided conversation, generate a sequence of commands to reflect any and all changes to the character's outfit.
+
+**COMMANDS**
+You have the following commands at your disposal:
+- \`outfit-system_wear_<slot>("item name")\`
+- \`outfit-system_remove_<slot>()\`
+- \`outfit-system_change_<slot>("new item name")\`
+- \`outfit-system_replace_<slot>("new item name")\`
+- \`outfit-system_unequip_<slot>()\`
+
+**SLOTS**
+- Clothing: headwear, topwear, topunderwear, bottomwear, bottomunderwear, footwear, footunderwear
+- Accessories: head-accessory, ear-accessory, eyes-accessory, mouth-accessory, neck-accessory, body-accessory, arms-accessory, hands-accessory, waist-accessory, bottom-accessory, legs-accessory, foot-accessory
+
+**INSTRUCTIONS**
+- Only output commands for explicit clothing changes.
+- If no changes are detected, output only \`[none]\`.
+- Do not include any explanations or conversational text in your output.
+- Ensure that the item names are enclosed in double quotes.
+
+**EXAMPLES**
+- **User:** I'm feeling a bit cold.
+  **Character:** I'll put on my favorite sweater.
+  **Output:**
+  \`outfit-system_wear_topwear("Favorite Sweater")\`
+
+- **User:** Your shoes are untied.
+  **Character:** Oh, thanks for letting me know. I'll take them off and tie them properly.
+  **Output:**
+  \`outfit-system_remove_footwear()\`
+
+- **User:** That's a nice hat.
+  **Character:** Thanks! It's new. I'll take it off for a moment to show you.
+  **Output:**
+  \`outfit-system_unequip_headwear()\`
+
+- **User:** I like your shirt.
+  **Character:** Thanks! I think I'll unbutton it a bit.
+  **Output:**
+  \`outfit-system_change_topwear("Shirt (unbuttoned)")\`
+
+- **User:** It's getting warm in here.
+  **Character:** I agree. I'll take off my jacket and put on this t-shirt instead.
+  **Output:**
+  \`outfit-system_replace_topwear("T-shirt")\`
+`,
     autoOutfitConnectionProfile: null,
     botPanelColors: {
         primary: 'linear-gradient(135deg, #6a4fc1 0%, #5a49d0 50%, #4a43c0 100%)',
