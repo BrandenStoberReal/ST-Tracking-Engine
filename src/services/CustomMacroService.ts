@@ -280,6 +280,23 @@ class CustomMacroService {
             return currentInstanceId;
         }
 
+        // Try to get instance ID from managers (useful during character switching when store isn't updated yet)
+        try {
+            if (window.eventService?.botManager) {
+                const managerInstanceId = window.eventService.botManager.getOutfitInstanceId();
+                if (managerInstanceId) {
+                    debugLog(
+                        `[CustomMacroService] Using manager instance ID ${managerInstanceId} during transition`,
+                        null,
+                        'debug'
+                    );
+                    return managerInstanceId;
+                }
+            }
+        } catch (error) {
+            debugLog('[CustomMacroService] Error getting instance ID from manager:', error, 'debug');
+        }
+
         // If no current instance, try to determine from chat context
         try {
             const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
@@ -304,6 +321,7 @@ class CustomMacroService {
             debugLog('[CustomMacroService] Error determining instance ID from context:', error, 'error');
         }
 
+        debugLog('[CustomMacroService] Could not determine instance ID from any source', null, 'debug');
         return null;
     }
 

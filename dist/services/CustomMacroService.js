@@ -188,21 +188,34 @@ class CustomMacroService {
      * Gets the appropriate instance ID for the current context
      */
     getInstanceIdForCurrentContext() {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         // First try the current instance ID
         const currentInstanceId = outfitStore.getCurrentInstanceId();
         if (currentInstanceId) {
             return currentInstanceId;
         }
+        // Try to get instance ID from managers (useful during character switching when store isn't updated yet)
+        try {
+            if ((_a = window.eventService) === null || _a === void 0 ? void 0 : _a.botManager) {
+                const managerInstanceId = window.eventService.botManager.getOutfitInstanceId();
+                if (managerInstanceId) {
+                    debugLog(`[CustomMacroService] Using manager instance ID ${managerInstanceId} during transition`, null, 'debug');
+                    return managerInstanceId;
+                }
+            }
+        }
+        catch (error) {
+            debugLog('[CustomMacroService] Error getting instance ID from manager:', error, 'debug');
+        }
         // If no current instance, try to determine from chat context
         try {
-            const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
+            const ctx = ((_b = window.SillyTavern) === null || _b === void 0 ? void 0 : _b.getContext) ? window.SillyTavern.getContext() : window.getContext();
             if (ctx && ctx.chat && ctx.chat.length > 0) {
                 // Find the first bot message
                 const firstBotMessage = ctx.chat.find((msg) => !msg.is_user && !msg.is_system);
-                if (firstBotMessage && ((_b = window.macroProcessor) === null || _b === void 0 ? void 0 : _b.messageInstanceMap)) {
+                if (firstBotMessage && ((_c = window.macroProcessor) === null || _c === void 0 ? void 0 : _c.messageInstanceMap)) {
                     // Create a simple hash of the first message for lookup
-                    const simpleHash = (_c = window.macroProcessor) === null || _c === void 0 ? void 0 : _c.createSimpleMessageHash(firstBotMessage.mes);
+                    const simpleHash = (_d = window.macroProcessor) === null || _d === void 0 ? void 0 : _d.createSimpleMessageHash(firstBotMessage.mes);
                     const mappedInstanceId = window.macroProcessor.messageInstanceMap.get(simpleHash);
                     if (mappedInstanceId) {
                         debugLog(`[CustomMacroService] Found mapped instance ID ${mappedInstanceId} for message hash ${simpleHash}`, null, 'debug');
@@ -214,6 +227,7 @@ class CustomMacroService {
         catch (error) {
             debugLog('[CustomMacroService] Error determining instance ID from context:', error, 'error');
         }
+        debugLog('[CustomMacroService] Could not determine instance ID from any source', null, 'debug');
         return null;
     }
     /**
