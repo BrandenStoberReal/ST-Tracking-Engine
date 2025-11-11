@@ -117,9 +117,6 @@ class EventService {
                     customMacroSystem.clearCache();
                     customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                     customMacroSystem.registerCharacterSpecificMacros(this.context);
-
-                    // Pre-populate macro cache after character change
-                    this._prepopulateMacroCache();
                 } else {
                     debugLog('[OutfitTracker] CHAT_CHANGED event fired but first message unchanged - skipping update');
                 }
@@ -131,10 +128,13 @@ class EventService {
                 this.updateForCurrentCharacter();
                 customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                 customMacroSystem.registerCharacterSpecificMacros(this.context);
-
-                // Pre-populate macro cache after character switch
-                this._prepopulateMacroCache();
             }
+
+            // Pre-populate macro cache after all character updates are complete
+            // Use a delay to ensure the system is fully ready
+            setTimeout(() => {
+                this._prepopulateMacroCache();
+            }, 500);
         }
     }
 
