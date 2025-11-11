@@ -24,9 +24,8 @@ export class UserOutfitPanel {
      * @param outfitManager - The outfit manager for the user character
      * @param clothingSlots - Array of clothing slot names
      * @param accessorySlots - Array of accessory slot names
-     * @param saveSettingsDebounced - Debounced function to save settings
      */
-    constructor(outfitManager, clothingSlots, accessorySlots, saveSettingsDebounced) {
+    constructor(outfitManager, clothingSlots, accessorySlots) {
         this.outfitManager = outfitManager;
         this.clothingSlots = clothingSlots;
         this.accessorySlots = accessorySlots;
@@ -35,7 +34,6 @@ export class UserOutfitPanel {
         this.currentTab = 'clothing';
         this.currentPresetCategory = 'all'; // Change to show all presets
         this.presetCategories = ['All']; // Simplified to just show all presets
-        this.saveSettingsDebounced = saveSettingsDebounced;
         this.eventListeners = [];
         this.outfitSubscription = null;
     }
@@ -155,7 +153,7 @@ export class UserOutfitPanel {
             promptInjectionToggle.addEventListener('change', (event) => {
                 const isChecked = event.target.checked;
                 this.outfitManager.setPromptInjectionEnabled(isChecked);
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
             });
         }
     }
@@ -178,7 +176,7 @@ export class UserOutfitPanel {
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
                 }
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
                 this.renderContent();
             }));
             container.appendChild(slotElement);
@@ -212,7 +210,7 @@ export class UserOutfitPanel {
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
                     }
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                     this.renderContent();
                 }));
                 (_b = presetElement.querySelector('.set-default-preset')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
@@ -220,7 +218,7 @@ export class UserOutfitPanel {
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
                     }
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                     this.renderContent();
                 }));
                 (_c = presetElement.querySelector('.delete-preset')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
@@ -229,7 +227,7 @@ export class UserOutfitPanel {
                         if (message && areSystemMessagesEnabled()) {
                             this.sendSystemMessage(message);
                         }
-                        this.saveSettingsDebounced();
+                        outfitStore.saveState();
                         this.renderContent();
                     }
                 });
@@ -240,7 +238,7 @@ export class UserOutfitPanel {
                         if (message && areSystemMessagesEnabled()) {
                             this.sendSystemMessage(message);
                         }
-                        this.saveSettingsDebounced();
+                        outfitStore.saveState();
                         this.renderContent();
                     }
                 });
@@ -259,7 +257,7 @@ export class UserOutfitPanel {
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
                 }
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
                 this.renderContent();
             }
             else if (presetName && presetName.toLowerCase() === 'default') {

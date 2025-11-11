@@ -318,7 +318,12 @@ export async function initializeExtension(): Promise<void> {
     }
 
     const storageService = new StorageService(
-        (data: unknown) => stContext.saveSettingsDebounced?.({ outfit_tracker: data }),
+        (data: unknown) => {
+            if (stContext.extensionSettings) {
+                stContext.extensionSettings.outfit_tracker = data as any;
+                stContext.saveSettingsDebounced?.();
+            }
+        },
         () => stContext.extensionSettings?.outfit_tracker
     );
 
@@ -342,12 +347,8 @@ export async function initializeExtension(): Promise<void> {
 
     debugLog('Outfit managers created', { botManager, userManager }, 'info');
 
-    const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: unknown) =>
-        stContext.saveSettingsDebounced?.({ outfit_tracker: data })
-    );
-    const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data: unknown) =>
-        stContext.saveSettingsDebounced?.({ outfit_tracker: data })
-    );
+    const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS);
+    const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS);
 
     debugLog('Outfit panels created', { botPanel, userPanel }, 'info');
 

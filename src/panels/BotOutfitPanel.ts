@@ -15,7 +15,6 @@ import {
     OutfitSlotData,
     OutfitStoreState,
     OutfitSubscription,
-    SaveSettingsFunction,
     SlotOutfitData,
 } from '../types';
 
@@ -35,21 +34,14 @@ export class BotOutfitPanel {
     presetCategories: string[];
     eventListeners: (() => void)[];
     outfitSubscription: OutfitSubscription | null;
-    saveSettingsDebounced: SaveSettingsFunction;
 
     /**
      * Creates a new BotOutfitPanel instance
      * @param outfitManager - The outfit manager for the bot character
      * @param clothingSlots - Array of clothing slot names
      * @param accessorySlots - Array of accessory slot names
-     * @param saveSettingsDebounced - Debounced function to save settings
      */
-    constructor(
-        outfitManager: OutfitManager,
-        clothingSlots: string[],
-        accessorySlots: string[],
-        saveSettingsDebounced: SaveSettingsFunction
-    ) {
+    constructor(outfitManager: OutfitManager, clothingSlots: string[], accessorySlots: string[]) {
         this.outfitManager = outfitManager;
         this.clothingSlots = clothingSlots;
         this.accessorySlots = accessorySlots;
@@ -60,7 +52,6 @@ export class BotOutfitPanel {
         this.presetCategories = ['All']; // Simplified to just show all presets
         this.eventListeners = [];
         this.outfitSubscription = null;
-        this.saveSettingsDebounced = saveSettingsDebounced;
     }
 
     /**
@@ -240,7 +231,7 @@ export class BotOutfitPanel {
                 const isChecked = (event.target as HTMLInputElement).checked;
 
                 this.outfitManager.setPromptInjectionEnabled(isChecked);
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
             });
         }
     }
@@ -274,7 +265,7 @@ export class BotOutfitPanel {
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
                 }
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
                 this.renderContent();
             });
 
@@ -318,7 +309,7 @@ export class BotOutfitPanel {
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
                     }
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                     this.renderContent();
                 });
 
@@ -328,7 +319,7 @@ export class BotOutfitPanel {
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
                     }
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                     this.renderContent();
                 });
 
@@ -339,7 +330,7 @@ export class BotOutfitPanel {
                         if (message && areSystemMessagesEnabled()) {
                             this.sendSystemMessage(message);
                         }
-                        this.saveSettingsDebounced();
+                        outfitStore.saveState();
                         this.renderContent();
                     }
                 });
@@ -352,7 +343,7 @@ export class BotOutfitPanel {
                         if (message && areSystemMessagesEnabled()) {
                             this.sendSystemMessage(message);
                         }
-                        this.saveSettingsDebounced();
+                        outfitStore.saveState();
                         this.renderContent();
                     }
                 });
@@ -376,7 +367,7 @@ export class BotOutfitPanel {
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
                 }
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
                 this.renderContent();
             } else if (presetName && presetName.toLowerCase() === 'default') {
                 alert(
@@ -599,7 +590,7 @@ export class BotOutfitPanel {
         this.renderContent();
 
         // Save the settings
-        this.saveSettingsDebounced();
+        outfitStore.saveState();
     }
 
     async processSingleCommand(command: string): Promise<void> {
@@ -755,7 +746,7 @@ export class BotOutfitPanel {
                     this.outfitManager.setPromptInjectionEnabled(isChecked);
 
                     // Save the settings after changing
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                 });
             }
         }

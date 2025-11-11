@@ -151,15 +151,17 @@ class OutfitDataService {
                     presetsCount: Object.keys(emptyOutfitTrackerData.presets).length,
                 });
 
-                // Try to call the save function directly with empty data to ensure it gets saved
-                if (typeof STContext.saveSettings === 'function') {
-                    debugLog('[OutfitDataService] Using immediate save function');
-                    STContext.saveSettings({ outfit_tracker: emptyOutfitTrackerData });
-                } else if (typeof STContext.saveSettingsDebounced === 'function') {
-                    debugLog('[OutfitDataService] Using debounced save function');
-                    STContext.saveSettingsDebounced({ outfit_tracker: emptyOutfitTrackerData });
+                // Try to save the data using the proper SillyTavern extension settings API
+                if (STContext.extensionSettings) {
+                    debugLog('[OutfitDataService] Saving to extensionSettings');
+                    STContext.extensionSettings.outfit_tracker = emptyOutfitTrackerData;
+                    if (typeof STContext.saveSettingsDebounced === 'function') {
+                        STContext.saveSettingsDebounced();
+                    } else if (typeof STContext.saveSettings === 'function') {
+                        STContext.saveSettings();
+                    }
                 } else {
-                    debugLog('[OutfitDataService] No save function found on STContext', null, 'error');
+                    debugLog('[OutfitDataService] extensionSettings not available, using fallback', null, 'error');
                     // Fallback: try to use the direct storage service save
                     if (this.dataManager.storageService && this.dataManager.storageService.saveFn) {
                         debugLog('[OutfitDataService] Using fallback direct save');

@@ -282,7 +282,13 @@ export function initializeExtension() {
             debugLog('[OutfitTracker] Required SillyTavern context is not available.', null, 'error');
             throw new Error('Missing required SillyTavern globals.');
         }
-        const storageService = new StorageService((data) => { var _a; return (_a = stContext.saveSettingsDebounced) === null || _a === void 0 ? void 0 : _a.call(stContext, { outfit_tracker: data }); }, () => { var _a; return (_a = stContext.extensionSettings) === null || _a === void 0 ? void 0 : _a.outfit_tracker; });
+        const storageService = new StorageService((data) => {
+            var _a;
+            if (stContext.extensionSettings) {
+                stContext.extensionSettings.outfit_tracker = data;
+                (_a = stContext.saveSettingsDebounced) === null || _a === void 0 ? void 0 : _a.call(stContext);
+            }
+        }, () => { var _a; return (_a = stContext.extensionSettings) === null || _a === void 0 ? void 0 : _a.outfit_tracker; });
         const dataManager = new DataManager(storageService);
         yield dataManager.initialize();
         outfitStore.setDataManager(dataManager);
@@ -295,8 +301,8 @@ export function initializeExtension() {
         const botManager = new NewBotOutfitManager(ALL_SLOTS);
         const userManager = new NewUserOutfitManager(ALL_SLOTS);
         debugLog('Outfit managers created', { botManager, userManager }, 'info');
-        const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data) => { var _a; return (_a = stContext.saveSettingsDebounced) === null || _a === void 0 ? void 0 : _a.call(stContext, { outfit_tracker: data }); });
-        const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS, (data) => { var _a; return (_a = stContext.saveSettingsDebounced) === null || _a === void 0 ? void 0 : _a.call(stContext, { outfit_tracker: data }); });
+        const botPanel = new BotOutfitPanel(botManager, CLOTHING_SLOTS, ACCESSORY_SLOTS);
+        const userPanel = new UserOutfitPanel(userManager, CLOTHING_SLOTS, ACCESSORY_SLOTS);
         debugLog('Outfit panels created', { botPanel, userPanel }, 'info');
         const autoOutfitSystem = new AutoOutfitSystem(botManager);
         debugLog('Auto outfit system created', { autoOutfitSystem }, 'info');

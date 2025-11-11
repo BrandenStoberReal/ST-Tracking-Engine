@@ -9,14 +9,25 @@ class StorageService {
             debugLog('[StorageService] Save function is not configured.', null, 'error');
             return;
         }
-        this.saveFn(data);
+        try {
+            this.saveFn(data);
+        }
+        catch (error) {
+            debugLog('[StorageService] Error saving data:', error, 'error');
+        }
     }
     load() {
         if (typeof this.loadFn !== 'function') {
             debugLog('[StorageService] Load function is not configured.', null, 'error');
             return null;
         }
-        return this.loadFn();
+        try {
+            return this.loadFn();
+        }
+        catch (error) {
+            debugLog('[StorageService] Error loading data:', error, 'error');
+            return null;
+        }
     }
 }
 export { StorageService };

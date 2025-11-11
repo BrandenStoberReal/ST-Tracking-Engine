@@ -10,7 +10,6 @@ import {
     OutfitSlotData,
     OutfitStoreState,
     OutfitSubscription,
-    SaveSettingsFunction,
     SlotOutfitData,
 } from '../types';
 
@@ -28,7 +27,6 @@ export class UserOutfitPanel {
     currentTab: string;
     currentPresetCategory: string;
     presetCategories: string[];
-    saveSettingsDebounced: SaveSettingsFunction;
     eventListeners: (() => void)[];
     outfitSubscription: OutfitSubscription | null;
 
@@ -37,14 +35,8 @@ export class UserOutfitPanel {
      * @param outfitManager - The outfit manager for the user character
      * @param clothingSlots - Array of clothing slot names
      * @param accessorySlots - Array of accessory slot names
-     * @param saveSettingsDebounced - Debounced function to save settings
      */
-    constructor(
-        outfitManager: OutfitManager,
-        clothingSlots: string[],
-        accessorySlots: string[],
-        saveSettingsDebounced: SaveSettingsFunction
-    ) {
+    constructor(outfitManager: OutfitManager, clothingSlots: string[], accessorySlots: string[]) {
         this.outfitManager = outfitManager;
         this.clothingSlots = clothingSlots;
         this.accessorySlots = accessorySlots;
@@ -53,7 +45,6 @@ export class UserOutfitPanel {
         this.currentTab = 'clothing';
         this.currentPresetCategory = 'all'; // Change to show all presets
         this.presetCategories = ['All']; // Simplified to just show all presets
-        this.saveSettingsDebounced = saveSettingsDebounced;
         this.eventListeners = [];
         this.outfitSubscription = null;
     }
@@ -200,7 +191,7 @@ export class UserOutfitPanel {
                 const isChecked = (event.target as HTMLInputElement).checked;
 
                 this.outfitManager.setPromptInjectionEnabled(isChecked);
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
             });
         }
     }
@@ -228,7 +219,7 @@ export class UserOutfitPanel {
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
                 }
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
                 this.renderContent();
             });
 
@@ -267,7 +258,7 @@ export class UserOutfitPanel {
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
                     }
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                     this.renderContent();
                 });
 
@@ -277,7 +268,7 @@ export class UserOutfitPanel {
                     if (message && areSystemMessagesEnabled()) {
                         this.sendSystemMessage(message);
                     }
-                    this.saveSettingsDebounced();
+                    outfitStore.saveState();
                     this.renderContent();
                 });
 
@@ -288,7 +279,7 @@ export class UserOutfitPanel {
                         if (message && areSystemMessagesEnabled()) {
                             this.sendSystemMessage(message);
                         }
-                        this.saveSettingsDebounced();
+                        outfitStore.saveState();
                         this.renderContent();
                     }
                 });
@@ -301,7 +292,7 @@ export class UserOutfitPanel {
                         if (message && areSystemMessagesEnabled()) {
                             this.sendSystemMessage(message);
                         }
-                        this.saveSettingsDebounced();
+                        outfitStore.saveState();
                         this.renderContent();
                     }
                 });
@@ -325,7 +316,7 @@ export class UserOutfitPanel {
                 if (message && areSystemMessagesEnabled()) {
                     this.sendSystemMessage(message);
                 }
-                this.saveSettingsDebounced();
+                outfitStore.saveState();
                 this.renderContent();
             } else if (presetName && presetName.toLowerCase() === 'default') {
                 alert(
