@@ -174,9 +174,10 @@ export class NewUserOutfitManager extends OutfitManager {
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
             debugLog(
-                `[NewNewUserOutfitManager] getPresets called with invalid parameters: instanceId=${actualInstanceId}`,
+                `getPresets called with invalid parameters: instanceId=${actualInstanceId}`,
                 null,
-                'warn'
+                'warn',
+                'NewUserOutfitManager'
             );
             return [];
         }
@@ -336,9 +337,10 @@ export class NewUserOutfitManager extends OutfitManager {
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
             debugLog(
-                `[NewNewUserOutfitManager] hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`,
+                `hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`,
                 null,
-                'warn'
+                'warn',
+                'NewUserOutfitManager'
             );
             return false;
         }
@@ -355,9 +357,10 @@ export class NewUserOutfitManager extends OutfitManager {
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
             debugLog(
-                `[NewNewUserOutfitManager] getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`,
+                `getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`,
                 null,
-                'warn'
+                'warn',
+                'NewUserOutfitManager'
             );
             return null;
         }

@@ -276,6 +276,24 @@ export class DebugPanel {
         return highlightedMessage;
     }
     /**
+     * Gets the service filter options for the dropdown
+     */
+    getServiceFilterOptions() {
+        const services = new Set();
+        const logs = debugLogger.getLogs();
+        // Collect all unique service names from logs
+        logs.forEach((log) => {
+            if (log.source) {
+                services.add(log.source);
+            }
+        });
+        // Generate option elements
+        const options = Array.from(services)
+            .sort()
+            .map((service) => `<option value="${service}">${service}</option>`);
+        return options.join('');
+    }
+    /**
      * Gets the CSS class for a service name
      */
     getServiceClass(serviceName) {
@@ -340,6 +358,10 @@ export class DebugPanel {
                     <option value="warn">Warn</option>
                     <option value="error">Error</option>
                 </select>
+                <select id="log-service-filter">
+                    <option value="all">All Services</option>
+                    ${this.getServiceFilterOptions()}
+                </select>
                 <button id="expand-all-logs-btn" class="menu_button" title="Expand all log details">📖 Expand All</button>
                 <button id="collapse-all-logs-btn" class="menu_button" title="Collapse all log details">📕 Collapse All</button>
                 <button id="refresh-logs-btn" class="menu_button" title="Refresh logs">🔄 Refresh</button>
@@ -370,15 +392,19 @@ export class DebugPanel {
                 const logItemClasses = `log-item log-${log.level.toLowerCase()}`;
                 const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
                 const countDisplay = group.count > 1 ? ` <span class="log-count">(${group.count}x)</span>` : '';
-                const highlightedMessage = this.highlightServiceNames(log.message, log.source);
+                const serviceLabel = log.source
+                    ? `<span class="log-service ${this.getServiceClass(log.source)}">${log.source}</span>`
+                    : '';
+                const dataServiceAttr = log.source ? `data-service="${log.source}"` : '';
                 if (hasData) {
                     return `
-                        <div class="${logItemClasses}" ${logItemAttributes}>
+                        <div class="${logItemClasses}" ${logItemAttributes} ${dataServiceAttr}>
                             <details>
                                 <summary>
+                                    ${serviceLabel}
                                     <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                                     <span class="log-level">[${log.level}]</span>
-                                    <span class="log-message">${highlightedMessage}${countDisplay}</span>
+                                    <span class="log-message">${log.message}${countDisplay}</span>
                                 </summary>
                                 <div class="log-data">
                                     <pre>${JSON.stringify(log.data, null, 2)}</pre>
@@ -389,10 +415,11 @@ export class DebugPanel {
                 }
                 else {
                     return `
-                        <div class="${logItemClasses}" ${logItemAttributes}>
+                        <div class="${logItemClasses}" ${logItemAttributes} ${dataServiceAttr}>
+                            ${serviceLabel}
                             <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                             <span class="log-level">[${log.level}]</span>
-                            <span class="log-message">${highlightedMessage}${countDisplay}</span>
+                            <span class="log-message">${log.message}${countDisplay}</span>
                         </div>
                     `;
                 }
@@ -404,6 +431,7 @@ export class DebugPanel {
         container.innerHTML = logsHtml;
         const searchInput = container.querySelector('#log-search');
         const levelFilter = container.querySelector('#log-level-filter');
+        const serviceFilter = container.querySelector('#log-service-filter');
         const expandAllBtn = container.querySelector('#expand-all-logs-btn');
         const collapseAllBtn = container.querySelector('#collapse-all-logs-btn');
         const refreshBtn = container.querySelector('#refresh-logs-btn');
@@ -413,13 +441,16 @@ export class DebugPanel {
         const filterLogs = () => {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedLevel = levelFilter.value;
+            const selectedService = serviceFilter.value;
             const logItems = container.querySelectorAll('.log-item');
             logItems.forEach((item) => {
                 const level = item.dataset.level;
                 const message = item.dataset.message;
+                const service = item.dataset.service;
                 const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
+                const isServiceMatch = selectedService === 'all' || service === selectedService;
                 const isSearchMatch = message === null || message === void 0 ? void 0 : message.includes(searchTerm);
-                if (isLevelMatch && isSearchMatch) {
+                if (isLevelMatch && isServiceMatch && isSearchMatch) {
                     item.style.display = '';
                 }
                 else {
@@ -429,6 +460,7 @@ export class DebugPanel {
         };
         searchInput.addEventListener('input', filterLogs);
         levelFilter.addEventListener('change', filterLogs);
+        serviceFilter.addEventListener('change', filterLogs);
         expandAllBtn.addEventListener('click', () => {
             const detailsElements = container.querySelectorAll('.log-item details');
             detailsElements.forEach((details) => {

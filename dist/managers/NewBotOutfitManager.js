@@ -19,7 +19,7 @@ export class NewBotOutfitManager extends OutfitManager {
     setPromptInjectionEnabled(enabled, instanceId = null) {
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!this.characterId || !actualInstanceId) {
-            debugLog('[NewNewBotOutfitManager] Cannot set prompt injection - missing characterId or instanceId', null, 'warn');
+            debugLog('Cannot set prompt injection - missing characterId or instanceId', null, 'warn', 'NewBotOutfitManager');
             return;
         }
         if (!outfitStore.state.botInstances[this.characterId]) {
@@ -41,7 +41,7 @@ export class NewBotOutfitManager extends OutfitManager {
         var _a;
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!this.characterId || !actualInstanceId) {
-            debugLog('[NewNewBotOutfitManager] Cannot get prompt injection - missing characterId or instanceId', null, 'warn');
+            debugLog('Cannot get prompt injection - missing characterId or instanceId', null, 'warn', 'NewBotOutfitManager');
             return true;
         }
         const instanceData = (_a = outfitStore.state.botInstances[this.characterId]) === null || _a === void 0 ? void 0 : _a[actualInstanceId];
@@ -55,7 +55,7 @@ export class NewBotOutfitManager extends OutfitManager {
     }
     loadOutfit() {
         if (!this.characterId || !this.outfitInstanceId) {
-            debugLog('[NewNewBotOutfitManager] Cannot load outfit - missing characterId or outfitInstanceId', null, 'debug');
+            debugLog('Cannot load outfit - missing characterId or outfitInstanceId', null, 'debug', 'NewBotOutfitManager');
             this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
@@ -75,7 +75,7 @@ export class NewBotOutfitManager extends OutfitManager {
     }
     saveOutfit() {
         if (!this.characterId || !this.outfitInstanceId) {
-            debugLog('[NewNewBotOutfitManager] Cannot save outfit - missing characterId or outfitInstanceId', null, 'warn');
+            debugLog('Cannot save outfit - missing characterId or outfitInstanceId', null, 'warn', 'NewBotOutfitManager');
             return;
         }
         const botOutfit = {};
@@ -184,7 +184,7 @@ export class NewBotOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure character is defined before attempting to get presets
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[NewNewBotOutfitManager] getPresets called with invalid parameters: characterId=${this.characterId}, instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`getPresets called with invalid parameters: characterId=${this.characterId}, instanceId=${actualInstanceId}`, null, 'warn', 'NewBotOutfitManager');
             return [];
         }
         // Get presets from extension storage only
@@ -205,7 +205,7 @@ export class NewBotOutfitManager extends OutfitManager {
             // First, try to load from character card embedded data
             const embeddedDefaultOutfit = getCharacterDefaultOutfitById(this.characterId);
             if (embeddedDefaultOutfit) {
-                debugLog(`[NewNewBotOutfitManager] Loading default outfit from character card for ${this.character}`, null, 'info');
+                debugLog(`Loading default outfit from character card for ${this.character}`, null, 'info', 'NewBotOutfitManager');
                 let changed = false;
                 for (const [slot, value] of Object.entries(embeddedDefaultOutfit)) {
                     if (this.slots.includes(slot) && this.currentValues[slot] !== value) {
@@ -320,7 +320,7 @@ export class NewBotOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure character and instanceId are defined before attempting to get presets
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[NewNewBotOutfitManager] hasDefaultOutfit called with invalid parameters: characterId=${this.characterId}, instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`hasDefaultOutfit called with invalid parameters: characterId=${this.characterId}, instanceId=${actualInstanceId}`, null, 'warn', 'NewBotOutfitManager');
             return false;
         }
         // Check if default outfit is embedded in character card
@@ -338,7 +338,7 @@ export class NewBotOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure character and instanceId are defined before attempting to get presets
         if (!this.characterId || !actualInstanceId) {
-            debugLog(`[NewNewBotOutfitManager] getDefaultPresetName called with invalid parameters: characterId=${this.characterId}, instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`getDefaultPresetName called with invalid parameters: characterId=${this.characterId}, instanceId=${actualInstanceId}`, null, 'warn', 'NewBotOutfitManager');
             return null;
         }
         // If default outfit is embedded in character card, return a special indicator
@@ -366,7 +366,7 @@ export class NewBotOutfitManager extends OutfitManager {
             // Embed the default outfit directly in the character card
             const success = yield setCharacterDefaultOutfitById(this.characterId, presetData);
             if (!success) {
-                debugLog(`[NewNewBotOutfitManager] Failed to embed default outfit in character card for ${this.character}`, null, 'error');
+                debugLog(`Failed to embed default outfit in character card for ${this.character}`, null, 'error', 'NewBotOutfitManager');
                 // Fallback to legacy behavior
                 const state = outfitStore.getState();
                 const defaultBotPresets = Object.assign({}, (state.settings.defaultBotPresets || {}));
@@ -377,7 +377,7 @@ export class NewBotOutfitManager extends OutfitManager {
                 outfitStore.setSetting('defaultBotPresets', defaultBotPresets);
             }
             else {
-                debugLog(`[NewNewBotOutfitManager] Successfully embedded default outfit in character card for ${this.character}`, null, 'info');
+                debugLog(`Successfully embedded default outfit in character card for ${this.character}`, null, 'info', 'NewBotOutfitManager');
             }
             // Emit default outfit set event
             extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_SET, {
@@ -405,7 +405,7 @@ export class NewBotOutfitManager extends OutfitManager {
             // Clear embedded default outfit from character card
             const success = yield setCharacterDefaultOutfitById(this.characterId, {});
             if (!success) {
-                debugLog(`[NewNewBotOutfitManager] Failed to clear embedded default outfit from character card for ${this.character}`, null, 'error');
+                debugLog(`Failed to clear embedded default outfit from character card for ${this.character}`, null, 'error', 'NewBotOutfitManager');
             }
             // Also clear legacy setting for backward compatibility
             const settings = outfitStore.getState().settings;

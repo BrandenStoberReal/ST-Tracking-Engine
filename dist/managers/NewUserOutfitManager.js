@@ -152,7 +152,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewNewUserOutfitManager] getPresets called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`getPresets called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn', 'NewUserOutfitManager');
             return [];
         }
         const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
@@ -271,7 +271,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewNewUserOutfitManager] hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn', 'NewUserOutfitManager');
             return false;
         }
         const settings = outfitStore.getState().settings;
@@ -282,7 +282,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewNewUserOutfitManager] getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn', 'NewUserOutfitManager');
             return null;
         }
         const settings = outfitStore.getState().settings;
