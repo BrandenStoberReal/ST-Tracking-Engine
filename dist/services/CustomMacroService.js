@@ -257,14 +257,14 @@ class CustomMacroService {
         return hash.toString(16).padStart(8, '0').substring(0, 16);
     }
     /**
-     * Processes a message for instance ID calculation (removes outfit macros)
+     * Processes a message for instance ID calculation (removes all macros)
      */
     processMessageForInstanceId(message) {
         let processedMessage = message;
-        // Remove outfit macros from the message (similar to MacroProcessor logic)
-        // This ensures instance IDs are consistent regardless of outfit values
-        const outfitMacroRegex = /\{\{char_([^}]+)\}\}|\{\{user_([^}]+)\}\}/g;
-        processedMessage = processedMessage.replace(outfitMacroRegex, '[OUTFIT_REMOVED]');
+        // Remove ALL macros from the message to ensure instance IDs are consistent
+        // regardless of when the message is processed or what macros it contains
+        const allMacroRegex = /\{\{[^}]+\}\}/g;
+        processedMessage = processedMessage.replace(allMacroRegex, '[MACRO_REMOVED]');
         return processedMessage;
     }
     deregisterMacros(context) {
