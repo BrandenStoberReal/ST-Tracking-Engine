@@ -1,5 +1,6 @@
 import { ALL_SLOTS } from '../config/constants';
-import { invalidateSpecificMacroCaches } from '../services/CustomMacroService';
+import { customMacroSystem } from '../services/CustomMacroService';
+import { macroProcessor } from '../processors/MacroProcessor';
 import { debugLog } from '../logging/DebugLogger';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
@@ -150,12 +151,9 @@ export abstract class OutfitManager {
         if (this.characterId && this.outfitInstanceId) {
             this.saveOutfit();
 
-            invalidateSpecificMacroCaches(
-                this.constructor.name.includes('Bot') ? 'bot' : 'user',
-                this.characterId,
-                this.outfitInstanceId,
-                slot
-            );
+            // Clear all macro caches when outfit changes to ensure freshness
+            customMacroSystem.clearCache();
+            macroProcessor.clearCache();
 
             // Emit outfit changed event
             extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_CHANGED, {

@@ -8,7 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { ALL_SLOTS } from '../config/constants.js';
-import { invalidateSpecificMacroCaches } from '../services/CustomMacroService.js';
+import { customMacroSystem } from '../services/CustomMacroService.js';
+import { macroProcessor } from '../processors/MacroProcessor.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
 export class OutfitManager {
@@ -112,7 +113,9 @@ export class OutfitManager {
             this.currentValues[slot] = value;
             if (this.characterId && this.outfitInstanceId) {
                 this.saveOutfit();
-                invalidateSpecificMacroCaches(this.constructor.name.includes('Bot') ? 'bot' : 'user', this.characterId, this.outfitInstanceId, slot);
+                // Clear all macro caches when outfit changes to ensure freshness
+                customMacroSystem.clearCache();
+                macroProcessor.clearCache();
                 // Emit outfit changed event
                 extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_CHANGED, {
                     characterId: this.characterId,
