@@ -136,7 +136,8 @@ class CustomMacroService {
         // Get the value directly from the outfit store using the resolved instance ID
         try {
             if (macroType === 'char') {
-                const characterId = outfitStore.getState().currentCharacterId || '';
+                // Use the outfit manager's character ID instead of the store's currentCharacterId
+                const characterId = window.outfitTracker?.botOutfitPanel?.outfitManager?.characterId || '';
                 debugLog(
                     `[CustomMacroService] Looking up bot outfit for character ${characterId}, instance ${instanceId}`,
                     null,
@@ -205,7 +206,8 @@ class CustomMacroService {
         // Get the value directly from the outfit store using the resolved instance ID
         try {
             if (macroType === 'char') {
-                const characterId = outfitStore.getState().currentCharacterId || '';
+                // Use the outfit manager's character ID instead of the store's currentCharacterId
+                const characterId = window.outfitTracker?.botOutfitPanel?.outfitManager?.characterId || '';
                 debugLog(
                     `[CustomMacroService] Looking up bot outfit for character ${characterId}, instance ${instanceId}`,
                     null,

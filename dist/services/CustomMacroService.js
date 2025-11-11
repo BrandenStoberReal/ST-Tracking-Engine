@@ -65,6 +65,7 @@ class CustomMacroService {
      * Gets the slot value using instance-aware resolution (for direct text replacement)
      */
     getInstanceAwareSlotValue(macroType, slotName, charNameParam = null) {
+        var _a, _b, _c;
         debugLog(`[CustomMacroService] getInstanceAwareSlotValue called for ${macroType}_${slotName}`, null, 'debug');
         if (!this.allSlots.includes(slotName)) {
             debugLog(`[CustomMacroService] Invalid slot name: ${slotName}`, null, 'debug');
@@ -82,7 +83,8 @@ class CustomMacroService {
         // Get the value directly from the outfit store using the resolved instance ID
         try {
             if (macroType === 'char') {
-                const characterId = outfitStore.getState().currentCharacterId || '';
+                // Use the outfit manager's character ID instead of the store's currentCharacterId
+                const characterId = ((_c = (_b = (_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager) === null || _c === void 0 ? void 0 : _c.characterId) || '';
                 debugLog(`[CustomMacroService] Looking up bot outfit for character ${characterId}, instance ${instanceId}`, null, 'debug');
                 const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
                 const value = outfitData[slotName] || 'None';
@@ -110,6 +112,7 @@ class CustomMacroService {
      * Gets the value from the appropriate instance-specific macro
      */
     getPointerMacroValue(macroType, slotName) {
+        var _a, _b, _c;
         debugLog(`[CustomMacroService] getPointerMacroValue called for ${macroType}_${slotName}`, null, 'debug');
         if (!this.allSlots.includes(slotName)) {
             debugLog(`[CustomMacroService] Invalid slot name: ${slotName}`, null, 'debug');
@@ -125,7 +128,8 @@ class CustomMacroService {
         // Get the value directly from the outfit store using the resolved instance ID
         try {
             if (macroType === 'char') {
-                const characterId = outfitStore.getState().currentCharacterId || '';
+                // Use the outfit manager's character ID instead of the store's currentCharacterId
+                const characterId = ((_c = (_b = (_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager) === null || _c === void 0 ? void 0 : _c.characterId) || '';
                 debugLog(`[CustomMacroService] Looking up bot outfit for character ${characterId}, instance ${instanceId}`, null, 'debug');
                 const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
                 const value = outfitData[slotName] || 'None';
