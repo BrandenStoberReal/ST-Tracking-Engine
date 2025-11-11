@@ -2,7 +2,6 @@ import { DEFAULT_SETTINGS } from '../config/constants.js';
 import { deepClone } from '../utils/utilities.js';
 import { debugLog } from '../logging/DebugLogger.js';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
-import { macroProcessor } from '../processors/MacroProcessor.js';
 class OutfitStore {
     constructor() {
         this.state = {
@@ -323,22 +322,16 @@ class OutfitStore {
             return;
         }
         const { botInstances, userInstances, presets, settings } = this.state;
-        // Get message-instance mappings from MacroProcessor
-        const messageInstanceMap = macroProcessor.getMessageInstanceMap();
-        this.dataManager.saveOutfitData({ botInstances, userInstances, presets, messageInstanceMap });
+        this.dataManager.saveOutfitData({ botInstances, userInstances, presets });
         this.dataManager.saveSettings(settings);
     }
     loadState() {
         if (!this.dataManager) {
             return;
         }
-        const { botInstances, userInstances, presets, messageInstanceMap } = this.dataManager.loadOutfitData();
+        const { botInstances, userInstances, presets } = this.dataManager.loadOutfitData();
         const settings = this.dataManager.loadSettings();
         this.setState({ botInstances, userInstances, presets, settings });
-        // Load message-instance mappings into MacroProcessor
-        if (messageInstanceMap) {
-            macroProcessor.loadMessageInstanceMap(messageInstanceMap);
-        }
         // Emit an event when outfit data is loaded to allow UI refresh
         import('../core/events.js')
             .then(({ extensionEventBus, EXTENSION_EVENTS }) => {

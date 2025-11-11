@@ -197,44 +197,44 @@ class CustomMacroService {
      * Gets the appropriate instance ID for the current context
      */
     getInstanceIdForCurrentContext(): string | null {
-        // First priority: Try message-to-instance mapping (most reliable for current chat context)
+        // First priority: Check if we already have a current instance ID
+        const currentInstanceId = outfitStore.getCurrentInstanceId();
+        if (currentInstanceId) {
+            return currentInstanceId;
+        }
+
+        // Calculate instance ID directly from current chat context and cache it
         try {
             const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
             if (ctx && ctx.chat && ctx.chat.length > 0) {
                 // Find the first bot message
                 const firstBotMessage = ctx.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
-                if (firstBotMessage && window.macroProcessor?.messageInstanceMap) {
-                    // Create a simple hash of the first message for lookup
-                    const simpleHash = window.macroProcessor?.createSimpleMessageHash(firstBotMessage.mes);
-                    const mappedInstanceId = window.macroProcessor.messageInstanceMap.get(simpleHash);
-                    if (mappedInstanceId) {
+                if (firstBotMessage) {
+                    // Calculate instance ID directly from the message content
+                    const instanceId = this.calculateInstanceIdFromMessage(firstBotMessage.mes);
+                    if (instanceId) {
+                        // Cache the calculated instance ID globally for other macros
+                        outfitStore.setCurrentInstanceId(instanceId);
                         debugLog(
-                            `[CustomMacroService] Using mapped instance ID ${mappedInstanceId} for message hash ${simpleHash}`,
+                            `[CustomMacroService] Calculated and cached instance ID ${instanceId} from first message`,
                             null,
                             'debug'
                         );
-                        return mappedInstanceId;
+                        return instanceId;
                     }
                 }
             }
         } catch (error) {
-            debugLog('[CustomMacroService] Error getting instance ID from mapping:', error, 'debug');
+            debugLog('[CustomMacroService] Error calculating instance ID from chat:', error, 'debug');
         }
 
-        // Second priority: Try the current instance ID from store
-        const currentInstanceId = outfitStore.getCurrentInstanceId();
-        if (currentInstanceId) {
-            debugLog(`[CustomMacroService] Using store instance ID ${currentInstanceId}`, null, 'debug');
-            return currentInstanceId;
-        }
-
-        // Third priority: Try to get instance ID from managers (useful during character switching)
+        // Last resort: Try to get instance ID from managers
         try {
             if (window.eventService?.botManager) {
                 const managerInstanceId = window.eventService.botManager.getOutfitInstanceId();
                 if (managerInstanceId) {
                     debugLog(
-                        `[CustomMacroService] Using manager instance ID ${managerInstanceId} during transition`,
+                        `[CustomMacroService] Using manager instance ID ${managerInstanceId} as last resort`,
                         null,
                         'debug'
                     );
@@ -250,16 +250,55 @@ class CustomMacroService {
     }
 
     /**
-     * Creates a simple synchronous hash of a message for instance mapping
+     * Calculates instance ID directly from a message by replicating the MacroProcessor logic
      */
-    createSimpleMessageHash(message: string): string {
-        let hash = 0;
-        for (let i = 0; i < message.length; i++) {
-            const char = message.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash = hash & hash; // Convert to 32-bit integer
+    private calculateInstanceIdFromMessage(message: string): string | null {
+        try {
+            // Process the message the same way MacroProcessor does
+            const processedMessage = this.processMessageForInstanceId(message);
+
+            // Use the simple synchronous hash function for consistency
+            return this.generateInstanceIdFromTextSimple(processedMessage);
+        } catch (error) {
+            debugLog('[CustomMacroService] Error calculating instance ID from message:', error, 'error');
+            return null;
         }
-        return hash.toString();
+    }
+
+    /**
+     * Simple synchronous instance ID generation (fallback from utilities.ts)
+     */
+    private generateInstanceIdFromTextSimple(text: string): string {
+        // Normalize the text (same as utilities.ts)
+        const normalizedText = text.toLowerCase().trim();
+
+        // FNV-1a hash
+        const FNV_PRIME = 16777619;
+        const FNV_OFFSET_BASIS = 2166136261;
+
+        let hash = FNV_OFFSET_BASIS;
+        for (let i = 0; i < normalizedText.length; i++) {
+            hash ^= normalizedText.charCodeAt(i);
+            hash *= FNV_PRIME;
+            hash = hash >>> 0; // Convert to unsigned 32-bit
+        }
+
+        // Convert to hex string (same format as crypto version)
+        return hash.toString(16).padStart(8, '0').substring(0, 16);
+    }
+
+    /**
+     * Processes a message for instance ID calculation (removes outfit macros)
+     */
+    private processMessageForInstanceId(message: string): string {
+        let processedMessage = message;
+
+        // Remove outfit macros from the message (similar to MacroProcessor logic)
+        // This ensures instance IDs are consistent regardless of outfit values
+        const outfitMacroRegex = /\{\{char_([^}]+)\}\}|\{\{user_([^}]+)\}\}/g;
+        processedMessage = processedMessage.replace(outfitMacroRegex, '[OUTFIT_REMOVED]');
+
+        return processedMessage;
     }
 
     deregisterMacros(context: any): void {

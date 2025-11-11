@@ -26,7 +26,6 @@ class DataManager {
                 presets: { bot: {}, user: {} },
                 settings: { ...DEFAULT_SETTINGS },
                 version: DATA_VERSION,
-                messageInstanceMap: {},
             };
         }
         this.migrateData();
@@ -99,7 +98,6 @@ class DataManager {
             botInstances: outfitData.botInstances || {},
             userInstances: outfitData.userInstances || {},
             presets: outfitData.presets || {},
-            messageInstanceMap: outfitData.messageInstanceMap || {},
         });
     }
 
@@ -123,7 +121,6 @@ class DataManager {
             botInstances: data?.botInstances || {},
             userInstances: data?.userInstances || {},
             presets: data?.presets || { bot: {}, user: {} },
-            messageInstanceMap: data?.messageInstanceMap || {},
         };
     }
 

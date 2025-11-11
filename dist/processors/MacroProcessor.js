@@ -16,39 +16,11 @@ class MacroProcessor {
         this.allSlots = ALL_SLOTS;
         this.outfitValuesCache = new Map();
         this.textProcessingCache = new Map();
-        this.messageInstanceMap = new Map();
         this.cacheExpiryTime = 5 * 60 * 1000;
     }
     clearCache() {
         this.outfitValuesCache.clear();
         this.textProcessingCache.clear();
-        this.messageInstanceMap.clear();
-    }
-    loadMessageInstanceMap(map) {
-        this.messageInstanceMap.clear();
-        for (const [key, value] of Object.entries(map)) {
-            this.messageInstanceMap.set(key, value);
-        }
-        debugLog(`[MacroProcessor] Loaded ${this.messageInstanceMap.size} message-instance mappings`, null, 'info');
-    }
-    getMessageInstanceMap() {
-        const result = {};
-        for (const [key, value] of this.messageInstanceMap.entries()) {
-            result[key] = value;
-        }
-        return result;
-    }
-    /**
-     * Creates a simple synchronous hash of a message for instance mapping
-     */
-    createSimpleMessageHash(message) {
-        let hash = 0;
-        for (let i = 0; i < message.length; i++) {
-            const char = message.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash = hash & hash; // Convert to 32-bit integer
-        }
-        return hash.toString();
     }
     processMacrosInFirstMessage(context) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -120,12 +92,6 @@ class MacroProcessor {
                     debugLog('[OutfitTracker] Outfit values removed:', outfitValues);
                     // Generate instance ID from the processed message with outfit values removed for consistent ID calculation
                     const instanceId = yield generateInstanceIdFromText(processedMessage, []);
-                    // Store mapping from first message to instance ID for macro resolution
-                    const firstMessageHash = this.createSimpleMessageHash(firstBotMessage.mes);
-                    this.messageInstanceMap.set(firstMessageHash, instanceId);
-                    debugLog('[OutfitTracker] Stored message-to-instance mapping:', { firstMessageHash, instanceId });
-                    // Save the updated mappings
-                    outfitStore.saveState();
                     debugLog('[OutfitTracker] Generated instance ID:', instanceId);
                     // Only update the instance ID if it's different from the current one
                     // This prevents unnecessary updates that could cause flip-flopping

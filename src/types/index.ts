@@ -22,7 +22,6 @@ export interface FullOutfitData {
     version?: string;
 
     variables?: Record<string, unknown>; // For macro variables
-    messageInstanceMap?: Record<string, string>; // Message hash -> instance ID mappings
 }
 
 export interface BotInstances {

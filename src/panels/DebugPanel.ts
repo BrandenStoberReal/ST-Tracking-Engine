@@ -284,24 +284,6 @@ export class DebugPanel {
 
         macrosHtml += '</tbody></table>';
 
-        // Show message-to-instance mappings
-        macrosHtml += '<h5>Message-to-Instance Mappings:</h5>';
-        macrosHtml += `<div class="message-instance-mappings">Mapped entries: ${window.macroProcessor?.messageInstanceMap?.size || 0}</div>`;
-
-        if (window.macroProcessor?.messageInstanceMap && window.macroProcessor.messageInstanceMap.size > 0) {
-            macrosHtml += '<table class="message-instance-table">';
-            macrosHtml += '<thead><tr><th>Message Hash</th><th>Instance ID</th></tr></thead>';
-            macrosHtml += '<tbody>';
-
-            for (const [hash, instanceId] of window.macroProcessor.messageInstanceMap.entries()) {
-                macrosHtml += `<tr><td>${hash}</td><td>${instanceId}</td></tr>`;
-            }
-
-            macrosHtml += '</tbody></table>';
-        } else {
-            macrosHtml += '<div class="no-mappings">No message-to-instance mappings available</div>';
-        }
-
         // Add more detailed macro processing information
         macrosHtml += '<h5>Detailed Macro Processing Info:</h5>';
         macrosHtml += '<div class="macro-processing-info">';

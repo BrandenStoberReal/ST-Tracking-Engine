@@ -126,39 +126,39 @@ class CustomMacroService {
      * Gets the appropriate instance ID for the current context
      */
     getInstanceIdForCurrentContext() {
-        var _a, _b, _c, _d;
-        // First priority: Try message-to-instance mapping (most reliable for current chat context)
+        var _a, _b;
+        // First priority: Check if we already have a current instance ID
+        const currentInstanceId = outfitStore.getCurrentInstanceId();
+        if (currentInstanceId) {
+            return currentInstanceId;
+        }
+        // Calculate instance ID directly from current chat context and cache it
         try {
             const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
             if (ctx && ctx.chat && ctx.chat.length > 0) {
                 // Find the first bot message
                 const firstBotMessage = ctx.chat.find((msg) => !msg.is_user && !msg.is_system);
-                if (firstBotMessage && ((_b = window.macroProcessor) === null || _b === void 0 ? void 0 : _b.messageInstanceMap)) {
-                    // Create a simple hash of the first message for lookup
-                    const simpleHash = (_c = window.macroProcessor) === null || _c === void 0 ? void 0 : _c.createSimpleMessageHash(firstBotMessage.mes);
-                    const mappedInstanceId = window.macroProcessor.messageInstanceMap.get(simpleHash);
-                    if (mappedInstanceId) {
-                        debugLog(`[CustomMacroService] Using mapped instance ID ${mappedInstanceId} for message hash ${simpleHash}`, null, 'debug');
-                        return mappedInstanceId;
+                if (firstBotMessage) {
+                    // Calculate instance ID directly from the message content
+                    const instanceId = this.calculateInstanceIdFromMessage(firstBotMessage.mes);
+                    if (instanceId) {
+                        // Cache the calculated instance ID globally for other macros
+                        outfitStore.setCurrentInstanceId(instanceId);
+                        debugLog(`[CustomMacroService] Calculated and cached instance ID ${instanceId} from first message`, null, 'debug');
+                        return instanceId;
                     }
                 }
             }
         }
         catch (error) {
-            debugLog('[CustomMacroService] Error getting instance ID from mapping:', error, 'debug');
+            debugLog('[CustomMacroService] Error calculating instance ID from chat:', error, 'debug');
         }
-        // Second priority: Try the current instance ID from store
-        const currentInstanceId = outfitStore.getCurrentInstanceId();
-        if (currentInstanceId) {
-            debugLog(`[CustomMacroService] Using store instance ID ${currentInstanceId}`, null, 'debug');
-            return currentInstanceId;
-        }
-        // Third priority: Try to get instance ID from managers (useful during character switching)
+        // Last resort: Try to get instance ID from managers
         try {
-            if ((_d = window.eventService) === null || _d === void 0 ? void 0 : _d.botManager) {
+            if ((_b = window.eventService) === null || _b === void 0 ? void 0 : _b.botManager) {
                 const managerInstanceId = window.eventService.botManager.getOutfitInstanceId();
                 if (managerInstanceId) {
-                    debugLog(`[CustomMacroService] Using manager instance ID ${managerInstanceId} during transition`, null, 'debug');
+                    debugLog(`[CustomMacroService] Using manager instance ID ${managerInstanceId} as last resort`, null, 'debug');
                     return managerInstanceId;
                 }
             }
@@ -170,16 +170,48 @@ class CustomMacroService {
         return null;
     }
     /**
-     * Creates a simple synchronous hash of a message for instance mapping
+     * Calculates instance ID directly from a message by replicating the MacroProcessor logic
      */
-    createSimpleMessageHash(message) {
-        let hash = 0;
-        for (let i = 0; i < message.length; i++) {
-            const char = message.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash = hash & hash; // Convert to 32-bit integer
+    calculateInstanceIdFromMessage(message) {
+        try {
+            // Process the message the same way MacroProcessor does
+            const processedMessage = this.processMessageForInstanceId(message);
+            // Use the simple synchronous hash function for consistency
+            return this.generateInstanceIdFromTextSimple(processedMessage);
         }
-        return hash.toString();
+        catch (error) {
+            debugLog('[CustomMacroService] Error calculating instance ID from message:', error, 'error');
+            return null;
+        }
+    }
+    /**
+     * Simple synchronous instance ID generation (fallback from utilities.ts)
+     */
+    generateInstanceIdFromTextSimple(text) {
+        // Normalize the text (same as utilities.ts)
+        const normalizedText = text.toLowerCase().trim();
+        // FNV-1a hash
+        const FNV_PRIME = 16777619;
+        const FNV_OFFSET_BASIS = 2166136261;
+        let hash = FNV_OFFSET_BASIS;
+        for (let i = 0; i < normalizedText.length; i++) {
+            hash ^= normalizedText.charCodeAt(i);
+            hash *= FNV_PRIME;
+            hash = hash >>> 0; // Convert to unsigned 32-bit
+        }
+        // Convert to hex string (same format as crypto version)
+        return hash.toString(16).padStart(8, '0').substring(0, 16);
+    }
+    /**
+     * Processes a message for instance ID calculation (removes outfit macros)
+     */
+    processMessageForInstanceId(message) {
+        let processedMessage = message;
+        // Remove outfit macros from the message (similar to MacroProcessor logic)
+        // This ensures instance IDs are consistent regardless of outfit values
+        const outfitMacroRegex = /\{\{char_([^}]+)\}\}|\{\{user_([^}]+)\}\}/g;
+        processedMessage = processedMessage.replace(outfitMacroRegex, '[OUTFIT_REMOVED]');
+        return processedMessage;
     }
     deregisterMacros(context) {
         var _a;

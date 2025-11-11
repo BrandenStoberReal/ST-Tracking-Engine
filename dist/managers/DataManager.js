@@ -27,7 +27,6 @@ class DataManager {
                     presets: { bot: {}, user: {} },
                     settings: Object.assign({}, DEFAULT_SETTINGS),
                     version: DATA_VERSION,
-                    messageInstanceMap: {},
                 };
             }
             this.migrateData();
@@ -91,7 +90,6 @@ class DataManager {
             botInstances: outfitData.botInstances || {},
             userInstances: outfitData.userInstances || {},
             presets: outfitData.presets || {},
-            messageInstanceMap: outfitData.messageInstanceMap || {},
         });
     }
     // Direct method to save wiped outfit data that bypasses deepMerge for complete wipe operations
@@ -111,7 +109,6 @@ class DataManager {
             botInstances: (data === null || data === void 0 ? void 0 : data.botInstances) || {},
             userInstances: (data === null || data === void 0 ? void 0 : data.userInstances) || {},
             presets: (data === null || data === void 0 ? void 0 : data.presets) || { bot: {}, user: {} },
-            messageInstanceMap: (data === null || data === void 0 ? void 0 : data.messageInstanceMap) || {},
         };
     }
     saveSettings(settings) {
