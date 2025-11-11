@@ -357,6 +357,7 @@ export class DebugPanel {
      */
     private getServiceClass(serviceName: string): string {
         const serviceClassMap: { [key: string]: string } = {
+            // Services
             CustomMacroService: 'service-custom-macro',
             EventService: 'service-event',
             CharacterService: 'service-character',
@@ -366,6 +367,42 @@ export class DebugPanel {
             CharacterOutfitService: 'service-character-outfit',
             CharacterIdService: 'service-character-id',
             OutfitDataService: 'service-outfit-data',
+
+            // Managers
+            DataManager: 'service-data-manager',
+            BotOutfitManager: 'service-bot-outfit-manager',
+            UserOutfitManager: 'service-user-outfit-manager',
+            OutfitManager: 'service-outfit-manager',
+
+            // Panels
+            BotOutfitPanel: 'service-bot-outfit-panel',
+            DebugPanel: 'service-debug-panel',
+            UserOutfitPanel: 'service-user-outfit-panel',
+
+            // Processors
+            MacroProcessor: 'service-macro-processor',
+            StringProcessor: 'service-string-processor',
+
+            // Utils
+            CharacterUtils: 'service-character-utils',
+            LLMUtility: 'service-llm-utility',
+            SettingsUtil: 'service-settings-util',
+            Utilities: 'service-utilities',
+
+            // Core
+            EventBus: 'service-event-bus',
+            ExtensionCore: 'service-extension-core',
+
+            // Commands
+            OutfitCommands: 'service-outfit-commands',
+
+            // Other
+            SharedUtils: 'service-shared-utils',
+            Store: 'service-store',
+            Settings: 'service-settings',
+            SettingsUI: 'service-settings-ui',
+
+            // Legacy
             OutfitTracker: 'service-outfit-tracker',
             'OutfitTracker Debug': 'service-outfit-tracker-debug',
         };

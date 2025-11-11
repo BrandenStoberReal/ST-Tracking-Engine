@@ -1633,6 +1633,132 @@ input:checked + .slider:before {
     border: 1px solid rgba(52, 73, 94, 0.3);
 }
 
+.service-data-manager {
+    background-color: rgba(142, 68, 173, 0.2);
+    color: #8e44ad;
+    border: 1px solid rgba(142, 68, 173, 0.3);
+}
+
+.service-bot-outfit-manager {
+    background-color: rgba(41, 128, 185, 0.2);
+    color: #2980b9;
+    border: 1px solid rgba(41, 128, 185, 0.3);
+}
+
+.service-user-outfit-manager {
+    background-color: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.service-outfit-manager {
+    background-color: rgba(211, 84, 0, 0.2);
+    color: #d35400;
+    border: 1px solid rgba(211, 84, 0, 0.3);
+}
+
+.service-bot-outfit-panel {
+    background-color: rgba(192, 57, 43, 0.2);
+    color: #c0392b;
+    border: 1px solid rgba(192, 57, 43, 0.3);
+}
+
+.service-debug-panel {
+    background-color: rgba(22, 160, 133, 0.2);
+    color: #16a085;
+    border: 1px solid rgba(22, 160, 133, 0.3);
+}
+
+.service-user-outfit-panel {
+    background-color: rgba(44, 62, 80, 0.2);
+    color: #2c3e50;
+    border: 1px solid rgba(44, 62, 80, 0.3);
+}
+
+.service-macro-processor {
+    background-color: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.service-string-processor {
+    background-color: rgba(155, 89, 182, 0.2);
+    color: #9b59b6;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.service-character-utils {
+    background-color: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.service-llm-utility {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.service-settings-util {
+    background-color: rgba(230, 126, 34, 0.2);
+    color: #e67e22;
+    border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+.service-utilities {
+    background-color: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+    border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
+.service-event-bus {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.service-extension-core {
+    background-color: rgba(26, 188, 156, 0.2);
+    color: #1abc9c;
+    border: 1px solid rgba(26, 188, 156, 0.3);
+}
+
+.service-outfit-commands {
+    background-color: rgba(44, 62, 80, 0.2);
+    color: #2c3e50;
+    border: 1px solid rgba(44, 62, 80, 0.3);
+}
+
+.service-shared-utils {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.service-store {
+    background-color: rgba(106, 79, 193, 0.2);
+    color: #6a4fc1;
+    border: 1px solid rgba(106, 79, 193, 0.3);
+}
+
+.service-settings {
+    background-color: rgba(52, 73, 94, 0.2);
+    color: #34495e;
+    border: 1px solid rgba(52, 73, 94, 0.3);
+}
+
+.service-settings-ui {
+    background-color: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+    border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
+.service-generic {
+    background-color: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+    border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
 .log-item {
     padding: 8px;
     border-radius: 4px;
