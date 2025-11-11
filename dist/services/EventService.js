@@ -239,18 +239,10 @@ class EventService {
             return;
         const { instanceId, instanceType, characterId } = data;
         debugLog(`[EventService] Instance created: ${instanceType} ${characterId} instance ${instanceId}`, null, 'debug');
-        // Register instance macros for the newly created instance
-        if (this.context && customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
-            if (instanceType === 'user') {
-                customMacroSystem.registerUserInstanceMacros(this.context, instanceId);
-            }
-            else if (instanceType === 'bot' && characterId) {
-                customMacroSystem.registerInstanceMacros(this.context, characterId, instanceId);
-            }
-            // Show toast notification when new instance macros are registered
-            if (typeof toastr !== 'undefined') {
-                toastr.success(`Instance macros registered for new ${instanceType} instance!`, 'Outfit System');
-            }
+        // Instance macros are no longer registered - pointer macros access data directly from store
+        // Show toast notification when new instance is created
+        if (typeof window.toastr !== 'undefined') {
+            window.toastr.success(`New ${instanceType} instance created!`, 'Outfit System');
         }
     }
     generateMessageHash(text) {

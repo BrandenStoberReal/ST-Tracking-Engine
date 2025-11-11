@@ -125,7 +125,6 @@ class CustomMacroService {
      * Gets the slot value using instance-aware resolution (for direct text replacement)
      */
     getInstanceAwareSlotValue(macroType, slotName, charNameParam = null) {
-        var _a;
         if (!this.allSlots.includes(slotName)) {
             return 'None';
         }
@@ -136,28 +135,28 @@ class CustomMacroService {
             debugLog('[CustomMacroService] No instance ID found for text replacement, falling back to direct lookup', null, 'debug');
             return this.getCurrentSlotValue(macroType, slotName, charNameParam);
         }
-        // Construct the instance-specific macro name
-        const instanceMacroName = `${macroType}_${slotName}_${instanceId}`;
-        // Try to get the value from the registered macro
-        const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
-        if (ctx && ctx.getMacro && ctx.getMacro[instanceMacroName]) {
-            try {
-                return ctx.getMacro[instanceMacroName]() || 'None';
+        // Get the value directly from the outfit store using the resolved instance ID
+        try {
+            if (macroType === 'char') {
+                const outfitData = outfitStore.getBotOutfit(outfitStore.getState().currentCharacterId || '', instanceId);
+                return outfitData[slotName] || 'None';
             }
-            catch (error) {
-                debugLog(`[CustomMacroService] Error getting instance macro value for ${instanceMacroName}:`, error, 'error');
-                return 'None';
+            else if (macroType === 'user') {
+                const outfitData = outfitStore.getUserOutfit(instanceId);
+                return outfitData[slotName] || 'None';
             }
         }
-        debugLog(`[CustomMacroService] Instance macro ${instanceMacroName} not found, falling back to direct lookup`, null, 'debug');
-        // Fallback to direct lookup if macro not available
+        catch (error) {
+            debugLog(`[CustomMacroService] Error getting outfit data for ${macroType}_${slotName}_${instanceId}:`, error, 'error');
+        }
+        debugLog(`[CustomMacroService] No outfit data found for ${macroType}_${slotName}_${instanceId}, falling back to direct lookup`, null, 'debug');
+        // Fallback to direct lookup if data not available
         return this.getCurrentSlotValue(macroType, slotName, charNameParam);
     }
     /**
      * Gets the value from the appropriate instance-specific macro
      */
     getPointerMacroValue(macroType, slotName) {
-        var _a;
         if (!this.allSlots.includes(slotName)) {
             return 'None';
         }
@@ -167,21 +166,22 @@ class CustomMacroService {
             debugLog('[CustomMacroService] No instance ID found for pointer macro', null, 'debug');
             return 'None';
         }
-        // Construct the instance-specific macro name
-        const instanceMacroName = `${macroType}_${slotName}_${instanceId}`;
-        // Try to get the value from the registered macro
-        const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
-        if (ctx && ctx.getMacro && ctx.getMacro[instanceMacroName]) {
-            try {
-                return ctx.getMacro[instanceMacroName]() || 'None';
+        // Get the value directly from the outfit store using the resolved instance ID
+        try {
+            if (macroType === 'char') {
+                const outfitData = outfitStore.getBotOutfit(outfitStore.getState().currentCharacterId || '', instanceId);
+                return outfitData[slotName] || 'None';
             }
-            catch (error) {
-                debugLog(`[CustomMacroService] Error getting instance macro value for ${instanceMacroName}:`, error, 'error');
-                return 'None';
+            else if (macroType === 'user') {
+                const outfitData = outfitStore.getUserOutfit(instanceId);
+                return outfitData[slotName] || 'None';
             }
         }
-        debugLog(`[CustomMacroService] Instance macro ${instanceMacroName} not found, falling back to direct lookup`, null, 'debug');
-        // Fallback to direct lookup if macro not available
+        catch (error) {
+            debugLog(`[CustomMacroService] Error getting outfit data for ${macroType}_${slotName}_${instanceId}:`, error, 'error');
+        }
+        debugLog(`[CustomMacroService] No outfit data found for ${macroType}_${slotName}_${instanceId}, falling back to direct lookup`, null, 'debug');
+        // Fallback to direct lookup if data not available
         return this.getCurrentSlotValue(macroType, slotName);
     }
     /**
@@ -272,21 +272,11 @@ class CustomMacroService {
                             }
                         });
                     }
-                    // Register instance-specific macros for all instances of this character
-                    if (characterId) {
-                        const instances = outfitStore.getCharacterInstances(characterId);
-                        instances.forEach((instanceId) => {
-                            this.registerInstanceMacros(ctx, characterId, instanceId);
-                        });
-                    }
+                    // Instance macros are no longer needed - pointer macros access data directly from store
                 }
             }
         }
-        // Also register user instance macros for all user instances
-        const userInstances = Object.keys(outfitStore.getState().userInstances || {});
-        userInstances.forEach((instanceId) => {
-            this.registerUserInstanceMacros(ctx, instanceId);
-        });
+        // User instance macros are no longer needed - pointer macros access data directly from store
     }
     deregisterCharacterSpecificMacros(context) {
         var _a;
