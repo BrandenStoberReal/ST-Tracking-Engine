@@ -47,9 +47,13 @@ class CustomMacroService {
 
                 if (!this.registeredMacros.has(charMacro)) {
                     ctx.registerMacro(charMacro, () => {
-                        // Ensure system is ready before attempting to get value
-                        if (!this._isSystemReady()) {
-                            debugLog(`[CustomMacroService] System not ready for macro ${charMacro}`, null, 'debug');
+                        // Ensure system is ready and we have data before attempting to get value
+                        if (!this._isSystemReady() || !this.hasOutfitData('char', slot)) {
+                            debugLog(
+                                `[CustomMacroService] System not ready or no data for macro ${charMacro}`,
+                                null,
+                                'debug'
+                            );
                             return 'None';
                         }
                         return this.getCurrentSlotValue('char', slot);
@@ -59,9 +63,13 @@ class CustomMacroService {
 
                 if (!this.registeredMacros.has(userMacro)) {
                     ctx.registerMacro(userMacro, () => {
-                        // Ensure system is ready before attempting to get value
-                        if (!this._isSystemReady()) {
-                            debugLog(`[CustomMacroService] System not ready for macro ${userMacro}`, null, 'debug');
+                        // Ensure system is ready and we have data before attempting to get value
+                        if (!this._isSystemReady() || !this.hasOutfitData('user', slot)) {
+                            debugLog(
+                                `[CustomMacroService] System not ready or no data for macro ${userMacro}`,
+                                null,
+                                'debug'
+                            );
                             return 'None';
                         }
                         return this.getCurrentSlotValue('user', slot);
@@ -112,10 +120,10 @@ class CustomMacroService {
                         const macroName = `${characterName}_${slot}`;
                         if (!this.registeredMacros.has(macroName)) {
                             ctx.registerMacro(macroName, () => {
-                                // Ensure system is ready before attempting to get value
-                                if (!this._isSystemReady()) {
+                                // Ensure system is ready and we have data before attempting to get value
+                                if (!this._isSystemReady() || !this.hasOutfitData(characterName, slot, characterName)) {
                                     debugLog(
-                                        `[CustomMacroService] System not ready for macro ${macroName}`,
+                                        `[CustomMacroService] System not ready or no data for macro ${macroName}`,
                                         null,
                                         'debug'
                                     );
@@ -346,6 +354,86 @@ class CustomMacroService {
         return result;
     }
 
+    /**
+     * Checks if outfit data is available for the given macro type and slot
+     * @param macroType - The macro type (char, user, etc.)
+     * @param slotName - The slot name
+     * @param charNameParam - Optional character name parameter
+     * @returns True if outfit data is available, false otherwise
+     */
+    hasOutfitData(macroType: string, slotName: string, charNameParam: string | null = null): boolean {
+        try {
+            if (!this._isSystemReady()) {
+                return false;
+            }
+
+            const context = window.SillyTavern?.getContext
+                ? window.SillyTavern.getContext()
+                : window.getContext
+                  ? window.getContext()
+                  : null;
+
+            let charId: any = null;
+
+            if (charNameParam) {
+                const characters = getCharacters();
+                if (context && characters) {
+                    const character = characters.find((c: any) => c.name === charNameParam);
+                    if (character) {
+                        charId = getCharacterId(character) || characters.indexOf(character);
+                    }
+                }
+            } else if (macroType === 'char' || macroType === 'bot') {
+                const botOutfitManager = window.outfitTracker?.botOutfitPanel?.outfitManager;
+                if (botOutfitManager?.characterId) {
+                    charId = botOutfitManager.characterId;
+                } else if (context?.characterId !== null && context?.characterId !== undefined) {
+                    const character = context.characters[context.characterId];
+                    if (character) {
+                        charId = getCharacterId(character) || context.characterId.toString();
+                    }
+                }
+            }
+
+            if (charId !== null && (macroType === 'char' || macroType === 'bot' || charNameParam)) {
+                const state = outfitStore.getState();
+                const currentInstanceId = state.currentOutfitInstanceId;
+
+                if (!currentInstanceId) {
+                    return false;
+                }
+
+                const outfitData = outfitStore.getBotOutfit(charId.toString(), currentInstanceId);
+                return (
+                    outfitData &&
+                    Object.keys(outfitData).length > 0 &&
+                    outfitData[slotName] !== undefined &&
+                    outfitData[slotName] !== 'None'
+                );
+            } else if (macroType === 'user') {
+                const state = outfitStore.getState();
+                const currentInstanceId = state.currentOutfitInstanceId;
+
+                if (!currentInstanceId) {
+                    return false;
+                }
+
+                const userOutfitData = outfitStore.getUserOutfit(currentInstanceId);
+                return (
+                    userOutfitData &&
+                    Object.keys(userOutfitData).length > 0 &&
+                    userOutfitData[slotName] !== undefined &&
+                    userOutfitData[slotName] !== 'None'
+                );
+            }
+
+            return false;
+        } catch (error) {
+            debugLog('[CustomMacroService] Error checking outfit data availability:', error, 'error');
+            return false;
+        }
+    }
+
     clearCache(): void {
         this.macroValueCache.clear();
         debugLog('[CustomMacroService] Macro cache cleared', null, 'debug');
@@ -509,17 +597,27 @@ class CustomMacroService {
             const macro = macros[i];
 
             if (macro.slot) {
-                // Handle slot-based macros like {{char_topwear}}, {{user_headwear}}, etc.
-                const replacement = this.getCurrentSlotValue(
+                // Check if we have actual outfit data before replacing
+                const hasData = this.hasOutfitData(
                     macro.type,
                     macro.slot,
                     ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type
                 );
 
-                result =
-                    result.substring(0, macro.startIndex) +
-                    replacement +
-                    result.substring(macro.startIndex + macro.fullMatch.length);
+                if (hasData) {
+                    // Only replace if we have actual data (not just "None")
+                    const replacement = this.getCurrentSlotValue(
+                        macro.type,
+                        macro.slot,
+                        ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type
+                    );
+
+                    result =
+                        result.substring(0, macro.startIndex) +
+                        replacement +
+                        result.substring(macro.startIndex + macro.fullMatch.length);
+                }
+                // If no data available, leave the macro unreplaced so it can be processed later
             }
             // Skip non-slot macros like {{char}} and {{user}} as they should be handled manually in prompt injection only
         }
