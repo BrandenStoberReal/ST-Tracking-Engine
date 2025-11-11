@@ -124,6 +124,12 @@ class MacroProcessor {
                         },
                         'log'
                     );
+
+                    // Clear macro cache when instance ID changes to prevent stale values
+                    if (window.customMacroSystem?.clearCache) {
+                        window.customMacroSystem.clearCache();
+                    }
+
                     outfitStore.setCurrentInstanceId(instanceId);
 
                     if (window.botOutfitPanel?.outfitManager) {

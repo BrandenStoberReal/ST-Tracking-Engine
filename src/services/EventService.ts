@@ -172,6 +172,9 @@ class EventService {
             return;
         }
 
+        // Clear macro cache on any message swipe to prevent stale cached values
+        customMacroSystem.clearCache();
+
         const aiMessages = chat.filter((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
         if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
@@ -199,6 +202,9 @@ class EventService {
 
             await this.processMacrosInFirstMessage(this.context);
             await this.updateForCurrentCharacter();
+
+            // Trigger outfit data loaded event to refresh UI and macros
+            extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
         }
     }
 
