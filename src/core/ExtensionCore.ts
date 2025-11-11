@@ -181,24 +181,6 @@ function setupApi(
         }
     };
 
-    // Register a function to update instance macros when outfit data changes
-    window.updateInstanceMacros = function (characterId: string, instanceId: string, isUser: boolean = false) {
-        const STContext = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
-
-        if (STContext && customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
-            if (isUser) {
-                customMacroSystem.updateUserInstanceMacros(STContext, instanceId);
-            } else {
-                customMacroSystem.updateInstanceMacros(STContext, characterId, instanceId);
-            }
-            debugLog(
-                `[ExtensionCore] Instance macros updated for ${isUser ? 'user' : 'character'} ${characterId || 'user'} instance ${instanceId}`,
-                null,
-                'info'
-            );
-        }
-    };
-
     // Create and set up the debug panel
     const debugPanel = new DebugPanel();
 

@@ -112,21 +112,12 @@ export class OutfitManager {
             this.currentValues[slot] = value;
             if (this.characterId && this.outfitInstanceId) {
                 this.saveOutfit();
-                // Update instance macros when outfit changes
+                // Instance macros no longer needed - direct store access is used instead
+                // Clear macro caches when outfit changes
                 if (this.characterId && this.outfitInstanceId) {
-                    if (window.updateInstanceMacros) {
-                        window.updateInstanceMacros(this.characterId, this.outfitInstanceId, false);
-                    }
-                    // Also clear specific macro caches for backward compatibility
                     import('../services/CustomMacroService.js').then(({ invalidateMacroCachesForCharacter }) => {
                         invalidateMacroCachesForCharacter(this.characterId, this.outfitInstanceId);
                     });
-                }
-                else if (this.constructor.name.includes('User') && this.outfitInstanceId) {
-                    // Handle user outfit changes
-                    if (window.updateInstanceMacros) {
-                        window.updateInstanceMacros('', this.outfitInstanceId, true);
-                    }
                 }
                 macroProcessor.clearCache();
                 // Emit outfit changed event

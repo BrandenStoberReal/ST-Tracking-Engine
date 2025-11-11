@@ -63,59 +63,6 @@ class CustomMacroService {
     }
 
     /**
-     * Registers instance-specific macros that store the actual outfit data
-     */
-    registerInstanceMacros(context: any, characterId: string, instanceId: string): void {
-        const ctx = context || (window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext());
-
-        if (!ctx || !ctx.registerMacro || !characterId || !instanceId) {
-            return;
-        }
-
-        // Get current outfit data for this instance
-        const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
-
-        this.allSlots.forEach((slot) => {
-            const instanceMacro = `char_${slot}_${instanceId}`;
-
-            if (!this.registeredMacros.has(instanceMacro)) {
-                const value = outfitData[slot] || 'None';
-                ctx.registerMacro(instanceMacro, () => value);
-                this.registeredMacros.add(instanceMacro);
-                debugLog(`[CustomMacroService] Registered instance macro: ${instanceMacro} = ${value}`, null, 'debug');
-            }
-        });
-    }
-
-    /**
-     * Updates instance-specific macros when outfit data changes
-     */
-    updateInstanceMacros(context: any, characterId: string, instanceId: string): void {
-        const ctx = context || (window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext());
-
-        if (!ctx || !ctx.registerMacro || !characterId || !instanceId) {
-            return;
-        }
-
-        // Get current outfit data for this instance
-        const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
-
-        this.allSlots.forEach((slot) => {
-            const instanceMacro = `char_${slot}_${instanceId}`;
-            const newValue = outfitData[slot] || 'None';
-
-            // Update the macro by re-registering it (SillyTavern should handle replacement)
-            ctx.registerMacro(instanceMacro, () => newValue);
-
-            if (!this.registeredMacros.has(instanceMacro)) {
-                this.registeredMacros.add(instanceMacro);
-            }
-
-            debugLog(`[CustomMacroService] Updated instance macro: ${instanceMacro} = ${newValue}`, null, 'debug');
-        });
-    }
-
-    /**
      * Registers user instance-specific macros
      */
     registerUserInstanceMacros(context: any, instanceId: string): void {
@@ -147,30 +94,6 @@ class CustomMacroService {
     /**
      * Updates user instance-specific macros when outfit data changes
      */
-    updateUserInstanceMacros(context: any, instanceId: string): void {
-        const ctx = context || (window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext());
-
-        if (!ctx || !ctx.registerMacro || !instanceId) {
-            return;
-        }
-
-        // Get current user outfit data for this instance
-        const outfitData = outfitStore.getUserOutfit(instanceId);
-
-        this.allSlots.forEach((slot) => {
-            const instanceMacro = `user_${slot}_${instanceId}`;
-            const newValue = outfitData[slot] || 'None';
-
-            // Update the macro by re-registering it
-            ctx.registerMacro(instanceMacro, () => newValue);
-
-            if (!this.registeredMacros.has(instanceMacro)) {
-                this.registeredMacros.add(instanceMacro);
-            }
-
-            debugLog(`[CustomMacroService] Updated user instance macro: ${instanceMacro} = ${newValue}`, null, 'debug');
-        });
-    }
 
     /**
      * Gets the slot value using instance-aware resolution (for direct text replacement)
@@ -274,13 +197,38 @@ class CustomMacroService {
      * Gets the appropriate instance ID for the current context
      */
     getInstanceIdForCurrentContext(): string | null {
-        // First try the current instance ID
+        // First priority: Try message-to-instance mapping (most reliable for current chat context)
+        try {
+            const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
+            if (ctx && ctx.chat && ctx.chat.length > 0) {
+                // Find the first bot message
+                const firstBotMessage = ctx.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
+                if (firstBotMessage && window.macroProcessor?.messageInstanceMap) {
+                    // Create a simple hash of the first message for lookup
+                    const simpleHash = window.macroProcessor?.createSimpleMessageHash(firstBotMessage.mes);
+                    const mappedInstanceId = window.macroProcessor.messageInstanceMap.get(simpleHash);
+                    if (mappedInstanceId) {
+                        debugLog(
+                            `[CustomMacroService] Using mapped instance ID ${mappedInstanceId} for message hash ${simpleHash}`,
+                            null,
+                            'debug'
+                        );
+                        return mappedInstanceId;
+                    }
+                }
+            }
+        } catch (error) {
+            debugLog('[CustomMacroService] Error getting instance ID from mapping:', error, 'debug');
+        }
+
+        // Second priority: Try the current instance ID from store
         const currentInstanceId = outfitStore.getCurrentInstanceId();
         if (currentInstanceId) {
+            debugLog(`[CustomMacroService] Using store instance ID ${currentInstanceId}`, null, 'debug');
             return currentInstanceId;
         }
 
-        // Try to get instance ID from managers (useful during character switching when store isn't updated yet)
+        // Third priority: Try to get instance ID from managers (useful during character switching)
         try {
             if (window.eventService?.botManager) {
                 const managerInstanceId = window.eventService.botManager.getOutfitInstanceId();
@@ -295,30 +243,6 @@ class CustomMacroService {
             }
         } catch (error) {
             debugLog('[CustomMacroService] Error getting instance ID from manager:', error, 'debug');
-        }
-
-        // If no current instance, try to determine from chat context
-        try {
-            const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
-            if (ctx && ctx.chat && ctx.chat.length > 0) {
-                // Find the first bot message
-                const firstBotMessage = ctx.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
-                if (firstBotMessage && window.macroProcessor?.messageInstanceMap) {
-                    // Create a simple hash of the first message for lookup
-                    const simpleHash = window.macroProcessor?.createSimpleMessageHash(firstBotMessage.mes);
-                    const mappedInstanceId = window.macroProcessor.messageInstanceMap.get(simpleHash);
-                    if (mappedInstanceId) {
-                        debugLog(
-                            `[CustomMacroService] Found mapped instance ID ${mappedInstanceId} for message hash ${simpleHash}`,
-                            null,
-                            'debug'
-                        );
-                        return mappedInstanceId;
-                    }
-                }
-            }
-        } catch (error) {
-            debugLog('[CustomMacroService] Error determining instance ID from context:', error, 'error');
         }
 
         debugLog('[CustomMacroService] Could not determine instance ID from any source', null, 'debug');

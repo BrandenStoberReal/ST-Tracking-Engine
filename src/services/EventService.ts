@@ -285,14 +285,7 @@ class EventService {
             'debug'
         );
 
-        // Update instance macros when outfit data changes
-        if (window.updateInstanceMacros) {
-            if (outfitType === 'user') {
-                window.updateInstanceMacros('', instanceId, true);
-            } else {
-                window.updateInstanceMacros(characterId, instanceId, false);
-            }
-        }
+        // Instance macros no longer needed - direct store access is used instead
     }
 
     handleInstanceCreated(data: any): void {
