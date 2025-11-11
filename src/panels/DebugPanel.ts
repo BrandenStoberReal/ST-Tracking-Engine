@@ -1778,7 +1778,7 @@ export class DebugPanel {
         const logLines = groupedLogs.map((group) => {
             const log = group.logs[0]; // Use the first (most recent) log for display
             const timestamp = new Date(log.timestamp).toISOString();
-            const level = log.level.toUpperCase().padEnd(5);
+            const level = log.level.toUpperCase();
             const message = log.message;
             const countSuffix = group.count > 1 ? ` (${group.count}x)` : '';
 
