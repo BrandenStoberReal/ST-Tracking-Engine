@@ -22,11 +22,25 @@ class CustomMacroService {
                 const charMacro = `char_${slot}`;
                 const userMacro = `user_${slot}`;
                 if (!this.registeredMacros.has(charMacro)) {
-                    ctx.registerMacro(charMacro, () => this.getCurrentSlotValue('char', slot));
+                    ctx.registerMacro(charMacro, () => {
+                        // Ensure system is ready before attempting to get value
+                        if (!this._isSystemReady()) {
+                            debugLog(`[CustomMacroService] System not ready for macro ${charMacro}`, null, 'debug');
+                            return 'None';
+                        }
+                        return this.getCurrentSlotValue('char', slot);
+                    });
                     this.registeredMacros.add(charMacro);
                 }
                 if (!this.registeredMacros.has(userMacro)) {
-                    ctx.registerMacro(userMacro, () => this.getCurrentSlotValue('user', slot));
+                    ctx.registerMacro(userMacro, () => {
+                        // Ensure system is ready before attempting to get value
+                        if (!this._isSystemReady()) {
+                            debugLog(`[CustomMacroService] System not ready for macro ${userMacro}`, null, 'debug');
+                            return 'None';
+                        }
+                        return this.getCurrentSlotValue('user', slot);
+                    });
                     this.registeredMacros.add(userMacro);
                 }
             });
@@ -66,7 +80,14 @@ class CustomMacroService {
                     this.allSlots.forEach((slot) => {
                         const macroName = `${characterName}_${slot}`;
                         if (!this.registeredMacros.has(macroName)) {
-                            ctx.registerMacro(macroName, () => this.getCurrentSlotValue(characterName, slot, characterName));
+                            ctx.registerMacro(macroName, () => {
+                                // Ensure system is ready before attempting to get value
+                                if (!this._isSystemReady()) {
+                                    debugLog(`[CustomMacroService] System not ready for macro ${macroName}`, null, 'debug');
+                                    return 'None';
+                                }
+                                return this.getCurrentSlotValue(characterName, slot, characterName);
+                            });
                             this.registeredMacros.add(macroName);
                         }
                     });
@@ -125,11 +146,15 @@ class CustomMacroService {
         if (!this.allSlots.includes(slotName)) {
             return 'None';
         }
-        // Check if the outfit system is fully initialized
-        // If not, we may want to return a placeholder or wait
+        // First check if the outfit system is fully initialized
+        if (!this._isSystemReady()) {
+            debugLog('[CustomMacroService] System not ready, deferring macro value', null, 'debug');
+            return 'None';
+        }
         const cacheKey = this._generateCacheKey(macroType, slotName, charNameParam);
         const cachedValue = this.macroValueCache.get(cacheKey);
-        if (cachedValue && Date.now() - cachedValue.timestamp < this.cacheExpiryTime) {
+        // Only use cache if we're confident the data is still valid
+        if (cachedValue && Date.now() - cachedValue.timestamp < this.cacheExpiryTime && cachedValue.value !== 'None') {
             return cachedValue.value;
         }
         try {
@@ -191,36 +216,39 @@ class CustomMacroService {
                     charId = context.characterId;
                 }
             }
-            // Wait to ensure outfit data is loaded before accessing it
-            // Check if the outfit managers are available and initialized
+            // Ensure outfit data is loaded before accessing it
             if (charId !== null &&
                 (macroType === 'char' ||
                     macroType === 'bot' ||
                     charNameParam ||
                     (this.isValidCharacterName(macroType) && !['user'].includes(macroType)))) {
-                // Check if outfit managers are available
                 const botOutfitManager = (_e = (_d = window.outfitTracker) === null || _d === void 0 ? void 0 : _d.botOutfitPanel) === null || _e === void 0 ? void 0 : _e.outfitManager;
                 if (!botOutfitManager) {
-                    // If managers aren't ready yet, return 'None' temporarily
-                    // The UI should update when the managers become available
                     this._setCache(cacheKey, 'None');
                     return 'None';
                 }
                 if (!botOutfitManager.getPromptInjectionEnabled()) {
                     return 'None';
                 }
-                // Check if the outfit data for this character/instance is loaded
+                // Ensure instance data exists before trying to access it
                 const state = outfitStore.getState();
                 const currentInstanceId = state.currentOutfitInstanceId;
                 if (!currentInstanceId) {
-                    // If no instance ID is set, the data may not be fully loaded yet
                     this._setCache(cacheKey, 'None');
                     return 'None';
                 }
                 // Verify that outfit data exists for this character and instance
                 const outfitData = outfitStore.getBotOutfit(charId.toString(), currentInstanceId);
+                // Only return a value if we have actual data (not just default "None" values)
+                if (!outfitData || Object.keys(outfitData).length === 0) {
+                    this._setCache(cacheKey, 'None');
+                    return 'None';
+                }
                 const result = outfitData[slotName] || 'None';
-                this._setCache(cacheKey, result);
+                // Only cache non-"None" values to prevent stale "None" values
+                if (result !== 'None') {
+                    this._setCache(cacheKey, result);
+                }
                 return result;
             }
             else if (macroType === 'user') {
@@ -240,8 +268,16 @@ class CustomMacroService {
                     return 'None';
                 }
                 const userOutfitData = outfitStore.getUserOutfit(currentInstanceId);
+                // Only return a value if we have actual data
+                if (!userOutfitData || Object.keys(userOutfitData).length === 0) {
+                    this._setCache(cacheKey, 'None');
+                    return 'None';
+                }
                 const result = userOutfitData[slotName] || 'None';
-                this._setCache(cacheKey, result);
+                // Only cache non-"None" values
+                if (result !== 'None') {
+                    this._setCache(cacheKey, result);
+                }
                 return result;
             }
         }
@@ -254,6 +290,7 @@ class CustomMacroService {
     }
     clearCache() {
         this.macroValueCache.clear();
+        debugLog('[CustomMacroService] Macro cache cleared', null, 'debug');
         // Note: We don't clear registeredMacros here as they should persist across cache clears
         // Only clear when explicitly deregistering
     }
@@ -406,6 +443,25 @@ class CustomMacroService {
         const currentInstanceId = outfitStore.getCurrentInstanceId() || 'unknown';
         return `${macroType}_${slotName}_${characterName || 'null'}_${currentCharacterId}_${currentInstanceId}`;
     }
+    _isSystemReady() {
+        var _a, _b, _c, _d, _e;
+        // Check if the core components are available
+        if (!((_b = (_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager) ||
+            !((_d = (_c = window.outfitTracker) === null || _c === void 0 ? void 0 : _c.userOutfitPanel) === null || _d === void 0 ? void 0 : _d.outfitManager)) {
+            return false;
+        }
+        // Check if the store has a current instance ID
+        const state = outfitStore.getState();
+        if (!state.currentOutfitInstanceId) {
+            return false;
+        }
+        // Check if we have character data
+        const context = ((_e = window.SillyTavern) === null || _e === void 0 ? void 0 : _e.getContext) ? window.SillyTavern.getContext() : window.getContext();
+        if (!context || !context.characters || context.characters.length === 0) {
+            return false;
+        }
+        return true;
+    }
     _setCache(cacheKey, value) {
         this.macroValueCache.set(cacheKey, {
             value: value,
@@ -462,4 +518,15 @@ export const invalidateSpecificMacroCaches = (outfitType, characterId, instanceI
             customMacroSystem.macroValueCache.delete(key);
         }
     }
+};
+export const invalidateMacroCachesForCharacter = (characterId, instanceId) => {
+    if (!characterId || !instanceId) {
+        return;
+    }
+    for (const [key] of customMacroSystem.macroValueCache.entries()) {
+        if (key.includes(characterId) && key.includes(instanceId)) {
+            customMacroSystem.macroValueCache.delete(key);
+        }
+    }
+    debugLog(`[CustomMacroService] Invalidated macro caches for character ${characterId}, instance ${instanceId}`, null, 'debug');
 };

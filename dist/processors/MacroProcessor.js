@@ -24,7 +24,7 @@ class MacroProcessor {
     }
     processMacrosInFirstMessage(context) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
             try {
                 const ctx = context ||
                     (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
@@ -102,11 +102,15 @@ class MacroProcessor {
                             from: currentInstanceId,
                             to: instanceId,
                         }, 'log');
+                        // Clear macro cache when instance ID changes to prevent stale values
+                        if ((_h = window.customMacroSystem) === null || _h === void 0 ? void 0 : _h.clearCache) {
+                            window.customMacroSystem.clearCache();
+                        }
                         outfitStore.setCurrentInstanceId(instanceId);
-                        if ((_h = window.botOutfitPanel) === null || _h === void 0 ? void 0 : _h.outfitManager) {
+                        if ((_j = window.botOutfitPanel) === null || _j === void 0 ? void 0 : _j.outfitManager) {
                             window.botOutfitPanel.outfitManager.setOutfitInstanceId(instanceId);
                         }
-                        if ((_j = window.userOutfitPanel) === null || _j === void 0 ? void 0 : _j.outfitManager) {
+                        if ((_k = window.userOutfitPanel) === null || _k === void 0 ? void 0 : _k.outfitManager) {
                             window.userOutfitPanel.outfitManager.setOutfitInstanceId(instanceId);
                         }
                     }

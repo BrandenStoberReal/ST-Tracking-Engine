@@ -1,5 +1,4 @@
 import { ALL_SLOTS } from '../config/constants';
-import { customMacroSystem } from '../services/CustomMacroService';
 import { macroProcessor } from '../processors/MacroProcessor';
 import { debugLog } from '../logging/DebugLogger';
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
@@ -151,8 +150,12 @@ export abstract class OutfitManager {
         if (this.characterId && this.outfitInstanceId) {
             this.saveOutfit();
 
-            // Clear all macro caches when outfit changes to ensure freshness
-            customMacroSystem.clearCache();
+            // Clear specific macro caches for this character/instance when outfit changes
+            if (this.characterId && this.outfitInstanceId) {
+                import('../services/CustomMacroService').then(({ invalidateMacroCachesForCharacter }) => {
+                    invalidateMacroCachesForCharacter(this.characterId, this.outfitInstanceId);
+                });
+            }
             macroProcessor.clearCache();
 
             // Emit outfit changed event

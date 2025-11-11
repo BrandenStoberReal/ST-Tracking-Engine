@@ -66,6 +66,12 @@ export class NewBotOutfitManager extends OutfitManager {
             const value = instanceOutfits[slot] !== undefined ? instanceOutfits[slot] : 'None';
             this.currentValues[slot] = value;
         });
+        // Invalidate macro caches for this character/instance after loading new outfit data
+        if (this.characterId && this.outfitInstanceId) {
+            import('../services/CustomMacroService.js').then(({ invalidateMacroCachesForCharacter }) => {
+                invalidateMacroCachesForCharacter(this.characterId, this.outfitInstanceId);
+            });
+        }
     }
     saveOutfit() {
         if (!this.characterId || !this.outfitInstanceId) {

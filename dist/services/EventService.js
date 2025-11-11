@@ -135,6 +135,8 @@ class EventService {
             if (!chat || index < 0 || index >= chat.length) {
                 return;
             }
+            // Clear macro cache on any message swipe to prevent stale cached values
+            customMacroSystem.clearCache();
             const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
             if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
                 debugLog('[OutfitTracker] First message was swiped, updating outfit instance.');
@@ -156,6 +158,8 @@ class EventService {
                 outfitStore.saveState();
                 yield this.processMacrosInFirstMessage(this.context);
                 yield this.updateForCurrentCharacter();
+                // Trigger outfit data loaded event to refresh UI and macros
+                extensionEventBus.emit(EXTENSION_EVENTS.OUTFIT_DATA_LOADED);
             }
         });
     }

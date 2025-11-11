@@ -149,11 +149,19 @@ function setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem
     if (typeof ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) !== 'undefined') {
         const STContext = window.SillyTavern.getContext();
         if (STContext) {
-            // Wait for character data to be loaded before registering character-specific macros
-            setTimeout(() => {
-                customMacroSystem.deregisterCharacterSpecificMacros(STContext);
-                customMacroSystem.registerCharacterSpecificMacros(STContext);
-            }, 2000); // Wait a bit for character data to load
+            // Wait for both character data and outfit system to be fully initialized
+            const registerMacrosWhenReady = () => {
+                if (customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
+                    customMacroSystem.deregisterCharacterSpecificMacros(STContext);
+                    customMacroSystem.registerCharacterSpecificMacros(STContext);
+                    debugLog('[ExtensionCore] Character-specific macros registered after system ready', null, 'info');
+                }
+                else {
+                    // Retry after a short delay
+                    setTimeout(registerMacrosWhenReady, 500);
+                }
+            };
+            setTimeout(registerMacrosWhenReady, 1000); // Initial delay
         }
     }
     // Also register a global function that can refresh macros when needed
@@ -161,8 +169,15 @@ function setupApi(botManager, userManager, botPanel, userPanel, autoOutfitSystem
         var _a;
         const STContext = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
         if (STContext) {
-            customMacroSystem.deregisterCharacterSpecificMacros(STContext);
-            customMacroSystem.registerCharacterSpecificMacros(STContext);
+            // Only refresh if system is ready
+            if (customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
+                customMacroSystem.deregisterCharacterSpecificMacros(STContext);
+                customMacroSystem.registerCharacterSpecificMacros(STContext);
+                debugLog('[ExtensionCore] Macros refreshed manually', null, 'info');
+            }
+            else {
+                debugLog('[ExtensionCore] System not ready for macro refresh', null, 'warn');
+            }
         }
     };
     // Create and set up the debug panel
