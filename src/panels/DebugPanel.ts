@@ -2,7 +2,7 @@ import { dragElementWithSave, resizeElement } from '../common/shared';
 import { outfitStore } from '../common/Store';
 import { customMacroSystem } from '../services/CustomMacroService';
 import { debugLogger } from '../logging/DebugLogger';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { findCharacterById } from '../services/CharacterIdService';
 import { extensionEventBus } from '../core/events';
 import { getCharacterOutfitData } from '../services/CharacterOutfitService';
 import { LogEntry, OutfitStoreState } from '../types';
@@ -1136,7 +1136,8 @@ export class DebugPanel {
             instancesHtml += '<p class="no-instances">No bot instances found</p>';
         } else {
             for (const [charId, charData] of Object.entries(botInstances)) {
-                const charName = String(getCharacterInfoById(charId, CharacterInfoType.Name) || 'Unknown');
+                const character = findCharacterById(charId);
+                const charName = character ? String(character.name || 'Unknown') : 'Unknown';
 
                 instancesHtml += `<h5>Character: ${charName} (${charId})</h5>`;
                 for (const [instId, instData] of Object.entries(charData as any)) {
@@ -1305,7 +1306,7 @@ export class DebugPanel {
         pointersHtml += '<div class="pointer-context-section">';
 
         const currentCharName = state.currentCharacterId
-            ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+            ? findCharacterById(state.currentCharacterId)?.name || 'Unknown'
             : 'None';
         const currentCharId = state.currentCharacterId || 'None';
 
@@ -1854,7 +1855,7 @@ export class DebugPanel {
         const contextGrid = contentArea.querySelector('.context-info-grid');
         if (contextGrid) {
             const currentCharName = state.currentCharacterId
-                ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+                ? findCharacterById(state.currentCharacterId)?.name || 'Unknown'
                 : 'None';
             const currentCharId = state.currentCharacterId || 'None';
 

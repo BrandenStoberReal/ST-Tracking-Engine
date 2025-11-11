@@ -11,7 +11,7 @@ import { dragElementWithSave, resizeElement } from '../common/shared.js';
 import { outfitStore } from '../common/Store.js';
 import { customMacroSystem } from '../services/CustomMacroService.js';
 import { debugLogger } from '../logging/DebugLogger.js';
-import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils.js';
+import { findCharacterById } from '../services/CharacterIdService.js';
 import { extensionEventBus } from '../core/events.js';
 import { getCharacterOutfitData } from '../services/CharacterOutfitService.js';
 export class DebugPanel {
@@ -985,7 +985,8 @@ export class DebugPanel {
         }
         else {
             for (const [charId, charData] of Object.entries(botInstances)) {
-                const charName = String(getCharacterInfoById(charId, CharacterInfoType.Name) || 'Unknown');
+                const character = findCharacterById(charId);
+                const charName = character ? String(character.name || 'Unknown') : 'Unknown';
                 instancesHtml += `<h5>Character: ${charName} (${charId})</h5>`;
                 for (const [instId, instData] of Object.entries(charData)) {
                     const currentInstanceId = state.currentOutfitInstanceId;
@@ -1121,6 +1122,7 @@ export class DebugPanel {
      * Renders the 'Pointers' tab
      */
     renderPointersTab(container) {
+        var _a;
         const state = outfitStore.getState();
         const references = state.references;
         let pointersHtml = '<div class="debug-tab-content">';
@@ -1128,7 +1130,7 @@ export class DebugPanel {
         pointersHtml += '<h4>📍 Current Context</h4>';
         pointersHtml += '<div class="pointer-context-section">';
         const currentCharName = state.currentCharacterId
-            ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+            ? ((_a = findCharacterById(state.currentCharacterId)) === null || _a === void 0 ? void 0 : _a.name) || 'Unknown'
             : 'None';
         const currentCharId = state.currentCharacterId || 'None';
         pointersHtml += '<div class="context-info-grid">';
@@ -1601,7 +1603,7 @@ export class DebugPanel {
      * Updates pointers tab with current reference status
      */
     updatePointersTab() {
-        var _a;
+        var _a, _b;
         const contentArea = (_a = this.domElement) === null || _a === void 0 ? void 0 : _a.querySelector('.outfit-debug-content');
         if (!contentArea || contentArea.getAttribute('data-tab') !== 'pointers')
             return;
@@ -1610,7 +1612,7 @@ export class DebugPanel {
         const contextGrid = contentArea.querySelector('.context-info-grid');
         if (contextGrid) {
             const currentCharName = state.currentCharacterId
-                ? getCharacterInfoById(state.currentCharacterId, CharacterInfoType.Name)
+                ? ((_b = findCharacterById(state.currentCharacterId)) === null || _b === void 0 ? void 0 : _b.name) || 'Unknown'
                 : 'None';
             const currentCharId = state.currentCharacterId || 'None';
             const contextItems = contextGrid.querySelectorAll('.context-item');
