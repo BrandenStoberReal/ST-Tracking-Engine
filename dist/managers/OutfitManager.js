@@ -27,7 +27,7 @@ export class OutfitManager {
             return;
         }
         if (!name || typeof name !== 'string') {
-            debugLog(`[${this.constructor.name}] Invalid character name provided, using "Unknown"`, null, 'warn');
+            debugLog('Invalid character name provided, using "Unknown"', null, 'warn', 'OutfitManager');
             name = 'Unknown';
         }
         this.character = name;
@@ -94,7 +94,7 @@ export class OutfitManager {
     setOutfitItem(slot, value) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.slots.includes(slot)) {
-                debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
+                debugLog(`Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
                 return null;
             }
             if (value === undefined || value === null || value === '') {
@@ -143,7 +143,7 @@ export class OutfitManager {
     changeOutfitItem(slot) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.slots.includes(slot)) {
-                debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
+                debugLog(`Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
                 return null;
             }
             const currentValue = this.currentValues[slot];

@@ -28,7 +28,7 @@ export abstract class OutfitManager {
         }
 
         if (!name || typeof name !== 'string') {
-            debugLog(`[${this.constructor.name}] Invalid character name provided, using "Unknown"`, null, 'warn');
+            debugLog('Invalid character name provided, using "Unknown"', null, 'warn', 'OutfitManager');
             name = 'Unknown';
         }
 
@@ -135,7 +135,7 @@ export abstract class OutfitManager {
 
     async setOutfitItem(slot: string, value: string): Promise<string | null> {
         if (!this.slots.includes(slot)) {
-            debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
+            debugLog(`Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
             return null;
         }
 
@@ -196,7 +196,7 @@ export abstract class OutfitManager {
 
     async changeOutfitItem(slot: string): Promise<string | null> {
         if (!this.slots.includes(slot)) {
-            debugLog(`[${this.constructor.name}] Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
+            debugLog(`Invalid slot: ${slot}`, null, 'error', 'OutfitManager');
             return null;
         }
 

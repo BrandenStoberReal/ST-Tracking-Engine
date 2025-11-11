@@ -3,16 +3,13 @@ import { debugLog } from './logging/DebugLogger';
 
 // jQuery is available globally
 
-debugLog('[OutfitTracker] Starting extension loading...');
-debugLog('Starting extension loading...', null, 'info');
+debugLog('Starting extension loading...', null, 'info', 'OutfitTracker');
 
 $(document).ready(async () => {
     try {
         await initializeExtension();
-        debugLog('[OutfitTracker] Extension loaded successfully');
-        debugLog('Extension loaded successfully', null, 'info');
+        debugLog('Extension loaded successfully', null, 'info', 'OutfitTracker');
     } catch (error) {
-        debugLog('[OutfitTracker] Initialization failed', error, 'error');
-        debugLog('Extension initialization failed', error, 'error');
+        debugLog('Extension initialization failed', error, 'error', 'OutfitTracker');
     }
 });

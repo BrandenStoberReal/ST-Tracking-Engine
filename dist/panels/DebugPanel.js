@@ -276,9 +276,9 @@ export class DebugPanel {
         return highlightedMessage;
     }
     /**
-     * Gets the service filter options for the dropdown
+     * Gets the service filter checkboxes
      */
-    getServiceFilterOptions() {
+    getServiceFilterCheckboxes() {
         const services = new Set();
         const logs = debugLogger.getLogs();
         // Collect all unique service names from logs
@@ -287,11 +287,13 @@ export class DebugPanel {
                 services.add(log.source);
             }
         });
-        // Generate option elements
-        const options = Array.from(services)
+        // Generate checkbox elements
+        const checkboxes = Array.from(services)
             .sort()
-            .map((service) => `<option value="${service}">${service}</option>`);
-        return options.join('');
+            .map((service) => `<label class="service-filter-checkbox">
+                <input type="checkbox" value="${service}" checked> ${service}
+            </label>`);
+        return checkboxes.join('');
     }
     /**
      * Gets the CSS class for a service name
@@ -358,10 +360,12 @@ export class DebugPanel {
                     <option value="warn">Warn</option>
                     <option value="error">Error</option>
                 </select>
-                <select id="log-service-filter">
-                    <option value="all">All Services</option>
-                    ${this.getServiceFilterOptions()}
-                </select>
+                <div id="log-service-filter" class="service-filter-container">
+                    <label class="service-filter-label">
+                        <input type="checkbox" id="service-all" checked> All Services
+                    </label>
+                    ${this.getServiceFilterCheckboxes()}
+                </div>
                 <button id="expand-all-logs-btn" class="menu_button" title="Expand all log details">📖 Expand All</button>
                 <button id="collapse-all-logs-btn" class="menu_button" title="Collapse all log details">📕 Collapse All</button>
                 <button id="refresh-logs-btn" class="menu_button" title="Refresh logs">🔄 Refresh</button>
@@ -431,24 +435,34 @@ export class DebugPanel {
         container.innerHTML = logsHtml;
         const searchInput = container.querySelector('#log-search');
         const levelFilter = container.querySelector('#log-level-filter');
-        const serviceFilter = container.querySelector('#log-service-filter');
+        const serviceFilterContainer = container.querySelector('#log-service-filter');
+        const serviceAllCheckbox = container.querySelector('#service-all');
         const expandAllBtn = container.querySelector('#expand-all-logs-btn');
         const collapseAllBtn = container.querySelector('#collapse-all-logs-btn');
         const refreshBtn = container.querySelector('#refresh-logs-btn');
         const sortBtn = container.querySelector('#toggle-logs-sort');
         const exportBtn = container.querySelector('#export-logs-btn');
         const clearBtn = container.querySelector('#clear-logs-btn');
+        const getSelectedServices = () => {
+            if (serviceAllCheckbox.checked) {
+                return ['all'];
+            }
+            const checkboxes = serviceFilterContainer.querySelectorAll('input[type="checkbox"]:checked');
+            return Array.from(checkboxes)
+                .map((cb) => cb.value)
+                .filter((value) => value !== 'all');
+        };
         const filterLogs = () => {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedLevel = levelFilter.value;
-            const selectedService = serviceFilter.value;
+            const selectedServices = getSelectedServices();
             const logItems = container.querySelectorAll('.log-item');
             logItems.forEach((item) => {
                 const level = item.dataset.level;
                 const message = item.dataset.message;
                 const service = item.dataset.service;
                 const isLevelMatch = selectedLevel === 'all' || level === selectedLevel;
-                const isServiceMatch = selectedService === 'all' || service === selectedService;
+                const isServiceMatch = selectedServices.includes('all') || selectedServices.includes(service || '');
                 const isSearchMatch = message === null || message === void 0 ? void 0 : message.includes(searchTerm);
                 if (isLevelMatch && isServiceMatch && isSearchMatch) {
                     item.style.display = '';
@@ -458,9 +472,33 @@ export class DebugPanel {
                 }
             });
         };
+        const handleServiceCheckboxChange = (event) => {
+            const target = event.target;
+            if (target.id === 'service-all') {
+                // If "All Services" is checked/unchecked, update all other checkboxes
+                const checkboxes = serviceFilterContainer.querySelectorAll('input[type="checkbox"]:not(#service-all)');
+                checkboxes.forEach((cb) => {
+                    cb.checked = target.checked;
+                });
+            }
+            else {
+                // If any individual service is unchecked, uncheck "All Services"
+                if (!target.checked) {
+                    serviceAllCheckbox.checked = false;
+                }
+                else {
+                    // If all individual services are checked, check "All Services"
+                    const checkboxes = serviceFilterContainer.querySelectorAll('input[type="checkbox"]:not(#service-all)');
+                    const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+                    serviceAllCheckbox.checked = allChecked;
+                }
+            }
+            filterLogs();
+        };
         searchInput.addEventListener('input', filterLogs);
         levelFilter.addEventListener('change', filterLogs);
-        serviceFilter.addEventListener('change', filterLogs);
+        // Add event listeners for service checkboxes
+        serviceFilterContainer.addEventListener('change', handleServiceCheckboxChange);
         expandAllBtn.addEventListener('click', () => {
             const detailsElements = container.querySelectorAll('.log-item details');
             detailsElements.forEach((details) => {

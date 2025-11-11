@@ -1764,6 +1764,40 @@ input:checked + .slider:before {
     border: 1px solid rgba(149, 165, 166, 0.3);
 }
 
+/* Service filter styling */
+.service-filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.service-filter-label,
+.service-filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.service-filter-label {
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+}
+
+.service-filter-checkbox input[type='checkbox'] {
+    margin: 0;
+}
+
 .log-item {
     padding: 8px;
     border-radius: 4px;

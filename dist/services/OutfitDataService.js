@@ -41,7 +41,7 @@ class OutfitDataService {
             try {
                 // Log initial state before wiping
                 const initialStoreState = outfitStore.getState();
-                debugLog('[OutfitDataService] Initial store state:', {
+                debugLog('Initial store state:', {
                     botInstancesCount: initialStoreState.botInstances
                         ? Object.keys(initialStoreState.botInstances).length
                         : 0,
@@ -54,9 +54,9 @@ class OutfitDataService {
                     userPresetsCount: initialStoreState.presets && initialStoreState.presets.user
                         ? Object.keys(initialStoreState.presets.user).length
                         : 0,
-                });
+                }, 'log', 'OutfitDataService');
                 const initialDataManagerState = this.dataManager.load();
-                debugLog('[OutfitDataService] Initial data manager state:', {
+                debugLog('Initial data manager state:', {
                     botInstancesCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.botInstances)
                         ? Object.keys(initialDataManagerState.botInstances).length
                         : 0,
@@ -66,18 +66,18 @@ class OutfitDataService {
                     presetsCount: (initialDataManagerState === null || initialDataManagerState === void 0 ? void 0 : initialDataManagerState.presets)
                         ? Object.keys(initialDataManagerState.presets).length
                         : 0,
-                });
+                }, 'log', 'OutfitDataService');
                 // Clear the store in memory first
                 debugLog('Clearing store in memory', 'OutfitDataService');
                 outfitStore.wipeAllOutfitData();
                 // Verify the store has been cleared
                 const storeAfterWipe = outfitStore.getState();
-                debugLog('[OutfitDataService] Store state after wiping in memory:', {
+                debugLog('Store state after wiping in memory:', {
                     botInstancesCount: Object.keys(storeAfterWipe.botInstances).length,
                     userInstancesCount: Object.keys(storeAfterWipe.userInstances).length,
                     botPresetsCount: Object.keys(storeAfterWipe.presets.bot).length,
                     userPresetsCount: Object.keys(storeAfterWipe.presets.user).length,
-                });
+                }, 'log', 'OutfitDataService');
                 // Update the data manager with wiped data using the direct wipe method
                 debugLog('Saving wiped data to data manager using direct wipe method', 'OutfitDataService');
                 this.dataManager.saveWipedOutfitData();
@@ -85,7 +85,7 @@ class OutfitDataService {
                 this.dataManager.saveSettings(outfitStore.getState().settings);
                 // Check data manager state after the direct save operation
                 const dataManagerAfterDirectSave = this.dataManager.load();
-                debugLog('[OutfitDataService] Data manager state after direct saveOutfitData:', {
+                debugLog('Data manager state after direct saveOutfitData:', {
                     botInstancesCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.botInstances)
                         ? Object.keys(dataManagerAfterDirectSave.botInstances).length
                         : 0,
@@ -95,13 +95,13 @@ class OutfitDataService {
                     presetsCount: (dataManagerAfterDirectSave === null || dataManagerAfterDirectSave === void 0 ? void 0 : dataManagerAfterDirectSave.presets)
                         ? Object.keys(dataManagerAfterDirectSave.presets).length
                         : 0,
-                });
+                }, 'log', 'OutfitDataService');
                 // Now sync the store with the wiped data in the data manager
                 debugLog('Loading wiped data from data manager to store', 'OutfitDataService');
                 outfitStore.loadState(); // This should load the wiped data from the data manager to the store
                 // Verify the store now has the wiped data
                 const storeAfterLoadState = outfitStore.getState();
-                debugLog('[OutfitDataService] Store state after loading from data manager:', {
+                debugLog('Store state after loading from data manager:', {
                     botInstancesCount: storeAfterLoadState.botInstances
                         ? Object.keys(storeAfterLoadState.botInstances).length
                         : 0,
@@ -114,7 +114,7 @@ class OutfitDataService {
                     userPresetsCount: storeAfterLoadState.presets && storeAfterLoadState.presets.user
                         ? Object.keys(storeAfterLoadState.presets.user).length
                         : 0,
-                });
+                }, 'log', 'OutfitDataService');
                 // IMPORTANT: Access the SillyTavern context directly to ensure immediate save with empty data
                 const STContext = ((_b = (_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) === null || _b === void 0 ? void 0 : _b.call(_a)) || ((_c = window.getContext) === null || _c === void 0 ? void 0 : _c.call(window));
                 if (STContext) {
@@ -128,11 +128,11 @@ class OutfitDataService {
                         version: '1.0.0',
                         variables: {},
                     };
-                    debugLog('[OutfitDataService] Attempting immediate save with completely empty data:', {
+                    debugLog('Attempting immediate save with completely empty data:', {
                         instancesCount: Object.keys(emptyOutfitTrackerData.instances).length,
                         userInstancesCount: Object.keys(emptyOutfitTrackerData.user_instances).length,
                         presetsCount: Object.keys(emptyOutfitTrackerData.presets).length,
-                    });
+                    }, 'log', 'OutfitDataService');
                     // Try to save the data using the proper SillyTavern extension settings API
                     if (STContext.extensionSettings) {
                         debugLog('Saving to extensionSettings', 'OutfitDataService');
