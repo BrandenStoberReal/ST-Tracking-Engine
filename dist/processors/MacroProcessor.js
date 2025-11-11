@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { generateInstanceIdFromText } from '../utils/utilities.js';
+import { generateInstanceIdFromText, scrubMessageForInstanceId } from '../utils/utilities.js';
 import { outfitStore } from '../common/Store.js';
 import { ALL_SLOTS } from '../config/constants.js';
 import { debugLog } from '../logging/DebugLogger.js';
@@ -67,23 +67,8 @@ class MacroProcessor {
                     if (uniqueCharacterId) {
                         outfitValues = this.getAllOutfitValuesForCharacter(uniqueCharacterId);
                     }
-                    // Start with the original message text
-                    let processedMessage = firstBotMessage.mes;
-                    // Clean outfit macros from the text (replace {{char_topwear}} with {{}})
-                    processedMessage = this.cleanOutfitMacrosFromText(processedMessage);
-                    // Remove all outfit values (including "None" and actual outfit names) from the message text
-                    // This prevents the instance ID from changing when outfit values change
-                    for (const value of outfitValues) {
-                        if (value && typeof value === 'string' && value.trim() !== '') {
-                            // Use a global case-insensitive replace to remove the value
-                            // Escape special regex characters in the value
-                            const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                            const regex = new RegExp(escapedValue, 'gi');
-                            processedMessage = processedMessage.replace(regex, '');
-                        }
-                    }
-                    // Clean up extra whitespace that might result from replacements
-                    processedMessage = processedMessage.replace(/\s+/g, ' ').trim();
+                    // Use the unified message scrubber for consistent processing
+                    const processedMessage = scrubMessageForInstanceId(firstBotMessage.mes, undefined, outfitValues);
                     debugLog('[OutfitTracker] Instance ID generation debug:');
                     debugLog('[OutfitTracker] Original message text:', firstBotMessage.mes);
                     debugLog('[OutfitTracker] Processed message text (macros and outfit values cleaned):', processedMessage);

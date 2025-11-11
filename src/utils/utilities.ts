@@ -3,6 +3,7 @@ import { debugLog } from '../logging/DebugLogger';
 /**
  * Utility functions for Outfit Tracker Extension
  */
+import { macroProcessor } from '../processors/MacroProcessor';
 
 export function generateShortId(id: string, maxLength: number = 8): string {
     if (!id) {
@@ -342,4 +343,39 @@ export async function generateInstanceIdFromText(
     } else {
         return generateInstanceIdFromTextSimple(normalizedText);
     }
+}
+
+/**
+ * Unified message scrubber for instance ID calculation - used by both macro system and OutfitTracker
+ */
+export function scrubMessageForInstanceId(message: string, charName?: string, outfitValues?: string[]): string {
+    let processedMessage = message;
+
+    // Replace {{char}} with character name if provided (simulates SillyTavern macro processing)
+    // If no charName provided, replace {{char}} with placeholder (for macro system)
+    if (charName) {
+        processedMessage = processedMessage.replace(/\{\{char\}\}/g, charName);
+    } else {
+        processedMessage = processedMessage.replace(/\{\{char\}\}/g, '[CHAR_NAME]');
+    }
+
+    // Clean outfit macros from the text (replace {{char_topwear}} with {{}})
+    processedMessage = (macroProcessor as any).cleanOutfitMacrosFromText(processedMessage);
+
+    // If outfit values are provided, remove them from the text (OutfitTracker logic)
+    if (outfitValues && outfitValues.length > 0) {
+        for (const value of outfitValues) {
+            if (value && typeof value === 'string' && value.trim() !== '') {
+                // Escape special regex characters in the value
+                const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(escapedValue, 'gi');
+                processedMessage = processedMessage.replace(regex, '');
+            }
+        }
+    }
+
+    // Clean up extra whitespace that might result from replacements
+    processedMessage = processedMessage.replace(/\s+/g, ' ').trim();
+
+    return processedMessage;
 }

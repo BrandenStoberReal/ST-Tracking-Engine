@@ -3,7 +3,7 @@ import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants';
 import { getCharacters } from '../utils/CharacterUtils';
 import { getCharacterId } from './CharacterIdService';
 import { debugLog } from '../logging/DebugLogger';
-import { macroProcessor } from '../processors/MacroProcessor';
+import { scrubMessageForInstanceId } from '../utils/utilities';
 import type { ChatMessage } from '../types';
 
 declare const window: any;
@@ -357,11 +357,14 @@ class CustomMacroService {
     }
 
     /**
-     * Processes a message for instance ID calculation using MacroProcessor's logic
+     * Processes a message for instance ID calculation using the unified scrubber
      */
     private processMessageForInstanceId(message: string): string {
-        // Use MacroProcessor's cleanOutfitMacrosFromText method for consistency
-        return (macroProcessor as any).cleanOutfitMacrosFromText(message);
+        // Get character name for {{char}} replacement
+        const charName = window.outfitTracker?.botOutfitPanel?.outfitManager?.character || '';
+
+        // For macro system, we don't have outfit values to remove yet, so just replace {{char}} and clean outfit macros
+        return scrubMessageForInstanceId(message, charName);
     }
 
     deregisterMacros(context: any): void {

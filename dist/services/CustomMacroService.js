@@ -3,7 +3,7 @@ import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants.js';
 import { getCharacters } from '../utils/CharacterUtils.js';
 import { getCharacterId } from './CharacterIdService.js';
 import { debugLog } from '../logging/DebugLogger.js';
-import { macroProcessor } from '../processors/MacroProcessor.js';
+import { scrubMessageForInstanceId } from '../utils/utilities.js';
 class CustomMacroService {
     constructor() {
         this.clothingSlots = CLOTHING_SLOTS;
@@ -243,11 +243,14 @@ class CustomMacroService {
         return hash.toString(16).padStart(8, '0').substring(0, 16);
     }
     /**
-     * Processes a message for instance ID calculation using MacroProcessor's logic
+     * Processes a message for instance ID calculation using the unified scrubber
      */
     processMessageForInstanceId(message) {
-        // Use MacroProcessor's cleanOutfitMacrosFromText method for consistency
-        return macroProcessor.cleanOutfitMacrosFromText(message);
+        var _a, _b, _c;
+        // Get character name for {{char}} replacement
+        const charName = ((_c = (_b = (_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) === null || _b === void 0 ? void 0 : _b.outfitManager) === null || _c === void 0 ? void 0 : _c.character) || '';
+        // For macro system, we don't have outfit values to remove yet, so just replace {{char}} and clean outfit macros
+        return scrubMessageForInstanceId(message, charName);
     }
     deregisterMacros(context) {
         var _a;
