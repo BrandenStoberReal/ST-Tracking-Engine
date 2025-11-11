@@ -1,8 +1,8 @@
-import {ALL_SLOTS} from '../config/constants';
-import {debugLog} from '../logging/DebugLogger';
-import {findCharacterById, getCharacterId} from './CharacterIdService';
-import {outfitStore} from '../common/Store';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { ALL_SLOTS } from '../config/constants';
+import { debugLog } from '../logging/DebugLogger';
+import { findCharacterById, getCharacterId } from './CharacterIdService';
+import { outfitStore } from '../common/Store';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 /**
  * CharacterOutfitService - Handles embedding outfit presets in character card extensions

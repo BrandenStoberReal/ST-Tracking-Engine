@@ -1,8 +1,8 @@
-import {generateInstanceIdFromText} from '../utils/utilities';
-import {outfitStore} from '../common/Store';
-import {ALL_SLOTS} from '../config/constants';
-import {debugLog} from '../logging/DebugLogger';
-import type {Character, ChatMessage, InstanceData, STContext} from '../types';
+import { generateInstanceIdFromText } from '../utils/utilities';
+import { outfitStore } from '../common/Store';
+import { ALL_SLOTS } from '../config/constants';
+import { debugLog } from '../logging/DebugLogger';
+import type { Character, ChatMessage, InstanceData, STContext } from '../types';
 
 class MacroProcessor {
     allSlots: string[];

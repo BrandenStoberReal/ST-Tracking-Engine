@@ -1,6 +1,6 @@
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
-import {IDummyAutoOutfitSystem} from '../types';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
+import { IDummyAutoOutfitSystem } from '../types';
 
 declare const $: any;
 declare const toastr: any;

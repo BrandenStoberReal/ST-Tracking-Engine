@@ -1,7 +1,7 @@
-import {deepMerge} from '../utils/utilities';
-import {StorageService} from '../services/StorageService';
-import {DEFAULT_SETTINGS} from '../config/constants';
-import {FullOutfitData, Settings} from '../types';
+import { deepMerge } from '../utils/utilities';
+import { StorageService } from '../services/StorageService';
+import { DEFAULT_SETTINGS } from '../config/constants';
+import { FullOutfitData, Settings } from '../types';
 
 const DATA_VERSION = '1.0.0';
 

@@ -1,8 +1,8 @@
-import {LLMUtility} from '../utils/LLMUtility';
-import {extractCommands} from '../processors/StringProcessor';
-import {findCharacterById} from './CharacterIdService';
-import {debugLog} from '../logging/DebugLogger';
-import {Character, LLMGenerationOptions, LLMImportResult, OutfitManager, STContext} from '../types';
+import { LLMUtility } from '../utils/LLMUtility';
+import { extractCommands } from '../processors/StringProcessor';
+import { findCharacterById } from './CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
+import { Character, LLMGenerationOptions, LLMImportResult, OutfitManager, STContext } from '../types';
 
 // Window is available globally
 

@@ -1,5 +1,5 @@
-import {initializeExtension} from './core/ExtensionCore';
-import {debugLog} from './logging/DebugLogger';
+import { initializeExtension } from './core/ExtensionCore';
+import { debugLog } from './logging/DebugLogger';
 
 // jQuery is available globally
 

@@ -1,4 +1,4 @@
-import {debugLog} from '../logging/DebugLogger';
+import { debugLog } from '../logging/DebugLogger';
 
 class StorageService {
     saveFn: (data: unknown) => void;

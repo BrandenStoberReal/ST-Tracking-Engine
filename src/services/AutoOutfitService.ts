@@ -1,10 +1,10 @@
-import {extractCommands} from '../processors/StringProcessor';
-import {generateOutfitFromLLM} from './LLMService';
-import {customMacroSystem} from './CustomMacroService';
-import {outfitStore} from '../common/Store';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {debugLog} from '../logging/DebugLogger';
-import {AutoOutfitSystemAPI, IAutoOutfitSystemStatus} from '../types';
+import { extractCommands } from '../processors/StringProcessor';
+import { generateOutfitFromLLM } from './LLMService';
+import { customMacroSystem } from './CustomMacroService';
+import { outfitStore } from '../common/Store';
+import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { debugLog } from '../logging/DebugLogger';
+import { AutoOutfitSystemAPI, IAutoOutfitSystemStatus } from '../types';
 
 declare const window: any;
 declare const toastr: any;

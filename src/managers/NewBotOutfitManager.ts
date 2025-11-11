@@ -1,8 +1,8 @@
-import {OutfitManager} from './OutfitManager';
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
-import {getCharacterDefaultOutfitById, setCharacterDefaultOutfitById} from '../services/CharacterOutfitService';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { OutfitManager } from './OutfitManager';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
+import { getCharacterDefaultOutfitById, setCharacterDefaultOutfitById } from '../services/CharacterOutfitService';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 export class NewBotOutfitManager extends OutfitManager {
     constructor(slots: string[]) {

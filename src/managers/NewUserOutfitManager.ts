@@ -1,7 +1,7 @@
-import {OutfitManager} from './OutfitManager';
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { OutfitManager } from './OutfitManager';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 
 export class NewUserOutfitManager extends OutfitManager {
     constructor(slots: string[]) {

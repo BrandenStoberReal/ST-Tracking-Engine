@@ -1,6 +1,6 @@
-import {generateGUID} from '../utils/utilities';
-import {debugLog} from '../logging/DebugLogger';
-import {Character} from '../types';
+import { generateGUID } from '../utils/utilities';
+import { debugLog } from '../logging/DebugLogger';
+import { Character } from '../types';
 
 /**
  * CharacterIdService - Manages character ID generation and assignment

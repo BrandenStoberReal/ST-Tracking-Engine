@@ -1,6 +1,6 @@
-import {outfitStore} from '../common/Store';
+import { outfitStore } from '../common/Store';
 
-import {LogEntry} from '../types';
+import { LogEntry } from '../types';
 
 const logs: LogEntry[] = [];
 const MAX_LOGS = 1000;

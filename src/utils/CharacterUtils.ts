@@ -1,6 +1,6 @@
-import {debugLog} from '../logging/DebugLogger';
-import {getCharacterId, getOrCreateCharacterId} from '../services/CharacterIdService';
-import {Character} from '../types';
+import { debugLog } from '../logging/DebugLogger';
+import { getCharacterId, getOrCreateCharacterId } from '../services/CharacterIdService';
+import { Character } from '../types';
 
 export const CharacterInfoType = {
     Name: 'CharName',

@@ -1,5 +1,5 @@
 // Function to make an element draggable with position saving
-import {ExtensionAPI} from '../types';
+import { ExtensionAPI } from '../types';
 
 export function dragElementWithSave(element: HTMLElement, storageKey: string): void {
     if (!element) {

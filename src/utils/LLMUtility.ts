@@ -1,6 +1,6 @@
-import {outfitStore} from '../common/Store';
-import {debugLog} from '../logging/DebugLogger';
-import {SillyTavernContext} from '../types';
+import { outfitStore } from '../common/Store';
+import { debugLog } from '../logging/DebugLogger';
+import { SillyTavernContext } from '../types';
 
 class ConnectionProfileHelper {
     static async withConnectionProfile(

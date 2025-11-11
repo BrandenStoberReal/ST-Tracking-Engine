@@ -1,8 +1,8 @@
-import {importOutfitFromCharacterCard} from '../services/LLMService';
-import {ACCESSORY_SLOTS, CLOTHING_SLOTS} from '../config/constants';
-import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
-import {debugLog} from '../logging/DebugLogger';
-import {AutoOutfitSystemAPI, CommandArgs, OutfitManager} from '../types';
+import { importOutfitFromCharacterCard } from '../services/LLMService';
+import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants';
+import { areSystemMessagesEnabled } from '../utils/SettingsUtil';
+import { debugLog } from '../logging/DebugLogger';
+import { AutoOutfitSystemAPI, CommandArgs, OutfitManager } from '../types';
 
 declare const window: any;
 declare const toastr: any;

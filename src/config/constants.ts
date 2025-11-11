@@ -1,4 +1,4 @@
-import {PanelColors} from '../types';
+import { PanelColors } from '../types';
 
 interface DefaultSettings {
     autoOpenBot: boolean;

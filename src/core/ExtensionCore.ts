@@ -1,14 +1,14 @@
-import {updateForCurrentCharacter} from '../services/CharacterService';
-import {generateOutfitFromLLM, importOutfitFromCharacterCard} from '../services/LLMService';
-import {customMacroSystem} from '../services/CustomMacroService';
-import {extension_api} from '../common/shared';
-import {outfitStore} from '../common/Store';
-import {NewBotOutfitManager} from '../managers/NewBotOutfitManager';
-import {BotOutfitPanel} from '../panels/BotOutfitPanel';
-import {NewUserOutfitManager} from '../managers/NewUserOutfitManager';
-import {UserOutfitPanel} from '../panels/UserOutfitPanel';
-import {DebugPanel} from '../panels/DebugPanel';
-import {setupEventListeners} from '../services/EventService';
+import { updateForCurrentCharacter } from '../services/CharacterService';
+import { generateOutfitFromLLM, importOutfitFromCharacterCard } from '../services/LLMService';
+import { customMacroSystem } from '../services/CustomMacroService';
+import { extension_api } from '../common/shared';
+import { outfitStore } from '../common/Store';
+import { NewBotOutfitManager } from '../managers/NewBotOutfitManager';
+import { BotOutfitPanel } from '../panels/BotOutfitPanel';
+import { NewUserOutfitManager } from '../managers/NewUserOutfitManager';
+import { UserOutfitPanel } from '../panels/UserOutfitPanel';
+import { DebugPanel } from '../panels/DebugPanel';
+import { setupEventListeners } from '../services/EventService';
 import {
     AutoOutfitSystemAPI,
     AutoOutfitSystemConstructor,
@@ -18,14 +18,14 @@ import {
     OutfitPanelAPI,
     STContext,
 } from '../types';
-import {createSettingsUI} from '../settings/SettingsUI';
-import {initSettings} from '../settings/settings';
-import {ACCESSORY_SLOTS, ALL_SLOTS, CLOTHING_SLOTS} from '../config/constants';
-import {StorageService} from '../services/StorageService';
-import {DataManager} from '../managers/DataManager';
-import {OutfitDataService} from '../services/OutfitDataService';
-import {macroProcessor} from '../processors/MacroProcessor';
-import {debugLog} from '../logging/DebugLogger';
+import { createSettingsUI } from '../settings/SettingsUI';
+import { initSettings } from '../settings/settings';
+import { ACCESSORY_SLOTS, ALL_SLOTS, CLOTHING_SLOTS } from '../config/constants';
+import { StorageService } from '../services/StorageService';
+import { DataManager } from '../managers/DataManager';
+import { OutfitDataService } from '../services/OutfitDataService';
+import { macroProcessor } from '../processors/MacroProcessor';
+import { debugLog } from '../logging/DebugLogger';
 
 let AutoOutfitSystem: AutoOutfitSystemConstructor;
 

@@ -1,8 +1,8 @@
-import {outfitStore} from '../common/Store';
-import {ACCESSORY_SLOTS, CLOTHING_SLOTS} from '../config/constants';
-import {getCharacters} from '../utils/CharacterUtils';
-import {getCharacterId} from './CharacterIdService';
-import {debugLog} from '../logging/DebugLogger';
+import { outfitStore } from '../common/Store';
+import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants';
+import { getCharacters } from '../utils/CharacterUtils';
+import { getCharacterId } from './CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
 

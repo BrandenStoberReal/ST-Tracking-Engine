@@ -1,13 +1,13 @@
-import {dragElementWithSave, resizeElement} from '../common/shared';
-import {extractCommands} from '../processors/StringProcessor';
-import {LLMUtility} from '../utils/LLMUtility';
-import {formatSlotName} from '../utils/utilities';
-import {areSystemMessagesEnabled} from '../utils/SettingsUtil';
-import {outfitStore} from '../common/Store';
-import {CharacterInfoType, getCharacterInfoById} from '../utils/CharacterUtils';
-import {findCharacterById} from '../services/CharacterIdService';
-import {debugLog} from '../logging/DebugLogger';
-import {EXTENSION_EVENTS, extensionEventBus} from '../core/events';
+import { dragElementWithSave, resizeElement } from '../common/shared';
+import { extractCommands } from '../processors/StringProcessor';
+import { LLMUtility } from '../utils/LLMUtility';
+import { formatSlotName } from '../utils/utilities';
+import { areSystemMessagesEnabled } from '../utils/SettingsUtil';
+import { outfitStore } from '../common/Store';
+import { CharacterInfoType, getCharacterInfoById } from '../utils/CharacterUtils';
+import { findCharacterById } from '../services/CharacterIdService';
+import { debugLog } from '../logging/DebugLogger';
+import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
 import {
     CharacterInfo,
     ChatMessage,
