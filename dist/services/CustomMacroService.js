@@ -16,35 +16,141 @@ class CustomMacroService {
         var _a;
         const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext());
         if (ctx && ctx.registerMacro) {
-            // Don't register {{char}} and {{user}} macros globally as they should be handled manually in prompt injection only
-            // Only register slot-specific macros
+            // Register pointer macros that fetch from instance-specific macros
             this.allSlots.forEach((slot) => {
                 const charMacro = `char_${slot}`;
                 const userMacro = `user_${slot}`;
                 if (!this.registeredMacros.has(charMacro)) {
                     ctx.registerMacro(charMacro, () => {
-                        // Ensure system is ready and we have data before attempting to get value
-                        if (!this._isSystemReady() || !this.hasOutfitData('char', slot)) {
-                            debugLog(`[CustomMacroService] System not ready or no data for macro ${charMacro}`, null, 'debug');
-                            return 'None';
-                        }
-                        return this.getCurrentSlotValue('char', slot);
+                        return this.getPointerMacroValue('char', slot);
                     });
                     this.registeredMacros.add(charMacro);
                 }
                 if (!this.registeredMacros.has(userMacro)) {
                     ctx.registerMacro(userMacro, () => {
-                        // Ensure system is ready and we have data before attempting to get value
-                        if (!this._isSystemReady() || !this.hasOutfitData('user', slot)) {
-                            debugLog(`[CustomMacroService] System not ready or no data for macro ${userMacro}`, null, 'debug');
-                            return 'None';
-                        }
-                        return this.getCurrentSlotValue('user', slot);
+                        return this.getPointerMacroValue('user', slot);
                     });
                     this.registeredMacros.add(userMacro);
                 }
             });
         }
+    }
+    /**
+     * Registers instance-specific macros that store the actual outfit data
+     */
+    registerInstanceMacros(context, characterId, instanceId) {
+        var _a;
+        const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext());
+        if (!ctx || !ctx.registerMacro || !characterId || !instanceId) {
+            return;
+        }
+        // Get current outfit data for this instance
+        const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
+        this.allSlots.forEach((slot) => {
+            const instanceMacro = `char_${slot}_${instanceId}`;
+            if (!this.registeredMacros.has(instanceMacro)) {
+                const value = outfitData[slot] || 'None';
+                ctx.registerMacro(instanceMacro, () => value);
+                this.registeredMacros.add(instanceMacro);
+                debugLog(`[CustomMacroService] Registered instance macro: ${instanceMacro} = ${value}`, null, 'debug');
+            }
+        });
+    }
+    /**
+     * Updates instance-specific macros when outfit data changes
+     */
+    updateInstanceMacros(context, characterId, instanceId) {
+        var _a;
+        const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext());
+        if (!ctx || !ctx.registerMacro || !characterId || !instanceId) {
+            return;
+        }
+        // Get current outfit data for this instance
+        const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
+        this.allSlots.forEach((slot) => {
+            const instanceMacro = `char_${slot}_${instanceId}`;
+            const newValue = outfitData[slot] || 'None';
+            // Update the macro by re-registering it (SillyTavern should handle replacement)
+            ctx.registerMacro(instanceMacro, () => newValue);
+            if (!this.registeredMacros.has(instanceMacro)) {
+                this.registeredMacros.add(instanceMacro);
+            }
+            debugLog(`[CustomMacroService] Updated instance macro: ${instanceMacro} = ${newValue}`, null, 'debug');
+        });
+    }
+    /**
+     * Registers user instance-specific macros
+     */
+    registerUserInstanceMacros(context, instanceId) {
+        var _a;
+        const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext());
+        if (!ctx || !ctx.registerMacro || !instanceId) {
+            return;
+        }
+        // Get current user outfit data for this instance
+        const outfitData = outfitStore.getUserOutfit(instanceId);
+        this.allSlots.forEach((slot) => {
+            const instanceMacro = `user_${slot}_${instanceId}`;
+            if (!this.registeredMacros.has(instanceMacro)) {
+                const value = outfitData[slot] || 'None';
+                ctx.registerMacro(instanceMacro, () => value);
+                this.registeredMacros.add(instanceMacro);
+                debugLog(`[CustomMacroService] Registered user instance macro: ${instanceMacro} = ${value}`, null, 'debug');
+            }
+        });
+    }
+    /**
+     * Updates user instance-specific macros when outfit data changes
+     */
+    updateUserInstanceMacros(context, instanceId) {
+        var _a;
+        const ctx = context || (((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext());
+        if (!ctx || !ctx.registerMacro || !instanceId) {
+            return;
+        }
+        // Get current user outfit data for this instance
+        const outfitData = outfitStore.getUserOutfit(instanceId);
+        this.allSlots.forEach((slot) => {
+            const instanceMacro = `user_${slot}_${instanceId}`;
+            const newValue = outfitData[slot] || 'None';
+            // Update the macro by re-registering it
+            ctx.registerMacro(instanceMacro, () => newValue);
+            if (!this.registeredMacros.has(instanceMacro)) {
+                this.registeredMacros.add(instanceMacro);
+            }
+            debugLog(`[CustomMacroService] Updated user instance macro: ${instanceMacro} = ${newValue}`, null, 'debug');
+        });
+    }
+    /**
+     * Gets the value from the appropriate instance-specific macro
+     */
+    getPointerMacroValue(macroType, slotName) {
+        var _a;
+        if (!this.allSlots.includes(slotName)) {
+            return 'None';
+        }
+        // Get the current instance ID
+        const currentInstanceId = outfitStore.getCurrentInstanceId();
+        if (!currentInstanceId) {
+            debugLog('[CustomMacroService] No current instance ID for pointer macro', null, 'debug');
+            return 'None';
+        }
+        // Construct the instance-specific macro name
+        const instanceMacroName = `${macroType}_${slotName}_${currentInstanceId}`;
+        // Try to get the value from the registered macro
+        const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
+        if (ctx && ctx.getMacro && ctx.getMacro[instanceMacroName]) {
+            try {
+                return ctx.getMacro[instanceMacroName]() || 'None';
+            }
+            catch (error) {
+                debugLog(`[CustomMacroService] Error getting instance macro value for ${instanceMacroName}:`, error, 'error');
+                return 'None';
+            }
+        }
+        debugLog(`[CustomMacroService] Instance macro ${instanceMacroName} not found, falling back to direct lookup`, null, 'debug');
+        // Fallback to direct lookup if macro not available
+        return this.getCurrentSlotValue(macroType, slotName);
     }
     deregisterMacros(context) {
         var _a;
@@ -73,26 +179,41 @@ class CustomMacroService {
             for (const character of characters) {
                 if (character && character.name) {
                     const characterName = character.name;
+                    const characterId = getCharacterId(character);
                     if (!this.registeredMacros.has(characterName)) {
                         ctx.registerMacro(characterName, () => characterName);
                         this.registeredMacros.add(characterName);
                     }
-                    this.allSlots.forEach((slot) => {
-                        const macroName = `${characterName}_${slot}`;
-                        if (!this.registeredMacros.has(macroName)) {
-                            ctx.registerMacro(macroName, () => {
-                                // Ensure system is ready and we have data before attempting to get value
-                                if (!this._isSystemReady() || !this.hasOutfitData(characterName, slot, characterName)) {
-                                    debugLog(`[CustomMacroService] System not ready or no data for macro ${macroName}`, null, 'debug');
-                                    return 'None';
-                                }
-                                return this.getCurrentSlotValue(characterName, slot, characterName);
-                            });
-                            this.registeredMacros.add(macroName);
-                        }
-                    });
+                    // Register pointer macros for character-specific access
+                    if (characterId) {
+                        this.allSlots.forEach((slot) => {
+                            const macroName = `${characterName}_${slot}`;
+                            if (!this.registeredMacros.has(macroName)) {
+                                ctx.registerMacro(macroName, () => {
+                                    return this.getCharacterPointerMacroValue(characterId, slot);
+                                });
+                                this.registeredMacros.add(macroName);
+                            }
+                        });
+                    }
+                    // Register instance-specific macros for all instances of this character
+                    if (characterId) {
+                        const instances = outfitStore.getCharacterInstances(characterId);
+                        instances.forEach((instanceId) => {
+                            this.registerInstanceMacros(ctx, characterId, instanceId);
+                        });
+                    }
                 }
             }
+        }
+        // Also register user instance macros for all user instances
+        const userInstances = Object.keys(outfitStore.getState().userInstances || {});
+        userInstances.forEach((instanceId) => {
+            this.registerUserInstanceMacros(ctx, instanceId);
+        });
+        // Show toast notification when all instance macros are registered
+        if (typeof toastr !== 'undefined') {
+            toastr.success('Instance macros registered successfully!', 'Outfit System');
         }
     }
     deregisterCharacterSpecificMacros(context) {
@@ -103,6 +224,7 @@ class CustomMacroService {
             for (const character of characters) {
                 if (character && character.name) {
                     const characterName = character.name;
+                    const characterId = getCharacterId(character);
                     if (this.registeredMacros.has(characterName)) {
                         ctx.unregisterMacro(characterName);
                         this.registeredMacros.delete(characterName);
@@ -113,9 +235,31 @@ class CustomMacroService {
                             ctx.unregisterMacro(macroName);
                             this.registeredMacros.delete(macroName);
                         }
+                        // Deregister instance-specific macros for this character
+                        if (characterId) {
+                            const instances = outfitStore.getCharacterInstances(characterId);
+                            instances.forEach((instanceId) => {
+                                const instanceMacro = `char_${slot}_${instanceId}`;
+                                if (this.registeredMacros.has(instanceMacro)) {
+                                    ctx.unregisterMacro(instanceMacro);
+                                    this.registeredMacros.delete(instanceMacro);
+                                }
+                            });
+                        }
                     });
                 }
             }
+            // Deregister user instance macros
+            const userInstances = Object.keys(outfitStore.getState().userInstances || {});
+            userInstances.forEach((instanceId) => {
+                this.allSlots.forEach((slot) => {
+                    const instanceMacro = `user_${slot}_${instanceId}`;
+                    if (this.registeredMacros.has(instanceMacro)) {
+                        ctx.unregisterMacro(instanceMacro);
+                        this.registeredMacros.delete(instanceMacro);
+                    }
+                });
+            });
         }
     }
     getCurrentCharName() {
@@ -368,6 +512,37 @@ class CustomMacroService {
     isValidCharacterName(name) {
         return !['char', 'bot', 'user'].includes(name);
     }
+    /**
+     * Gets the value from the appropriate character instance-specific macro
+     */
+    getCharacterPointerMacroValue(characterId, slotName) {
+        var _a;
+        if (!this.allSlots.includes(slotName) || !characterId) {
+            return 'None';
+        }
+        // Get the current instance ID
+        const currentInstanceId = outfitStore.getCurrentInstanceId();
+        if (!currentInstanceId) {
+            debugLog('[CustomMacroService] No current instance ID for character pointer macro', null, 'debug');
+            return 'None';
+        }
+        // Construct the instance-specific macro name
+        const instanceMacroName = `char_${slotName}_${currentInstanceId}`;
+        // Try to get the value from the registered macro
+        const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
+        if (ctx && ctx.getMacro && ctx.getMacro[instanceMacroName]) {
+            try {
+                return ctx.getMacro[instanceMacroName]() || 'None';
+            }
+            catch (error) {
+                debugLog(`[CustomMacroService] Error getting character instance macro value for ${instanceMacroName}:`, error, 'error');
+                return 'None';
+            }
+        }
+        debugLog(`[CustomMacroService] Character instance macro ${instanceMacroName} not found, falling back to direct lookup`, null, 'debug');
+        // Fallback to direct lookup if macro not available
+        return this.getCurrentSlotValue('char', slotName);
+    }
     getCurrentUserName() {
         var _a;
         try {
@@ -610,6 +785,12 @@ export const invalidateMacroCachesForCharacter = (characterId, instanceId) => {
     }
     for (const [key] of customMacroSystem.macroValueCache.entries()) {
         if (key.includes(characterId) && key.includes(instanceId)) {
+            customMacroSystem.macroValueCache.delete(key);
+        }
+    }
+    // Also invalidate pointer macro caches that might reference this instance
+    for (const [key] of customMacroSystem.macroValueCache.entries()) {
+        if (key.includes(instanceId)) {
             customMacroSystem.macroValueCache.delete(key);
         }
     }

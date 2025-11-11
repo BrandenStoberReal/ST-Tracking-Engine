@@ -85,6 +85,8 @@ class EventService {
         extensionEventBus.on(EXTENSION_EVENTS.PANEL_VISIBILITY_CHANGED, (data: any) =>
             this.handlePanelVisibilityChanged(data)
         );
+        extensionEventBus.on(EXTENSION_EVENTS.OUTFIT_CHANGED, (data: any) => this.handleOutfitChanged(data));
+        extensionEventBus.on(EXTENSION_EVENTS.INSTANCE_CREATED, (data: any) => this.handleInstanceCreated(data));
     }
 
     handleAppReady(): void {
@@ -267,6 +269,48 @@ class EventService {
                 `[OutfitTracker] Panel visibility changed: ${data.panelType} panel is now ${data.visible ? 'visible' : 'hidden'}`
             );
             outfitStore.setPanelVisibility(data.panelType, data.visible);
+        }
+    }
+
+    handleOutfitChanged(data: any): void {
+        if (!data) return;
+
+        const { characterId, instanceId, outfitType, slotName } = data;
+
+        debugLog(
+            `[EventService] Outfit changed: ${outfitType} ${characterId || 'user'} instance ${instanceId} slot ${slotName}`,
+            null,
+            'debug'
+        );
+
+        // Update instance macros when outfit data changes
+        if (window.updateInstanceMacros) {
+            if (outfitType === 'user') {
+                window.updateInstanceMacros('', instanceId, true);
+            } else {
+                window.updateInstanceMacros(characterId, instanceId, false);
+            }
+        }
+    }
+
+    handleInstanceCreated(data: any): void {
+        if (!data) return;
+
+        const { instanceId, instanceType, characterId } = data;
+
+        debugLog(
+            `[EventService] Instance created: ${instanceType} ${characterId} instance ${instanceId}`,
+            null,
+            'debug'
+        );
+
+        // Register instance macros for the newly created instance
+        if (this.context && customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
+            if (instanceType === 'user') {
+                customMacroSystem.registerUserInstanceMacros(this.context, instanceId);
+            } else if (instanceType === 'bot' && characterId) {
+                customMacroSystem.registerInstanceMacros(this.context, characterId, instanceId);
+            }
         }
     }
 

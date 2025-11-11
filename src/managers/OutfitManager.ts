@@ -150,11 +150,20 @@ export abstract class OutfitManager {
         if (this.characterId && this.outfitInstanceId) {
             this.saveOutfit();
 
-            // Clear specific macro caches for this character/instance when outfit changes
+            // Update instance macros when outfit changes
             if (this.characterId && this.outfitInstanceId) {
+                if (window.updateInstanceMacros) {
+                    window.updateInstanceMacros(this.characterId, this.outfitInstanceId, false);
+                }
+                // Also clear specific macro caches for backward compatibility
                 import('../services/CustomMacroService').then(({ invalidateMacroCachesForCharacter }) => {
                     invalidateMacroCachesForCharacter(this.characterId, this.outfitInstanceId);
                 });
+            } else if (this.constructor.name.includes('User') && this.outfitInstanceId) {
+                // Handle user outfit changes
+                if (window.updateInstanceMacros) {
+                    window.updateInstanceMacros('', this.outfitInstanceId, true);
+                }
             }
             macroProcessor.clearCache();
 

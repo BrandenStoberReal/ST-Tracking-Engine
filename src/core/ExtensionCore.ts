@@ -155,7 +155,7 @@ function setupApi(
         managers: { bot: Boolean(botManager), user: Boolean(userManager) },
     });
 
-    // Register character-specific macros when the API is set up
+    // Register character-specific macros and instance macros when the API is set up
     if (typeof window.SillyTavern?.getContext !== 'undefined') {
         const STContext = window.SillyTavern.getContext();
 
@@ -165,7 +165,11 @@ function setupApi(
                 if (customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
                     customMacroSystem.deregisterCharacterSpecificMacros(STContext);
                     customMacroSystem.registerCharacterSpecificMacros(STContext);
-                    debugLog('[ExtensionCore] Character-specific macros registered after system ready', null, 'info');
+                    debugLog(
+                        '[ExtensionCore] Character-specific and instance macros registered after system ready',
+                        null,
+                        'info'
+                    );
                 } else {
                     // Retry after a short delay
                     setTimeout(registerMacrosWhenReady, 500);
@@ -189,6 +193,24 @@ function setupApi(
             } else {
                 debugLog('[ExtensionCore] System not ready for macro refresh', null, 'warn');
             }
+        }
+    };
+
+    // Register a function to update instance macros when outfit data changes
+    window.updateInstanceMacros = function (characterId: string, instanceId: string, isUser: boolean = false) {
+        const STContext = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
+
+        if (STContext && customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
+            if (isUser) {
+                customMacroSystem.updateUserInstanceMacros(STContext, instanceId);
+            } else {
+                customMacroSystem.updateInstanceMacros(STContext, characterId, instanceId);
+            }
+            debugLog(
+                `[ExtensionCore] Instance macros updated for ${isUser ? 'user' : 'character'} ${characterId || 'user'} instance ${instanceId}`,
+                null,
+                'info'
+            );
         }
     };
 

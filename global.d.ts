@@ -21,6 +21,7 @@ declare global {
         name2: string;
         wipeAllOutfits: () => Promise<void>;
         refreshOutfitMacros: () => void;
+        updateInstanceMacros: (characterId: string, instanceId: string, isUser?: boolean) => void;
         outfitDebugPanel: {
             toggle: () => void;
         };
