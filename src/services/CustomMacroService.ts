@@ -3,6 +3,7 @@ import { ACCESSORY_SLOTS, CLOTHING_SLOTS } from '../config/constants';
 import { getCharacters } from '../utils/CharacterUtils';
 import { getCharacterId } from './CharacterIdService';
 import { debugLog } from '../logging/DebugLogger';
+import { macroProcessor } from '../processors/MacroProcessor';
 import type { ChatMessage } from '../types';
 
 declare const window: any;
@@ -254,7 +255,7 @@ class CustomMacroService {
     getInstanceIdForCurrentContext(): string | null {
         debugLog('[CustomMacroService] getInstanceIdForCurrentContext called', null, 'debug');
 
-        // First priority: Check if we already have a current instance ID
+        // First priority: Check if we already have a current instance ID from the store
         const currentInstanceId = outfitStore.getCurrentInstanceId();
         if (currentInstanceId) {
             debugLog(`[CustomMacroService] Using existing current instance ID: ${currentInstanceId}`, null, 'debug');
@@ -264,6 +265,7 @@ class CustomMacroService {
         debugLog('[CustomMacroService] No existing current instance ID, calculating from chat', null, 'debug');
 
         // Calculate instance ID directly from current chat context and cache it
+        // Use the same logic as OutfitTracker to ensure consistency
         try {
             const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
             if (ctx && ctx.chat && ctx.chat.length > 0) {
@@ -275,12 +277,15 @@ class CustomMacroService {
                     const instanceId = this.calculateInstanceIdFromMessage(firstBotMessage.mes);
                     if (instanceId) {
                         // Cache the calculated instance ID globally for other macros
-                        outfitStore.setCurrentInstanceId(instanceId);
-                        debugLog(
-                            `[CustomMacroService] Calculated and cached instance ID ${instanceId} from first message`,
-                            null,
-                            'debug'
-                        );
+                        // But don't override if OutfitTracker has already set one
+                        if (!outfitStore.getCurrentInstanceId()) {
+                            outfitStore.setCurrentInstanceId(instanceId);
+                            debugLog(
+                                `[CustomMacroService] Calculated and cached instance ID ${instanceId} from first message`,
+                                null,
+                                'debug'
+                            );
+                        }
                         return instanceId;
                     } else {
                         debugLog('[CustomMacroService] Failed to calculate instance ID from message', null, 'debug');
@@ -293,27 +298,6 @@ class CustomMacroService {
             }
         } catch (error) {
             debugLog('[CustomMacroService] Error calculating instance ID from chat:', error, 'debug');
-        }
-
-        // Last resort: Try to get instance ID from managers
-        try {
-            if (window.eventService?.botManager) {
-                const managerInstanceId = window.eventService.botManager.getOutfitInstanceId();
-                if (managerInstanceId) {
-                    debugLog(
-                        `[CustomMacroService] Using manager instance ID ${managerInstanceId} as last resort`,
-                        null,
-                        'debug'
-                    );
-                    return managerInstanceId;
-                } else {
-                    debugLog('[CustomMacroService] Manager has no instance ID', null, 'debug');
-                }
-            } else {
-                debugLog('[CustomMacroService] No bot manager available', null, 'debug');
-            }
-        } catch (error) {
-            debugLog('[CustomMacroService] Error getting instance ID from manager:', error, 'debug');
         }
 
         debugLog('[CustomMacroService] Could not determine instance ID from any source', null, 'debug');
@@ -373,17 +357,11 @@ class CustomMacroService {
     }
 
     /**
-     * Processes a message for instance ID calculation (removes all macros)
+     * Processes a message for instance ID calculation using MacroProcessor's logic
      */
     private processMessageForInstanceId(message: string): string {
-        let processedMessage = message;
-
-        // Remove ALL macros from the message to ensure instance IDs are consistent
-        // regardless of when the message is processed or what macros it contains
-        const allMacroRegex = /\{\{[^}]+\}\}/g;
-        processedMessage = processedMessage.replace(allMacroRegex, '[MACRO_REMOVED]');
-
-        return processedMessage;
+        // Use MacroProcessor's cleanOutfitMacrosFromText method for consistency
+        return (macroProcessor as any).cleanOutfitMacrosFromText(message);
     }
 
     deregisterMacros(context: any): void {
