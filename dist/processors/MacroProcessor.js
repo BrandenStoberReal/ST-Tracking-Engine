@@ -24,6 +24,20 @@ class MacroProcessor {
         this.textProcessingCache.clear();
         this.messageInstanceMap.clear();
     }
+    loadMessageInstanceMap(map) {
+        this.messageInstanceMap.clear();
+        for (const [key, value] of Object.entries(map)) {
+            this.messageInstanceMap.set(key, value);
+        }
+        debugLog(`[MacroProcessor] Loaded ${this.messageInstanceMap.size} message-instance mappings`, null, 'info');
+    }
+    getMessageInstanceMap() {
+        const result = {};
+        for (const [key, value] of this.messageInstanceMap.entries()) {
+            result[key] = value;
+        }
+        return result;
+    }
     /**
      * Creates a simple synchronous hash of a message for instance mapping
      */
@@ -110,6 +124,8 @@ class MacroProcessor {
                     const firstMessageHash = this.createSimpleMessageHash(firstBotMessage.mes);
                     this.messageInstanceMap.set(firstMessageHash, instanceId);
                     debugLog('[OutfitTracker] Stored message-to-instance mapping:', { firstMessageHash, instanceId });
+                    // Save the updated mappings
+                    outfitStore.saveState();
                     debugLog('[OutfitTracker] Generated instance ID:', instanceId);
                     // Only update the instance ID if it's different from the current one
                     // This prevents unnecessary updates that could cause flip-flopping
