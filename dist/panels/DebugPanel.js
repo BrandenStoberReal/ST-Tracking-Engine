@@ -292,8 +292,8 @@ export class DebugPanel {
             OutfitDataService: 'service-outfit-data',
             // Managers
             DataManager: 'service-data-manager',
-            BotOutfitManager: 'service-bot-outfit-manager',
-            UserOutfitManager: 'service-user-outfit-manager',
+            NewBotOutfitManager: 'service-bot-outfit-manager',
+            NewUserOutfitManager: 'service-user-outfit-manager',
             OutfitManager: 'service-outfit-manager',
             // Panels
             BotOutfitPanel: 'service-bot-outfit-panel',

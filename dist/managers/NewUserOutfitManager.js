@@ -24,7 +24,7 @@ export class NewUserOutfitManager extends OutfitManager {
     }
     loadOutfit() {
         if (!this.outfitInstanceId) {
-            debugLog('Cannot load outfit - missing outfitInstanceId', null, 'debug', 'UserOutfitManager');
+            debugLog('Cannot load outfit - missing outfitInstanceId', null, 'debug', 'NewUserOutfitManager');
             this.slots.forEach((slot) => {
                 this.currentValues[slot] = 'None';
             });
@@ -38,7 +38,7 @@ export class NewUserOutfitManager extends OutfitManager {
     }
     saveOutfit() {
         if (!this.outfitInstanceId) {
-            debugLog('Cannot save outfit - missing outfitInstanceId', null, 'warn', 'UserOutfitManager');
+            debugLog('Cannot save outfit - missing outfitInstanceId', null, 'warn', 'NewUserOutfitManager');
             return;
         }
         const userOutfit = {};
@@ -62,7 +62,7 @@ export class NewUserOutfitManager extends OutfitManager {
     }
     savePreset(presetName, instanceId = null) {
         if (!presetName || typeof presetName !== 'string' || presetName.trim() === '') {
-            debugLog('Invalid preset name provided', null, 'error', 'UserOutfitManager');
+            debugLog('Invalid preset name provided', null, 'error', 'NewUserOutfitManager');
             return '[Outfit System] Invalid preset name provided.';
         }
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
@@ -152,7 +152,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewUserOutfitManager] getPresets called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`[NewNewUserOutfitManager] getPresets called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
             return [];
         }
         const { user: presets } = outfitStore.getPresets('user', actualInstanceId);
@@ -209,7 +209,7 @@ export class NewUserOutfitManager extends OutfitManager {
     }
     overwritePreset(presetName, instanceId = null) {
         if (!presetName || typeof presetName !== 'string' || presetName.trim() === '') {
-            debugLog('Invalid preset name provided', null, 'error', 'UserOutfitManager');
+            debugLog('Invalid preset name provided', null, 'error', 'NewUserOutfitManager');
             return '[Outfit System] Invalid preset name provided.';
         }
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
@@ -247,7 +247,7 @@ export class NewUserOutfitManager extends OutfitManager {
     setPromptInjectionEnabled(enabled, instanceId = null) {
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!actualInstanceId) {
-            debugLog('Cannot set prompt injection - missing instanceId', null, 'warn', 'UserOutfitManager');
+            debugLog('Cannot set prompt injection - missing instanceId', null, 'warn', 'NewUserOutfitManager');
             return;
         }
         if (!outfitStore.state.userInstances[actualInstanceId]) {
@@ -261,7 +261,7 @@ export class NewUserOutfitManager extends OutfitManager {
     getPromptInjectionEnabled(instanceId = null) {
         const actualInstanceId = instanceId || this.outfitInstanceId;
         if (!actualInstanceId) {
-            debugLog('Cannot get prompt injection - missing instanceId', null, 'warn', 'UserOutfitManager');
+            debugLog('Cannot get prompt injection - missing instanceId', null, 'warn', 'NewUserOutfitManager');
             return true;
         }
         const instanceData = outfitStore.state.userInstances[actualInstanceId];
@@ -271,7 +271,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewUserOutfitManager] hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`[NewNewUserOutfitManager] hasDefaultOutfit called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
             return false;
         }
         const settings = outfitStore.getState().settings;
@@ -282,7 +282,7 @@ export class NewUserOutfitManager extends OutfitManager {
         const actualInstanceId = instanceId || this.outfitInstanceId || 'default';
         // Ensure instanceId is defined before attempting to get presets
         if (!actualInstanceId) {
-            debugLog(`[NewUserOutfitManager] getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
+            debugLog(`[NewNewUserOutfitManager] getDefaultPresetName called with invalid parameters: instanceId=${actualInstanceId}`, null, 'warn');
             return null;
         }
         const settings = outfitStore.getState().settings;
@@ -352,7 +352,7 @@ export class NewUserOutfitManager extends OutfitManager {
     }
     loadOutfitFromInstanceId(instanceId) {
         if (!instanceId) {
-            debugLog('Cannot load outfit - missing instanceId', null, 'debug', 'UserOutfitManager');
+            debugLog('Cannot load outfit - missing instanceId', null, 'debug', 'NewUserOutfitManager');
             const defaultOutfit = {};
             this.slots.forEach((slot) => {
                 defaultOutfit[slot] = 'None';
@@ -363,7 +363,7 @@ export class NewUserOutfitManager extends OutfitManager {
     }
     saveOutfitToInstanceId(outfitData, instanceId) {
         if (!instanceId) {
-            debugLog('Cannot save outfit - missing instanceId', null, 'warn', 'UserOutfitManager');
+            debugLog('Cannot save outfit - missing instanceId', null, 'warn', 'NewUserOutfitManager');
             return;
         }
         outfitStore.setUserOutfit(instanceId, outfitData);
