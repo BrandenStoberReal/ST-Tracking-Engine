@@ -1,5 +1,5 @@
 import { outfitStore } from '../common/Store';
-
+import { ALL_SLOTS } from '../config/constants';
 import { debugLog } from '../logging/DebugLogger';
 import { findCharacterById, getOrCreateCharacterId } from './CharacterIdService';
 import { getCharacterOutfitData } from './CharacterOutfitService';
@@ -189,6 +189,26 @@ export async function updateForCurrentCharacter(
 
         // Optionally trigger a refresh of macro processing after character change
         refreshMacroProcessing();
+
+        // Pre-populate macro cache after character change to ensure macros are ready
+        if (window.customMacroSystem && characterUniqueId) {
+            try {
+                // Pre-populate bot macros for the new character
+                ALL_SLOTS.forEach((slot) => {
+                    // This will trigger the getCurrentSlotValue and populate the cache
+                    window.customMacroSystem.getCurrentSlotValue('char', slot);
+                });
+
+                // Pre-populate user macros
+                ALL_SLOTS.forEach((slot) => {
+                    window.customMacroSystem.getCurrentSlotValue('user', slot);
+                });
+
+                debugLog('[CharacterService] Pre-populated macro cache after character change', null, 'info');
+            } catch (error) {
+                debugLog('[CharacterService] Error pre-populating macro cache:', error, 'error');
+            }
+        }
 
         // Emit context updated event
         extensionEventBus.emit(EXTENSION_EVENTS.CONTEXT_UPDATED, {

@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events.js';
+import { ALL_SLOTS } from '../config/constants.js';
 import { customMacroSystem } from './CustomMacroService.js';
 import { outfitStore } from '../common/Store.js';
 import { generateMessageHash } from '../utils/utilities.js';
@@ -83,6 +84,8 @@ class EventService {
                     customMacroSystem.clearCache();
                     customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                     customMacroSystem.registerCharacterSpecificMacros(this.context);
+                    // Pre-populate macro cache after character change
+                    this._prepopulateMacroCache();
                 }
                 else {
                     debugLog('[OutfitTracker] CHAT_CHANGED event fired but first message unchanged - skipping update');
@@ -94,6 +97,8 @@ class EventService {
                 this.updateForCurrentCharacter();
                 customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                 customMacroSystem.registerCharacterSpecificMacros(this.context);
+                // Pre-populate macro cache after character switch
+                this._prepopulateMacroCache();
             }
         }
     }
@@ -214,6 +219,27 @@ class EventService {
     }
     generateMessageHash(text) {
         return generateMessageHash(text);
+    }
+    _prepopulateMacroCache() {
+        var _a;
+        if (!window.customMacroSystem || !((_a = this.botManager) === null || _a === void 0 ? void 0 : _a.characterId)) {
+            return;
+        }
+        try {
+            // Pre-populate bot macros for the current character
+            ALL_SLOTS.forEach((slot) => {
+                // This will trigger the getCurrentSlotValue and populate the cache
+                window.customMacroSystem.getCurrentSlotValue('char', slot);
+            });
+            // Pre-populate user macros
+            ALL_SLOTS.forEach((slot) => {
+                window.customMacroSystem.getCurrentSlotValue('user', slot);
+            });
+            debugLog('[EventService] Pre-populated macro cache after character change', null, 'info');
+        }
+        catch (error) {
+            debugLog('[EventService] Error pre-populating macro cache:', error, 'error');
+        }
     }
     overrideResetChat() {
         if (typeof window.restartLLM !== 'function') {

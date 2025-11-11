@@ -1,10 +1,11 @@
 import { EXTENSION_EVENTS, extensionEventBus } from '../core/events';
-import { AutoOutfitSystemAPI, ChatMessage, EventCallback, OutfitPanelAPI, STContext } from '../types';
+import { ALL_SLOTS } from '../config/constants';
 import { customMacroSystem } from './CustomMacroService';
 import { outfitStore } from '../common/Store';
 import { generateMessageHash } from '../utils/utilities';
 import { NewBotOutfitManager } from '../managers/NewBotOutfitManager';
 import { NewUserOutfitManager } from '../managers/NewUserOutfitManager';
+import { AutoOutfitSystemAPI, ChatMessage, EventCallback, OutfitPanelAPI, STContext } from '../types';
 import { debugLog } from '../logging/DebugLogger';
 
 interface EventServiceContext {
@@ -116,6 +117,9 @@ class EventService {
                     customMacroSystem.clearCache();
                     customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                     customMacroSystem.registerCharacterSpecificMacros(this.context);
+
+                    // Pre-populate macro cache after character change
+                    this._prepopulateMacroCache();
                 } else {
                     debugLog('[OutfitTracker] CHAT_CHANGED event fired but first message unchanged - skipping update');
                 }
@@ -127,6 +131,9 @@ class EventService {
                 this.updateForCurrentCharacter();
                 customMacroSystem.deregisterCharacterSpecificMacros(this.context);
                 customMacroSystem.registerCharacterSpecificMacros(this.context);
+
+                // Pre-populate macro cache after character switch
+                this._prepopulateMacroCache();
             }
         }
     }
@@ -265,6 +272,29 @@ class EventService {
 
     generateMessageHash(text: string): string {
         return generateMessageHash(text);
+    }
+
+    private _prepopulateMacroCache(): void {
+        if (!window.customMacroSystem || !this.botManager?.characterId) {
+            return;
+        }
+
+        try {
+            // Pre-populate bot macros for the current character
+            ALL_SLOTS.forEach((slot) => {
+                // This will trigger the getCurrentSlotValue and populate the cache
+                window.customMacroSystem.getCurrentSlotValue('char', slot);
+            });
+
+            // Pre-populate user macros
+            ALL_SLOTS.forEach((slot) => {
+                window.customMacroSystem.getCurrentSlotValue('user', slot);
+            });
+
+            debugLog('[EventService] Pre-populated macro cache after character change', null, 'info');
+        } catch (error) {
+            debugLog('[EventService] Error pre-populating macro cache:', error, 'error');
+        }
     }
 
     overrideResetChat(): void {

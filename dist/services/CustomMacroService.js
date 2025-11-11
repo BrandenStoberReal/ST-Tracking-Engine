@@ -433,13 +433,22 @@ class CustomMacroService {
         return result;
     }
     _generateCacheKey(macroType, slotName, characterName) {
-        var _a;
+        var _a, _b, _c, _d;
         const context = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext)
             ? window.SillyTavern.getContext()
             : window.getContext
                 ? window.getContext()
                 : null;
-        const currentCharacterId = (context === null || context === void 0 ? void 0 : context.characterId) || 'unknown';
+        // Use the bot manager's character ID (unique GUID) instead of context characterId (array index)
+        // This ensures cache consistency when switching characters
+        let currentCharacterId = 'unknown';
+        if ((_d = (_c = (_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) === null || _c === void 0 ? void 0 : _c.outfitManager) === null || _d === void 0 ? void 0 : _d.characterId) {
+            currentCharacterId = window.outfitTracker.botOutfitPanel.outfitManager.characterId;
+        }
+        else if ((context === null || context === void 0 ? void 0 : context.characterId) !== undefined && (context === null || context === void 0 ? void 0 : context.characterId) !== null) {
+            // Fallback to array index if bot manager characterId is not available
+            currentCharacterId = context.characterId.toString();
+        }
         const currentInstanceId = outfitStore.getCurrentInstanceId() || 'unknown';
         return `${macroType}_${slotName}_${characterName || 'null'}_${currentCharacterId}_${currentInstanceId}`;
     }

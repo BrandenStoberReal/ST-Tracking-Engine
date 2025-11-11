@@ -533,7 +533,17 @@ class CustomMacroService {
             : window.getContext
               ? window.getContext()
               : null;
-        const currentCharacterId = context?.characterId || 'unknown';
+
+        // Use the bot manager's character ID (unique GUID) instead of context characterId (array index)
+        // This ensures cache consistency when switching characters
+        let currentCharacterId = 'unknown';
+        if (window.outfitTracker?.botOutfitPanel?.outfitManager?.characterId) {
+            currentCharacterId = window.outfitTracker.botOutfitPanel.outfitManager.characterId;
+        } else if (context?.characterId !== undefined && context?.characterId !== null) {
+            // Fallback to array index if bot manager characterId is not available
+            currentCharacterId = context.characterId.toString();
+        }
+
         const currentInstanceId = outfitStore.getCurrentInstanceId() || 'unknown';
         return `${macroType}_${slotName}_${characterName || 'null'}_${currentCharacterId}_${currentInstanceId}`;
     }
