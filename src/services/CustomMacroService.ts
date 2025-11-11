@@ -173,6 +173,56 @@ class CustomMacroService {
     }
 
     /**
+     * Gets the slot value using instance-aware resolution (for direct text replacement)
+     */
+    getInstanceAwareSlotValue(macroType: string, slotName: string, charNameParam: string | null = null): string {
+        if (!this.allSlots.includes(slotName)) {
+            return 'None';
+        }
+
+        debugLog(`[CustomMacroService] getInstanceAwareSlotValue called for ${macroType}_${slotName}`, null, 'debug');
+
+        // Try to get instance ID from current context or message mapping
+        const instanceId = this.getInstanceIdForCurrentContext();
+
+        if (!instanceId) {
+            debugLog(
+                '[CustomMacroService] No instance ID found for text replacement, falling back to direct lookup',
+                null,
+                'debug'
+            );
+            return this.getCurrentSlotValue(macroType, slotName, charNameParam);
+        }
+
+        // Construct the instance-specific macro name
+        const instanceMacroName = `${macroType}_${slotName}_${instanceId}`;
+
+        // Try to get the value from the registered macro
+        const ctx = window.SillyTavern?.getContext ? window.SillyTavern.getContext() : window.getContext();
+        if (ctx && ctx.getMacro && ctx.getMacro[instanceMacroName]) {
+            try {
+                return ctx.getMacro[instanceMacroName]() || 'None';
+            } catch (error) {
+                debugLog(
+                    `[CustomMacroService] Error getting instance macro value for ${instanceMacroName}:`,
+                    error,
+                    'error'
+                );
+                return 'None';
+            }
+        }
+
+        debugLog(
+            `[CustomMacroService] Instance macro ${instanceMacroName} not found, falling back to direct lookup`,
+            null,
+            'debug'
+        );
+
+        // Fallback to direct lookup if macro not available
+        return this.getCurrentSlotValue(macroType, slotName, charNameParam);
+    }
+
+    /**
      * Gets the value from the appropriate instance-specific macro
      */
     getPointerMacroValue(macroType: string, slotName: string): string {
@@ -869,7 +919,7 @@ class CustomMacroService {
 
                 if (hasData) {
                     // Only replace if we have actual data (not just "None")
-                    const replacement = this.getCurrentSlotValue(
+                    const replacement = this.getInstanceAwareSlotValue(
                         macro.type,
                         macro.slot,
                         ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type

@@ -122,6 +122,38 @@ class CustomMacroService {
         });
     }
     /**
+     * Gets the slot value using instance-aware resolution (for direct text replacement)
+     */
+    getInstanceAwareSlotValue(macroType, slotName, charNameParam = null) {
+        var _a;
+        if (!this.allSlots.includes(slotName)) {
+            return 'None';
+        }
+        debugLog(`[CustomMacroService] getInstanceAwareSlotValue called for ${macroType}_${slotName}`, null, 'debug');
+        // Try to get instance ID from current context or message mapping
+        const instanceId = this.getInstanceIdForCurrentContext();
+        if (!instanceId) {
+            debugLog('[CustomMacroService] No instance ID found for text replacement, falling back to direct lookup', null, 'debug');
+            return this.getCurrentSlotValue(macroType, slotName, charNameParam);
+        }
+        // Construct the instance-specific macro name
+        const instanceMacroName = `${macroType}_${slotName}_${instanceId}`;
+        // Try to get the value from the registered macro
+        const ctx = ((_a = window.SillyTavern) === null || _a === void 0 ? void 0 : _a.getContext) ? window.SillyTavern.getContext() : window.getContext();
+        if (ctx && ctx.getMacro && ctx.getMacro[instanceMacroName]) {
+            try {
+                return ctx.getMacro[instanceMacroName]() || 'None';
+            }
+            catch (error) {
+                debugLog(`[CustomMacroService] Error getting instance macro value for ${instanceMacroName}:`, error, 'error');
+                return 'None';
+            }
+        }
+        debugLog(`[CustomMacroService] Instance macro ${instanceMacroName} not found, falling back to direct lookup`, null, 'debug');
+        // Fallback to direct lookup if macro not available
+        return this.getCurrentSlotValue(macroType, slotName, charNameParam);
+    }
+    /**
      * Gets the value from the appropriate instance-specific macro
      */
     getPointerMacroValue(macroType, slotName) {
@@ -711,7 +743,7 @@ class CustomMacroService {
                 const hasData = this.hasOutfitData(macro.type, macro.slot, ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type);
                 if (hasData) {
                     // Only replace if we have actual data (not just "None")
-                    const replacement = this.getCurrentSlotValue(macro.type, macro.slot, ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type);
+                    const replacement = this.getInstanceAwareSlotValue(macro.type, macro.slot, ['char', 'bot', 'user'].includes(macro.type) ? null : macro.type);
                     result =
                         result.substring(0, macro.startIndex) +
                             replacement +

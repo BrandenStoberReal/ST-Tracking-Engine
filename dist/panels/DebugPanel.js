@@ -170,6 +170,7 @@ export class DebugPanel {
      * Renders the 'Macros' tab to showcase current instances and derivations
      */
     renderMacrosTab(container) {
+        var _a, _b, _c;
         const state = outfitStore.getState();
         const botInstances = state.botInstances;
         const userInstances = state.userInstances;
@@ -218,6 +219,21 @@ export class DebugPanel {
             macrosHtml += `<tr><td>${key}</td><td>${entry.value}</td><td>${timestamp}</td></tr>`;
         }
         macrosHtml += '</tbody></table>';
+        // Show message-to-instance mappings
+        macrosHtml += '<h5>Message-to-Instance Mappings:</h5>';
+        macrosHtml += `<div class="message-instance-mappings">Mapped entries: ${((_b = (_a = window.macroProcessor) === null || _a === void 0 ? void 0 : _a.messageInstanceMap) === null || _b === void 0 ? void 0 : _b.size) || 0}</div>`;
+        if (((_c = window.macroProcessor) === null || _c === void 0 ? void 0 : _c.messageInstanceMap) && window.macroProcessor.messageInstanceMap.size > 0) {
+            macrosHtml += '<table class="message-instance-table">';
+            macrosHtml += '<thead><tr><th>Message Hash</th><th>Instance ID</th></tr></thead>';
+            macrosHtml += '<tbody>';
+            for (const [hash, instanceId] of window.macroProcessor.messageInstanceMap.entries()) {
+                macrosHtml += `<tr><td>${hash}</td><td>${instanceId}</td></tr>`;
+            }
+            macrosHtml += '</tbody></table>';
+        }
+        else {
+            macrosHtml += '<div class="no-mappings">No message-to-instance mappings available</div>';
+        }
         // Add more detailed macro processing information
         macrosHtml += '<h5>Detailed Macro Processing Info:</h5>';
         macrosHtml += '<div class="macro-processing-info">';
