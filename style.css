@@ -146,7 +146,7 @@
 }
 
 .slot-label:before {
-    content: "•";
+    content: '•';
     margin-right: 7px;
     font-size: 1.3em;
     opacity: 0.7;
@@ -215,7 +215,7 @@
 }
 
 .outfit-category-title::before {
-    content: "»";
+    content: '»';
     margin-right: 8px;
     opacity: 0.7;
 }
@@ -256,7 +256,9 @@
     background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.2) 100%);
     border: 1px solid rgba(255, 215, 0, 0.4);
     position: relative;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), inset 0 0 8px rgba(255, 215, 0, 0.4);
+    box-shadow:
+        0 0 15px rgba(255, 215, 0, 0.6),
+        inset 0 0 8px rgba(255, 215, 0, 0.4);
 }
 
 .outfit-preset.default-preset-highlight .preset-name {
@@ -266,7 +268,7 @@
 }
 
 .outfit-preset.default-preset-highlight .preset-name::before {
-    content: "⭐ "; /* Gold star emoji */
+    content: '⭐ '; /* Gold star emoji */
     margin-right: 5px;
 }
 
@@ -449,24 +451,24 @@
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 24px;
 }
 
 .slider:before {
     position: absolute;
-    content: "";
+    content: '';
     height: 18px;
     width: 18px;
     left: 3px;
     bottom: 3px;
     background-color: white;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 50%;
 }
 
 input:checked + .slider {
-    background-color: #4CAF50;
+    background-color: #4caf50;
 }
 
 input:checked + .slider:before {
@@ -529,7 +531,6 @@ input:checked + .slider:before {
     background: rgba(255, 255, 255, 0.35);
 }
 
-
 /* Ensure outfits page has proper scroll */
 #bot-outfit-tab-content,
 #user-outfit-tab-content {
@@ -576,7 +577,6 @@ input:checked + .slider:before {
     background: rgba(255, 255, 255, 0.35);
 }
 
-
 /* Responsive design */
 @media (max-width: 768px) {
     #bot-outfit-panel,
@@ -588,7 +588,6 @@ input:checked + .slider:before {
         max-width: calc(100% - 20px);
     }
 }
-
 
 .outfit-extension-settings h4 {
     margin: 0 0 12px 0 !important;
@@ -660,7 +659,7 @@ input:checked + .slider:before {
     font-weight: bold !important;
 }
 
-.outfit-extension-settings input[type="text"],
+.outfit-extension-settings input[type='text'],
 .outfit-extension-settings textarea {
     flex: 2 !important;
     padding: 6px 10px !important;
@@ -677,7 +676,7 @@ input:checked + .slider:before {
     resize: vertical !important;
 }
 
-.outfit-extension-settings input[type="checkbox"] {
+.outfit-extension-settings input[type='checkbox'] {
     width: 42px !important;
     height: 22px !important;
     -webkit-appearance: none !important;
@@ -691,8 +690,8 @@ input:checked + .slider:before {
     margin: 0 !important;
 }
 
-.outfit-extension-settings input[type="checkbox"]:before {
-    content: "" !important;
+.outfit-extension-settings input[type='checkbox']:before {
+    content: '' !important;
     position: absolute !important;
     width: 18px !important;
     height: 18px !important;
@@ -703,16 +702,16 @@ input:checked + .slider:before {
     transition: transform 0.3s !important;
 }
 
-.outfit-extension-settings input[type="checkbox"]:checked {
+.outfit-extension-settings input[type='checkbox']:checked {
     background: #ffffff !important;
 }
 
-.outfit-extension-settings input[type="checkbox"]:checked:before {
+.outfit-extension-settings input[type='checkbox']:checked:before {
     transform: translateX(20px) !important;
     background: #333333 !important;
 }
 
-.outfit-extension-settings input[type="color"] {
+.outfit-extension-settings input[type='color'] {
     width: 44px !important;
     height: 30px !important;
     padding: 2px !important;
@@ -722,7 +721,6 @@ input:checked + .slider:before {
     background: #333333 !important;
     box-sizing: border-box !important;
 }
-
 
 .outfit-extension-settings .color-input-wrapper {
     display: flex !important;
@@ -858,14 +856,13 @@ input:checked + .slider:before {
     box-shadow: 0 3px 6px rgba(183, 28, 28, 0.4) !important;
 }
 
-.outfit-extension-settings .color-input-wrapper input[type="text"] {
+.outfit-extension-settings .color-input-wrapper input[type='text'] {
     border-radius: 5px 0 0 5px !important;
     margin-left: 8px !important;
     border: 1px solid #555555 !important;
     background: #333333 !important;
     color: #ffffff !important;
 }
-
 
 /* Error text styling - Changed to black for black and white theme */
 .outfit-extension-settings .error-text {
@@ -1205,7 +1202,7 @@ input:checked + .slider:before {
 }
 
 .instance-item.current-instance::before {
-    content: " ";
+    content: ' ';
     position: absolute;
     top: 0;
     left: 0;
@@ -1271,21 +1268,25 @@ input:checked + .slider:before {
     padding-bottom: 4px;
 }
 
-.macro-values-table, .macro-cache-table {
+.macro-values-table,
+.macro-cache-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
 }
 
-.macro-values-table th, .macro-values-table td,
-.macro-cache-table th, .macro-cache-table td {
+.macro-values-table th,
+.macro-values-table td,
+.macro-cache-table th,
+.macro-cache-table td {
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 6px 8px;
     text-align: left;
     font-size: 0.85em;
 }
 
-.macro-values-table th, .macro-cache-table th {
+.macro-values-table th,
+.macro-cache-table th {
     background: rgba(0, 0, 0, 0.3);
     color: #ecf0f1;
 }
@@ -1558,6 +1559,80 @@ input:checked + .slider:before {
     gap: 8px;
 }
 
+/* Service name highlighting in logs */
+.service-name {
+    font-weight: bold;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+.service-custom-macro {
+    background-color: rgba(155, 89, 182, 0.2);
+    color: #9b59b6;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.service-event {
+    background-color: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.service-character {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.service-llm {
+    background-color: rgba(230, 126, 34, 0.2);
+    color: #e67e22;
+    border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+.service-storage {
+    background-color: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+    border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
+.service-auto-outfit {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.service-character-outfit {
+    background-color: rgba(26, 188, 156, 0.2);
+    color: #1abc9c;
+    border: 1px solid rgba(26, 188, 156, 0.3);
+}
+
+.service-character-id {
+    background-color: rgba(44, 62, 80, 0.2);
+    color: #2c3e50;
+    border: 1px solid rgba(44, 62, 80, 0.3);
+}
+
+.service-outfit-data {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.service-outfit-tracker {
+    background-color: rgba(106, 79, 193, 0.2);
+    color: #6a4fc1;
+    border: 1px solid rgba(106, 79, 193, 0.3);
+}
+
+.service-outfit-tracker-debug {
+    background-color: rgba(52, 73, 94, 0.2);
+    color: #34495e;
+    border: 1px solid rgba(52, 73, 94, 0.3);
+}
+
 .log-item {
     padding: 8px;
     border-radius: 4px;
@@ -1586,6 +1661,13 @@ input:checked + .slider:before {
 
 .log-item.log-error {
     color: #e74c3c;
+}
+
+/* Disable text wrapping for log messages */
+.log-message {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Debug Settings Tab */
@@ -1715,7 +1797,8 @@ input:checked + .slider:before {
     color: rgba(255, 255, 255, 0.7);
 }
 
-.events-count, .events-filtered-count {
+.events-count,
+.events-filtered-count {
     font-weight: 500;
 }
 
@@ -1908,7 +1991,9 @@ input:checked + .slider:before {
 .outfit-debug-panel .menu_button:focus {
     outline: none;
     border-color: rgba(52, 152, 219, 0.8);
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 0 0 2px rgba(52, 152, 219, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .outfit-debug-panel .menu_button.danger-button {
@@ -2405,6 +2490,3 @@ input:checked + .slider:before {
         width: 100%;
     }
 }
-
-
-

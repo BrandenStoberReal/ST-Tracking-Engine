@@ -315,6 +315,36 @@ export class DebugPanel {
     }
 
     /**
+     * Parses and highlights service names in log messages
+     */
+    private highlightServiceNames(message: string): string {
+        // Common service names to highlight
+        const servicePatterns = [
+            { pattern: /\[CustomMacroService\]/g, class: 'service-custom-macro' },
+            { pattern: /\[EventService\]/g, class: 'service-event' },
+            { pattern: /\[CharacterService\]/g, class: 'service-character' },
+            { pattern: /\[LLMService\]/g, class: 'service-llm' },
+            { pattern: /\[StorageService\]/g, class: 'service-storage' },
+            { pattern: /\[AutoOutfitService\]/g, class: 'service-auto-outfit' },
+            { pattern: /\[CharacterOutfitService\]/g, class: 'service-character-outfit' },
+            { pattern: /\[CharacterIdService\]/g, class: 'service-character-id' },
+            { pattern: /\[OutfitDataService\]/g, class: 'service-outfit-data' },
+            { pattern: /\[OutfitTracker\]/g, class: 'service-outfit-tracker' },
+            { pattern: /\[OutfitTracker Debug\]/g, class: 'service-outfit-tracker-debug' },
+        ];
+
+        let highlightedMessage = message;
+        for (const { pattern, class: className } of servicePatterns) {
+            highlightedMessage = highlightedMessage.replace(
+                pattern,
+                `<span class="service-name ${className}">$&</span>`
+            );
+        }
+
+        return highlightedMessage;
+    }
+
+    /**
      * Renders the 'Logs' tab with logs from the DebugLogger
      */
     renderLogsTab(container: HTMLElement): void {
@@ -365,6 +395,8 @@ export class DebugPanel {
                     const logItemAttributes = `data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}"`;
                     const countDisplay = group.count > 1 ? ` <span class="log-count">(${group.count}x)</span>` : '';
 
+                    const highlightedMessage = this.highlightServiceNames(log.message);
+
                     if (hasData) {
                         return `
                         <div class="${logItemClasses}" ${logItemAttributes}>
@@ -372,7 +404,7 @@ export class DebugPanel {
                                 <summary>
                                     <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                                     <span class="log-level">[${log.level}]</span>
-                                    <span class="log-message">${log.message}${countDisplay}</span>
+                                    <span class="log-message">${highlightedMessage}${countDisplay}</span>
                                 </summary>
                                 <div class="log-data">
                                     <pre>${JSON.stringify(log.data, null, 2)}</pre>
@@ -385,7 +417,7 @@ export class DebugPanel {
                         <div class="${logItemClasses}" ${logItemAttributes}>
                             <span class="log-timestamp">${new Date(log.timestamp).toISOString()}</span>
                             <span class="log-level">[${log.level}]</span>
-                            <span class="log-message">${log.message}${countDisplay}</span>
+                            <span class="log-message">${highlightedMessage}${countDisplay}</span>
                         </div>
                     `;
                     }
@@ -1803,7 +1835,7 @@ export class DebugPanel {
         });
 
         // Create the full log content
-        const logContent = logLines.join('\n\n') + '\n';
+        const logContent = logLines.join('\n') + '\n';
 
         // Create and download the file
         const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' });
