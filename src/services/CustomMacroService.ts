@@ -5,7 +5,6 @@ import { getCharacterId } from './CharacterIdService';
 import { debugLog } from '../logging/DebugLogger';
 
 declare const window: any;
-declare const toastr: any;
 
 interface MacroCacheEntry {
     value: string;
@@ -281,11 +280,6 @@ class CustomMacroService {
         userInstances.forEach((instanceId) => {
             this.registerUserInstanceMacros(ctx, instanceId);
         });
-
-        // Show toast notification when all instance macros are registered
-        if (typeof toastr !== 'undefined') {
-            toastr.success('Instance macros registered successfully!', 'Outfit System');
-        }
     }
 
     deregisterCharacterSpecificMacros(context: any): void {

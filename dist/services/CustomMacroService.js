@@ -211,10 +211,6 @@ class CustomMacroService {
         userInstances.forEach((instanceId) => {
             this.registerUserInstanceMacros(ctx, instanceId);
         });
-        // Show toast notification when all instance macros are registered
-        if (typeof toastr !== 'undefined') {
-            toastr.success('Instance macros registered successfully!', 'Outfit System');
-        }
     }
     deregisterCharacterSpecificMacros(context) {
         var _a;

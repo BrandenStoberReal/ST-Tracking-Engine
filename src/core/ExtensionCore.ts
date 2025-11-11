@@ -160,23 +160,7 @@ function setupApi(
         const STContext = window.SillyTavern.getContext();
 
         if (STContext) {
-            // Wait for both character data and outfit system to be fully initialized
-            const registerMacrosWhenReady = () => {
-                if (customMacroSystem._isSystemReady && customMacroSystem._isSystemReady()) {
-                    customMacroSystem.deregisterCharacterSpecificMacros(STContext);
-                    customMacroSystem.registerCharacterSpecificMacros(STContext);
-                    debugLog(
-                        '[ExtensionCore] Character-specific and instance macros registered after system ready',
-                        null,
-                        'info'
-                    );
-                } else {
-                    // Retry after a short delay
-                    setTimeout(registerMacrosWhenReady, 500);
-                }
-            };
-
-            setTimeout(registerMacrosWhenReady, 1000); // Initial delay
+            // Macro registration is handled by EventService.handleAppReady() when the app is fully ready
         }
     }
 

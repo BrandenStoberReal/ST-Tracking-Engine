@@ -69,6 +69,10 @@ class EventService {
         customMacroSystem.clearCache();
         customMacroSystem.deregisterCharacterSpecificMacros(this.context);
         customMacroSystem.registerCharacterSpecificMacros(this.context);
+        // Show toast notification when instance macros are registered on app startup
+        if (typeof toastr !== 'undefined') {
+            toastr.success('Instance macros registered successfully!', 'Outfit System');
+        }
     }
     handleChatChange() {
         var _a, _b;
@@ -84,8 +88,7 @@ class EventService {
                     this.currentFirstMessageHash = firstMessageHash;
                     this.updateForCurrentCharacter();
                     customMacroSystem.clearCache();
-                    customMacroSystem.deregisterCharacterSpecificMacros(this.context);
-                    customMacroSystem.registerCharacterSpecificMacros(this.context);
+                    // Note: Macro registration is handled by handleAppReady on startup and handleInstanceCreated for new instances
                 }
                 else {
                     debugLog('[OutfitTracker] CHAT_CHANGED event fired but first message unchanged - skipping update');
@@ -95,8 +98,7 @@ class EventService {
                 this.currentFirstMessageHash = null;
                 debugLog('[OutfitTracker] CHAT_CHANGED event fired with no first bot message - updating for character switch');
                 this.updateForCurrentCharacter();
-                customMacroSystem.deregisterCharacterSpecificMacros(this.context);
-                customMacroSystem.registerCharacterSpecificMacros(this.context);
+                // Note: Macro registration is handled by handleAppReady on startup and handleInstanceCreated for new instances
             }
             // Pre-populate macro cache after all character updates are complete
             // Use a delay to ensure the system is fully ready
@@ -174,10 +176,7 @@ class EventService {
     handleContextUpdate() {
         this.updateForCurrentCharacter();
         customMacroSystem.clearCache();
-        if (this.context) {
-            customMacroSystem.deregisterCharacterSpecificMacros(this.context);
-            customMacroSystem.registerCharacterSpecificMacros(this.context);
-        }
+        // Note: Macro registration is handled by handleAppReady on startup and handleInstanceCreated for new instances
     }
     handleOutfitDataLoaded() {
         debugLog('[OutfitTracker] Outfit data loaded, refreshing macros and UI');
@@ -247,6 +246,10 @@ class EventService {
             }
             else if (instanceType === 'bot' && characterId) {
                 customMacroSystem.registerInstanceMacros(this.context, characterId, instanceId);
+            }
+            // Show toast notification when new instance macros are registered
+            if (typeof toastr !== 'undefined') {
+                toastr.success(`Instance macros registered for new ${instanceType} instance!`, 'Outfit System');
             }
         }
     }
