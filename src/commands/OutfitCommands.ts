@@ -11,7 +11,7 @@ declare const SlashCommand: any;
 declare const SlashCommandArgument: any;
 declare const SlashCommandNamedArgument: any;
 declare const ARGUMENT_TYPE: any;
-declare const $: any;
+declare const $: JQueryStatic;
 
 /**
  * Registers all outfit-related slash commands with SillyTavern's command system.
