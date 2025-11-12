@@ -606,19 +606,24 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         }
         return true;
     }
+    // Helper function to safely get string value from jQuery element
+    function getStringValue(selector) {
+        const val = $(selector).val();
+        return typeof val === 'string' ? val : '';
+    }
     // Function to update the color pickers based on text input values
     function updateColorPickersFromText() {
         // Update bot panel color pickers
-        const botPrimaryText = $('#bot-panel-primary-color').val();
+        const botPrimaryText = getStringValue('#bot-panel-primary-color');
         if (botPrimaryText.startsWith('linear-gradient')) {
             $('#bot-panel-primary-color-picker').val(extractHexFromGradient(botPrimaryText));
         }
         else {
             $('#bot-panel-primary-color-picker').val(botPrimaryText);
         }
-        const botBorderText = $('#bot-panel-border-color').val();
+        const botBorderText = getStringValue('#bot-panel-border-color');
         $('#bot-panel-border-color-picker').val(extractHexFromGradient(botBorderText) || botBorderText);
-        const botShadowText = $('#bot-panel-shadow-color').val();
+        const botShadowText = getStringValue('#bot-panel-shadow-color');
         // Extract hex from rgba if possible
         const rgbaMatch = extractRgbaValues(botShadowText);
         if (rgbaMatch) {
@@ -631,16 +636,16 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             $('#bot-panel-shadow-color-picker').val(extractHexFromGradient(botShadowText) || botShadowText);
         }
         // Update user panel color pickers
-        const userPrimaryText = $('#user-panel-primary-color').val();
+        const userPrimaryText = getStringValue('#user-panel-primary-color');
         if (userPrimaryText.startsWith('linear-gradient')) {
             $('#user-panel-primary-color-picker').val(extractHexFromGradient(userPrimaryText));
         }
         else {
             $('#user-panel-primary-color-picker').val(userPrimaryText);
         }
-        const userBorderText = $('#user-panel-border-color').val();
+        const userBorderText = getStringValue('#user-panel-border-color');
         $('#user-panel-border-color-picker').val(extractHexFromGradient(userBorderText) || userBorderText);
-        const userShadowText = $('#user-panel-shadow-color').val();
+        const userShadowText = getStringValue('#user-panel-shadow-color');
         // Extract hex from rgba if possible
         const userRgbaMatch = extractRgbaValues(userShadowText);
         if (userRgbaMatch) {
@@ -742,14 +747,14 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         // Update the extension settings with new color values
         if (settings && settings[MODULE_NAME]) {
             settings[MODULE_NAME].botPanelColors = {
-                primary: $('#bot-panel-primary-color').val(),
-                border: $('#bot-panel-border-color').val(),
-                shadow: $('#bot-panel-shadow-color').val(),
+                primary: getStringValue('#bot-panel-primary-color'),
+                border: getStringValue('#bot-panel-border-color'),
+                shadow: getStringValue('#bot-panel-shadow-color'),
             };
             settings[MODULE_NAME].userPanelColors = {
-                primary: $('#user-panel-primary-color').val(),
-                border: $('#user-panel-border-color').val(),
-                shadow: $('#user-panel-shadow-color').val(),
+                primary: getStringValue('#user-panel-primary-color'),
+                border: getStringValue('#user-panel-border-color'),
+                shadow: getStringValue('#user-panel-shadow-color'),
             };
             saveSettingsFn();
             // Update the outfit store to reflect the new color settings
@@ -786,6 +791,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         // Get the current input element
         const $currentInput = $(this);
         const colorValue = $currentInput.val();
+        // Ensure we have a string value
+        if (typeof colorValue !== 'string') {
+            return;
+        }
         // For non-hex colors (like gradients or rgba), don't validate
         // Only validate if it looks like a hex color
         const colorValueNoSpaces = colorValue
@@ -827,14 +836,14 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
     $(document).on('change', '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color', () => {
         // Update the outfit store to reflect the new color settings
         const newBotColors = {
-            primary: $('#bot-panel-primary-color').val(),
-            border: $('#bot-panel-border-color').val(),
-            shadow: $('#bot-panel-shadow-color').val(),
+            primary: getStringValue('#bot-panel-primary-color'),
+            border: getStringValue('#bot-panel-border-color'),
+            shadow: getStringValue('#bot-panel-shadow-color'),
         };
         const newUserColors = {
-            primary: $('#user-panel-primary-color').val(),
-            border: $('#user-panel-border-color').val(),
-            shadow: $('#user-panel-shadow-color').val(),
+            primary: getStringValue('#user-panel-primary-color'),
+            border: getStringValue('#user-panel-border-color'),
+            shadow: getStringValue('#user-panel-shadow-color'),
         };
         outfitStore.setSetting('botPanelColors', newBotColors);
         outfitStore.setSetting('userPanelColors', newUserColors);
@@ -854,31 +863,43 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
     $('#bot-panel-primary-color-picker').on('input', function () {
         // Extract hex color from the picker and update the text field
         const hexColor = $(this).val();
-        $('#bot-panel-primary-color').val(`linear-gradient(135deg, ${hexColor} 0%, #5a49d0 50%, #4a43c0 100%)`);
+        if (typeof hexColor === 'string') {
+            $('#bot-panel-primary-color').val(`linear-gradient(135deg, ${hexColor} 0%, #5a49d0 50%, #4a43c0 100%)`);
+        }
     });
     $('#bot-panel-border-color-picker').on('input', function () {
         const hexColor = $(this).val();
-        $('#bot-panel-border-color').val(hexColor);
+        if (typeof hexColor === 'string') {
+            $('#bot-panel-border-color').val(hexColor);
+        }
     });
     $('#bot-panel-shadow-color-picker').on('input', function () {
         const hexColor = $(this).val();
-        // Convert hex to rgba for shadow (with opacity)
-        const rgba = hexToRgba(hexColor, 0.4);
-        $('#bot-panel-shadow-color').val(rgba);
+        if (typeof hexColor === 'string') {
+            // Convert hex to rgba for shadow (with opacity)
+            const rgba = hexToRgba(hexColor, 0.4);
+            $('#bot-panel-shadow-color').val(rgba);
+        }
     });
     $('#user-panel-primary-color-picker').on('input', function () {
         const hexColor = $(this).val();
-        $('#user-panel-primary-color').val(`linear-gradient(135deg, ${hexColor} 0%, #2a68c1 50%, #1a58b1 100%)`);
+        if (typeof hexColor === 'string') {
+            $('#user-panel-primary-color').val(`linear-gradient(135deg, ${hexColor} 0%, #2a68c1 50%, #1a58b1 100%)`);
+        }
     });
     $('#user-panel-border-color-picker').on('input', function () {
         const hexColor = $(this).val();
-        $('#user-panel-border-color').val(hexColor);
+        if (typeof hexColor === 'string') {
+            $('#user-panel-border-color').val(hexColor);
+        }
     });
     $('#user-panel-shadow-color-picker').on('input', function () {
         const hexColor = $(this).val();
-        // Convert hex to rgba for shadow (with opacity)
-        const rgba = hexToRgba(hexColor, 0.4);
-        $('#user-panel-shadow-color').val(rgba);
+        if (typeof hexColor === 'string') {
+            // Convert hex to rgba for shadow (with opacity)
+            const rgba = hexToRgba(hexColor, 0.4);
+            $('#user-panel-shadow-color').val(rgba);
+        }
     });
     // Update color pickers when text inputs change (in case users type in values)
     $(document).on('input', '#bot-panel-primary-color, #bot-panel-border-color, #bot-panel-shadow-color, #user-panel-primary-color, #user-panel-border-color, #user-panel-shadow-color', function () {
@@ -980,8 +1001,9 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
     if (hasAutoSystem) {
         $('#outfit-auto-system').on('input', function () {
             if (settings && settings[MODULE_NAME]) {
-                settings[MODULE_NAME].autoOutfitSystem = $(this).prop('checked');
-                if ($(this).prop('checked')) {
+                const isChecked = $(this).prop('checked') || false;
+                settings[MODULE_NAME].autoOutfitSystem = isChecked;
+                if (isChecked) {
                     autoOutfitSystem.enable();
                 }
                 else {
@@ -993,7 +1015,8 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
             }
         });
         $('#outfit-connection-profile').on('change', function () {
-            const profile = $(this).val() || null;
+            const val = $(this).val();
+            const profile = typeof val === 'string' ? val : null;
             if (settings && settings[MODULE_NAME]) {
                 settings[MODULE_NAME].autoOutfitConnectionProfile = profile;
                 if (autoOutfitSystem.setConnectionProfile) {
@@ -1006,11 +1029,14 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
         });
         $('#outfit-prompt-input').on('change', function () {
             if (settings && settings[MODULE_NAME]) {
-                settings[MODULE_NAME].autoOutfitPrompt = $(this).val();
-                autoOutfitSystem.setPrompt($(this).val());
-                saveSettingsFn();
-                // Update the outfit store to reflect the new settings
-                outfitStore.setSetting('autoOutfitPrompt', settings[MODULE_NAME].autoOutfitPrompt);
+                const promptValue = $(this).val();
+                if (typeof promptValue === 'string') {
+                    settings[MODULE_NAME].autoOutfitPrompt = promptValue;
+                    autoOutfitSystem.setPrompt(promptValue);
+                    saveSettingsFn();
+                    // Update the outfit store to reflect the new settings
+                    outfitStore.setSetting('autoOutfitPrompt', settings[MODULE_NAME].autoOutfitPrompt);
+                }
             }
         });
         $('#outfit-prompt-reset-btn').on('click', function () {
