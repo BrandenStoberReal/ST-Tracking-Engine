@@ -340,7 +340,9 @@ ST-Outfits/
 │   ├── settings/          # Settings UI and configuration
 │   └── utils/             # Utility functions
 ├── dist/                  # Compiled JavaScript output
-├── docs/                  # Documentation and examples
+├── docs/                  # Documentation (organized by category)
+│   ├── extension/         # Extension-specific documentation
+│   └── sillytavern/       # SillyTavern platform documentation
 ├── tests/                 # Jest test suite
 └── node_modules/          # NPM dependencies
 ```
@@ -469,7 +471,7 @@ browser-dependent nature of the SillyTavern extension:
 | `npm run test:watch`    | Run tests in watch mode        |
 
 The tests are located in the `tests/` directory and include setup files that mock the SillyTavern context and browser
-APIs. See `tests/README.md` for detailed testing information.
+APIs. See [Testing Documentation](docs/extension/testing.md) for detailed information about the test setup and coverage standards.
 
 ### 🔄 GitHub Actions
 
@@ -479,7 +481,7 @@ This project uses GitHub Actions for continuous integration and automated releas
 - **Security Scan**: Weekly automated security scanning and on package changes
 - **Release Workflow**: Automated releases when new version tags are pushed
 
-See [GitHub Actions Documentation](docs/github_actions.md) for detailed information about the workflows.
+See [GitHub Actions Documentation](docs/extension/github_actions.md) for detailed information about the workflows.
 
 ### Developer Documentation
 
