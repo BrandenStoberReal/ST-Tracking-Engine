@@ -471,6 +471,16 @@ browser-dependent nature of the SillyTavern extension:
 The tests are located in the `tests/` directory and include setup files that mock the SillyTavern context and browser
 APIs. See `tests/README.md` for detailed testing information.
 
+### 🔄 GitHub Actions
+
+This project uses GitHub Actions for continuous integration and automated releases:
+
+- **CI Workflow**: Runs tests, type checking, linting, and builds on multiple platforms (Linux, Windows, macOS) and Node.js versions (18.x, 20.x)
+- **Security Scan**: Weekly automated security scanning and on package changes
+- **Release Workflow**: Automated releases when new version tags are pushed
+
+See [GitHub Actions Documentation](docs/github_actions.md) for detailed information about the workflows.
+
 ### Developer Documentation
 
 For more detailed information about the internal systems, please see the following documentation:
