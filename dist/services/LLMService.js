@@ -28,7 +28,7 @@ function processSingleCommand(command, botManager) {
             }
             const [, action, slot, value] = match;
             const cleanValue = value || '';
-            debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, 'LLMService');
+            debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, null, 'info', 'LLMService');
             let finalAction = action;
             if (action === 'replace') {
                 finalAction = 'change';
@@ -133,7 +133,7 @@ export function importOutfitFromCharacterCard() {
             const commands = extractCommands(response);
             // Process the commands to update the current bot outfit
             if (commands && commands.length > 0) {
-                debugLog(`Found ${commands.length} outfit commands to process:`, commands, 'LLMService');
+                debugLog(`Found ${commands.length} outfit commands to process:`, commands, 'info', 'LLMService');
                 // Get the global bot outfit manager from window if available
                 if (window.botOutfitPanel && window.botOutfitPanel.outfitManager) {
                     const botManager = window.botOutfitPanel.outfitManager;
@@ -159,7 +159,7 @@ export function importOutfitFromCharacterCard() {
                 }
             }
             else {
-                debugLog('No outfit commands found in response', 'LLMService');
+                debugLog('No outfit commands found in response', null, 'info', 'LLMService');
             }
             return {
                 message: `Imported outfit information from ${characterName || 'the character'}. Found and applied ${commands.length} outfit items.`, // Corrected escaping for \'

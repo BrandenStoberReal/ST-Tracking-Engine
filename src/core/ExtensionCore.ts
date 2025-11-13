@@ -236,7 +236,8 @@ window.outfitTrackerInterceptor = async function (chat: ChatMessage[]): Promise<
                     botPanel: Boolean(botPanel),
                     userPanel: Boolean(userPanel),
                 },
-                'warn'
+                'warn',
+                'ExtensionCore'
             );
             return;
         }
@@ -251,7 +252,8 @@ window.outfitTrackerInterceptor = async function (chat: ChatMessage[]): Promise<
                     botManager: Boolean(botManager),
                     userManager: Boolean(userManager),
                 },
-                'warn'
+                'warn',
+                'ExtensionCore'
             );
             return;
         }

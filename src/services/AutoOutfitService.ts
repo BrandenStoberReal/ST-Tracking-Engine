@@ -141,7 +141,7 @@ You have the following commands at your disposal:
 
             this.eventHandler = (data: any) => {
                 if (this._isEnabled && !this.isProcessing && this.appInitialized && data && !data.is_user) {
-                    debugLog('New AI message received, processing...', 'AutoOutfitService');
+                    debugLog('New AI message received, processing...', null, 'info', 'AutoOutfitService');
 
                     setTimeout(() => {
                         this.processOutfitCommands().catch((error: any) => {
@@ -153,7 +153,7 @@ You have the following commands at your disposal:
             };
 
             eventSource.on(event_types.MESSAGE_RECEIVED, this.eventHandler);
-            debugLog('Event listener registered for MESSAGE_RECEIVED', 'AutoOutfitService');
+            debugLog('Event listener registered for MESSAGE_RECEIVED', null, 'info', 'AutoOutfitService');
         } catch (error) {
             debugLog('Failed to set up event listeners:', error, 'error', 'AutoOutfitService');
         }
@@ -172,7 +172,7 @@ You have the following commands at your disposal:
                     context.eventSource.off(context.event_types.MESSAGE_RECEIVED, this.eventHandler);
                 }
                 this.eventHandler = null;
-                debugLog('Event listener removed', 'AutoOutfitService');
+                debugLog('Event listener removed', null, 'info', 'AutoOutfitService');
             }
         } catch (error) {
             debugLog('Failed to remove event listeners:', error, 'error', 'AutoOutfitService');
@@ -182,7 +182,7 @@ You have the following commands at your disposal:
     markAppInitialized(): void {
         if (!this.appInitialized) {
             this.appInitialized = true;
-            debugLog('App marked as initialized - will now process new AI messages', 'AutoOutfitService');
+            debugLog('App marked as initialized - will now process new AI messages', null, 'info', 'AutoOutfitService');
         }
     }
 
@@ -194,7 +194,7 @@ You have the following commands at your disposal:
         }
 
         if (this.isProcessing) {
-            debugLog('Already processing, skipping', 'AutoOutfitService');
+            debugLog('Already processing, skipping', null, 'info', 'AutoOutfitService');
             return;
         }
 
@@ -254,23 +254,23 @@ You have the following commands at your disposal:
         const processedSystemPrompt = this.replaceMacrosInPrompt(this.systemPrompt);
         const promptText = `${processedSystemPrompt}\n\nRecent Messages:\n${recentMessages}\n\nOutput:`;
 
-        debugLog('Generating outfit commands with LLMService...', 'AutoOutfitService');
+        debugLog('Generating outfit commands with LLMService...', null, 'info', 'AutoOutfitService');
 
         try {
             const result = await generateOutfitFromLLM({ prompt: promptText });
 
             this.llmOutput = result; // Store the LLM output
-            debugLog('Generated result:', result, 'AutoOutfitService');
+            debugLog('Generated result:', result, 'info', 'AutoOutfitService');
 
             const commands = this.parseGeneratedText(result);
 
             this.generatedCommands = commands; // Store the generated commands
 
             if (commands.length > 0) {
-                debugLog(`Found ${commands.length} commands, processing...`, 'AutoOutfitService');
+                debugLog(`Found ${commands.length} commands, processing...`, null, 'info', 'AutoOutfitService');
                 await this.processCommandBatch(commands);
             } else {
-                debugLog('No outfit commands found in response', 'AutoOutfitService');
+                debugLog('No outfit commands found in response', null, 'info', 'AutoOutfitService');
                 if (result.trim() !== '[none]') {
                     this.showPopup('LLM could not parse any clothing data from the character.', 'warning');
                 }
@@ -299,17 +299,17 @@ You have the following commands at your disposal:
 
         const commands = extractCommands(text);
 
-        debugLog(`Found ${commands.length} commands:`, commands, 'AutoOutfitService');
+        debugLog(`Found ${commands.length} commands:`, commands, 'info', 'AutoOutfitService');
         return commands;
     }
 
     async processCommandBatch(commands: string[]): Promise<void> {
         if (!commands || commands.length === 0) {
-            debugLog('No commands to process', 'AutoOutfitService');
+            debugLog('No commands to process', null, 'info', 'AutoOutfitService');
             return;
         }
 
-        debugLog(`Processing batch of ${commands.length} commands`, 'AutoOutfitService');
+        debugLog(`Processing batch of ${commands.length} commands`, null, 'info', 'AutoOutfitService');
 
         const successfulCommands: any[] = [];
         const failedCommands: any[] = [];
@@ -501,7 +501,7 @@ You have the following commands at your disposal:
             const { action, slot, value } = parsedCommand;
             const cleanValue = value !== undefined ? this.replaceAll(value, '"', '').trim() : '';
 
-            debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, 'AutoOutfitService');
+            debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, null, 'info', 'AutoOutfitService');
 
             const message = await this.executeCommand(action, slot, cleanValue);
 
@@ -554,7 +554,7 @@ You have the following commands at your disposal:
 
                     window.botOutfitPanel.outfitManager.loadOutfit(outfitInstanceId);
                     window.botOutfitPanel.renderContent();
-                    debugLog('Outfit panel updated', 'AutoOutfitService');
+                    debugLog('Outfit panel updated', null, 'info', 'AutoOutfitService');
                 } catch (error) {
                     debugLog('Failed to update outfit panel:', error, 'error', 'AutoOutfitService');
                 }

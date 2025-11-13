@@ -51,7 +51,7 @@ class ConnectionProfileHelper {
                         yield window.connectionManager.applyProfile(profile);
                     }
                     else {
-                        debugLog(`[LLMUtility] Profile with ID ${profileId} not found. Falling back to slash command.`, null, 'warn');
+                        debugLog(`Profile with ID ${profileId} not found. Falling back to slash command.`, null, 'warn', 'LLMUtility');
                         if ((_b = (_a = window.SlashCommandParser) === null || _a === void 0 ? void 0 : _a.commands) === null || _b === void 0 ? void 0 : _b.profile) {
                             yield window.SlashCommandParser.commands['profile'].callback({}, profileId);
                         }
@@ -147,7 +147,7 @@ export class LLMUtility {
                         throw new Error('No generation method available in context');
                     }
                     if (!result || result.trim() === '') {
-                        debugLog(`[LLMUtility] Empty response from LLM (attempt ${attempt + 1}/${maxRetries})`, null, 'warn');
+                        debugLog(`Empty response from LLM (attempt ${attempt + 1}/${maxRetries})`, null, 'warn', 'LLMUtility');
                         attempt++;
                         if (attempt >= maxRetries) {
                             throw new Error('Empty response from LLM after retries');
@@ -202,7 +202,7 @@ export class LLMUtility {
                         return result;
                     }
                     catch (error) {
-                        debugLog(`[LLMUtility] Profile generation attempt ${attempt + 1}/${maxRetries} with profile ${profile} failed:`, error, 'error');
+                        debugLog(`Profile generation attempt ${attempt + 1}/${maxRetries} with profile ${profile} failed:`, error, 'error', 'LLMUtility');
                         attempt++;
                         if (attempt >= maxRetries) {
                             throw new Error(`Profile generation failed after ${maxRetries} attempts: ${error.message}`);
@@ -229,7 +229,7 @@ export class LLMUtility {
             }
             catch (error) {
                 debugLog(`Profile generation with ${profile !== null && profile !== void 0 ? profile : 'null'} failed:`, error, 'error', 'LLMUtility');
-                debugLog('Falling back to default generation after profile failures...', 'LLMUtility');
+                debugLog('Falling back to default generation after profile failures...', null, 'info', 'LLMUtility');
                 return this.generateWithRetry(prompt, systemPrompt, context, maxRetries);
             }
         });

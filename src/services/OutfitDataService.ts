@@ -28,7 +28,7 @@ class OutfitDataService {
                     });
 
                     this.dataManager.save({ variables: { global: globalVars } });
-                    debugLog(`Removed ${outfitVars.length} outfit-related global variables`, 'OutfitDataService');
+                    debugLog(`Removed ${outfitVars.length} outfit-related global variables`, null, 'info', 'OutfitDataService');
                 }
             }
         } catch (error) {
@@ -37,7 +37,7 @@ class OutfitDataService {
     }
 
     async wipeAllOutfits(): Promise<string> {
-        debugLog('Starting wipeAllOutfits process', 'OutfitDataService');
+        debugLog('Starting wipeAllOutfits process', null, 'info', 'OutfitDataService');
 
         try {
             // Log initial state before wiping
@@ -83,7 +83,7 @@ class OutfitDataService {
             );
 
             // Clear the store in memory first
-            debugLog('Clearing store in memory', 'OutfitDataService');
+            debugLog('Clearing store in memory', null, 'info', 'OutfitDataService');
             outfitStore.wipeAllOutfitData();
 
             // Verify the store has been cleared
@@ -101,7 +101,7 @@ class OutfitDataService {
             );
 
             // Update the data manager with wiped data using the direct wipe method
-            debugLog('Saving wiped data to data manager using direct wipe method', 'OutfitDataService');
+            debugLog('Saving wiped data to data manager using direct wipe method', null, 'info', 'OutfitDataService');
             this.dataManager.saveWipedOutfitData();
 
             // Update settings too
@@ -127,7 +127,7 @@ class OutfitDataService {
             );
 
             // Now sync the store with the wiped data in the data manager
-            debugLog('Loading wiped data from data manager to store', 'OutfitDataService');
+            debugLog('Loading wiped data from data manager to store', null, 'info', 'OutfitDataService');
             outfitStore.loadState(); // This should load the wiped data from the data manager to the store
 
             // Verify the store now has the wiped data
@@ -158,7 +158,7 @@ class OutfitDataService {
             const STContext = window.SillyTavern?.getContext?.() || window.getContext?.();
 
             if (STContext) {
-                debugLog('Using direct SillyTavern save to ensure immediate persistence', 'OutfitDataService');
+                debugLog('Using direct SillyTavern save to ensure immediate persistence', null, 'info', 'OutfitDataService');
 
                 // Create a complete outfit tracker object with empty data in the format expected by SillyTavern
                 const emptyOutfitTrackerData = {
@@ -183,7 +183,7 @@ class OutfitDataService {
 
                 // Try to save the data using the proper SillyTavern extension settings API
                 if (STContext.extensionSettings) {
-                    debugLog('Saving to extensionSettings', 'OutfitDataService');
+                    debugLog('Saving to extensionSettings', null, 'info', 'OutfitDataService');
                     STContext.extensionSettings.outfit_tracker = emptyOutfitTrackerData;
                     if (typeof STContext.saveSettingsDebounced === 'function') {
                         STContext.saveSettingsDebounced();
@@ -194,7 +194,7 @@ class OutfitDataService {
                     debugLog('extensionSettings not available, using fallback', null, 'error', 'OutfitDataService');
                     // Fallback: try to use the direct storage service save
                     if (this.dataManager.storageService && this.dataManager.storageService.saveFn) {
-                        debugLog('Using fallback direct save', 'OutfitDataService');
+                        debugLog('Using fallback direct save', null, 'info', 'OutfitDataService');
                         this.dataManager.storageService.saveFn(emptyOutfitTrackerData);
                     }
                 }
@@ -206,7 +206,7 @@ class OutfitDataService {
 
                 // Fallback: try to use the direct storage service save (original approach)
                 if (this.dataManager.storageService && this.dataManager.storageService.saveFn) {
-                    debugLog('Using fallback direct save', 'OutfitDataService');
+                    debugLog('Using fallback direct save', null, 'info', 'OutfitDataService');
 
                     // Create empty data structure to save
                     const emptyData = {
@@ -226,7 +226,7 @@ class OutfitDataService {
             this.clearGlobalOutfitVariables();
 
             // Reload the state after wipe to ensure the store is in sync with saved data
-            debugLog('Loading wiped data from data manager to store after save', 'OutfitDataService');
+            debugLog('Loading wiped data from data manager to store after save', null, 'info', 'OutfitDataService');
             outfitStore.loadState(); // This ensures the store reflects the saved wiped state
 
             // Update the UI to reflect the cleared state
@@ -238,7 +238,7 @@ class OutfitDataService {
                 window.userOutfitPanel.renderContent(); // Refresh user panel to show cleared state
             }
 
-            debugLog('All outfit data wiped successfully', 'OutfitDataService');
+            debugLog('All outfit data wiped successfully', null, 'info', 'OutfitDataService');
             return '[Outfit System] All outfit data has been wiped.';
         } catch (error) {
             debugLog('Error wiping outfit data:', error, 'error', 'OutfitDataService');
