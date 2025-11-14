@@ -37,9 +37,7 @@ export function initSettings(autoOutfitSystem, AutoOutfitSystemClass, context) {
         if (settings[MODULE_NAME].autoOutfitConnectionProfile) {
             autoOutfitSystem.setConnectionProfile(settings[MODULE_NAME].autoOutfitConnectionProfile);
         }
-        setTimeout(() => {
-            autoOutfitSystem.enable();
-        }, 1000);
+        autoOutfitSystem.enable();
     }
     else if (autoOutfitSystem) {
         // Even if disabled, still set the prompt from settings so it's ready when enabled
