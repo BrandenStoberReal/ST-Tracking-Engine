@@ -31,6 +31,7 @@ class EventService {
     processMacrosInFirstMessage: (context?: STContext) => Promise<void>;
     context: STContext | null;
     currentFirstMessageHash: string | null;
+    isNewChat: boolean;
 
     constructor(context: EventServiceContext) {
         this.botManager = context.botManager;
@@ -42,6 +43,7 @@ class EventService {
         this.processMacrosInFirstMessage = context.processMacrosInFirstMessage;
         this.context = context.context || null;
         this.currentFirstMessageHash = null;
+        this.isNewChat = false;
         this.initialize();
     }
 
@@ -76,6 +78,7 @@ class EventService {
 
         eventSource.on(event_types.APP_READY, () => this.handleAppReady());
         eventSource.on(event_types.CHAT_CREATED, () => {
+            this.isNewChat = true;
             this.handleChatReset();
         });
         eventSource.on(event_types.CHAT_CHANGED, () => this.handleChatChange());
@@ -94,23 +97,33 @@ class EventService {
 
     async handleChatReset(): Promise<void> {
         debugLog('Chat has been reset, applying default outfits.', null, 'info', 'EventService');
+
+        // Wait a small delay to ensure context is established before loading default outfits
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         const botOutfitInstanceId = this.botManager.getOutfitInstanceId();
         const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
 
-        if (botOutfitInstanceId) {
-            const appliedDefault = await this.botManager.applyDefaultOutfitAfterReset();
-            if (!appliedDefault) {
-                this.botManager.loadOutfit();
-            }
+        // Clear macro cache to ensure fresh data after reset
+        import('../services/CustomMacroService').then(({ customMacroSystem }) => {
+            customMacroSystem.clearCache();
+        });
+
+        if (botOutfitInstanceId && this.botManager.characterId) {
+            // Load the default outfit for the bot
+            await this.botManager.loadDefaultOutfit();
+
+            // Force refresh the bot panel UI
             if ((window as any).botOutfitPanel && typeof (window as any).botOutfitPanel.renderContent === 'function') {
                 (window as any).botOutfitPanel.renderContent();
             }
         }
+
         if (userOutfitInstanceId) {
-            const appliedDefault = await this.userManager.applyDefaultOutfitAfterReset();
-            if (!appliedDefault) {
-                this.userManager.loadOutfit();
-            }
+            // Load the default outfit for the user
+            await this.userManager.loadDefaultOutfit();
+
+            // Force refresh the user panel UI
             if (
                 (window as any).userOutfitPanel &&
                 typeof (window as any).userOutfitPanel.renderContent === 'function'
