@@ -277,12 +277,11 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
     }
     // Update status indicators after settings are loaded
     function updateStatusIndicators() {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g;
         if (typeof window.getOutfitExtensionStatus === 'function') {
             const status = window.getOutfitExtensionStatus();
             // Cache DOM elements to avoid repeated jQuery lookups
             const $statusCore = $('#status-core');
-            const $statusAutoOutfit = $('#status-auto-outfit');
             const $statusBotPanel = $('#status-bot-panel');
             const $statusUserPanel = $('#status-user-panel');
             const $statusEvents = $('#status-events');
@@ -299,23 +298,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 }
             }
             // Update auto outfit system status
-            if (status.autoOutfit) {
-                if (status.autoOutfit.enabled) {
-                    if (!$statusAutoOutfit.hasClass('status-active')) {
-                        $statusAutoOutfit.removeClass('status-loading').addClass('status-active').text('Active');
-                    }
-                }
-                else {
-                    if (!$statusAutoOutfit.hasClass('status-inactive')) {
-                        $statusAutoOutfit.removeClass('status-loading').addClass('status-inactive').text('Inactive');
-                    }
-                }
-            }
-            else {
-                if (!$statusAutoOutfit.hasClass('status-inactive') || $statusAutoOutfit.text() !== 'Not Available') {
-                    $statusAutoOutfit.removeClass('status-loading').addClass('status-inactive').text('Not Available');
-                }
-            }
+            updateAutoOutfitStatus();
             // Update bot panel status
             if (status.botPanel) {
                 if (status.botPanel.isVisible) {
@@ -385,34 +368,10 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 else {
                     $('#status-core').removeClass('status-loading').addClass('status-inactive').text('Inactive');
                 }
-                // Check if auto outfit system is available and enabled
-                if ((_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.autoOutfitSystem) {
-                    const autoOutfitSystem = window.outfitTracker.autoOutfitSystem;
-                    const autoOutfitStatus = typeof autoOutfitSystem.getStatus === 'function' ? autoOutfitSystem.getStatus() : null;
-                    if (autoOutfitStatus && autoOutfitStatus.enabled) {
-                        $('#status-auto-outfit').removeClass('status-loading').addClass('status-active').text('Active');
-                    }
-                    else if (autoOutfitStatus) {
-                        $('#status-auto-outfit')
-                            .removeClass('status-loading')
-                            .addClass('status-inactive')
-                            .text('Inactive');
-                    }
-                    else {
-                        $('#status-auto-outfit')
-                            .removeClass('status-loading')
-                            .addClass('status-inactive')
-                            .text('Not Available');
-                    }
-                }
-                else {
-                    $('#status-auto-outfit')
-                        .removeClass('status-loading')
-                        .addClass('status-inactive')
-                        .text('Not Available');
-                }
+                // Update auto outfit system status using the async function
+                updateAutoOutfitStatus();
                 // Check bot panel status
-                if ((_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.botOutfitPanel) {
+                if ((_a = window.outfitTracker) === null || _a === void 0 ? void 0 : _a.botOutfitPanel) {
                     if (window.outfitTracker.botOutfitPanel.isVisible) {
                         $('#status-bot-panel').removeClass('status-loading').addClass('status-active').text('Visible');
                     }
@@ -424,7 +383,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                     $('#status-bot-panel').removeClass('status-loading').addClass('status-inactive').text('Not Loaded');
                 }
                 // Check user panel status
-                if ((_c = window.outfitTracker) === null || _c === void 0 ? void 0 : _c.userOutfitPanel) {
+                if ((_b = window.outfitTracker) === null || _b === void 0 ? void 0 : _b.userOutfitPanel) {
                     if (window.outfitTracker.userOutfitPanel.isVisible) {
                         $('#status-user-panel').removeClass('status-loading').addClass('status-active').text('Visible');
                     }
@@ -442,7 +401,7 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                         .text('Not Loaded');
                 }
                 // Check event system status (check if event listeners were set up)
-                const context = ((_d = window.SillyTavern) === null || _d === void 0 ? void 0 : _d.getContext)
+                const context = ((_c = window.SillyTavern) === null || _c === void 0 ? void 0 : _c.getContext)
                     ? window.SillyTavern.getContext()
                     : window.getContext
                         ? window.getContext()
@@ -454,8 +413,8 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                     $('#status-events').removeClass('status-loading').addClass('status-warning').text('Limited');
                 }
                 // Check outfit managers status
-                if (((_f = (_e = window.outfitTracker) === null || _e === void 0 ? void 0 : _e.botOutfitPanel) === null || _f === void 0 ? void 0 : _f.outfitManager) &&
-                    ((_h = (_g = window.outfitTracker) === null || _g === void 0 ? void 0 : _g.userOutfitPanel) === null || _h === void 0 ? void 0 : _h.outfitManager)) {
+                if (((_e = (_d = window.outfitTracker) === null || _d === void 0 ? void 0 : _d.botOutfitPanel) === null || _e === void 0 ? void 0 : _e.outfitManager) &&
+                    ((_g = (_f = window.outfitTracker) === null || _f === void 0 ? void 0 : _f.userOutfitPanel) === null || _g === void 0 ? void 0 : _g.outfitManager)) {
                     $('#status-managers').removeClass('status-loading').addClass('status-active').text('Active');
                 }
                 else {
@@ -566,6 +525,47 @@ export function createSettingsUI(AutoOutfitSystem, autoOutfitSystem, context) {
                 }
             }, 100);
         };
+    }
+    // Helper function to update auto outfit status indicator with retries for async initialization
+    function updateAutoOutfitStatus() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!hasAutoSystem || !autoOutfitSystem) {
+                $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+                return;
+            }
+            // Retry mechanism to handle async initialization
+            const maxRetries = 10;
+            const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const autoOutfitStatus = typeof autoOutfitSystem.getStatus === 'function' ? autoOutfitSystem.getStatus() : null;
+                    if (autoOutfitStatus) {
+                        const $statusAutoOutfit = $('#status-auto-outfit');
+                        if (autoOutfitStatus.enabled) {
+                            if (!$statusAutoOutfit.hasClass('status-active')) {
+                                $statusAutoOutfit.removeClass('status-loading').addClass('status-active').text('Active');
+                            }
+                        }
+                        else {
+                            if (!$statusAutoOutfit.hasClass('status-inactive')) {
+                                $statusAutoOutfit
+                                    .removeClass('status-loading')
+                                    .addClass('status-inactive')
+                                    .text('Inactive');
+                            }
+                        }
+                        break; // Exit the retry loop if we got a valid status
+                    }
+                }
+                catch (error) {
+                    debugLog(`Error getting auto outfit status (attempt ${i + 1}/${maxRetries}):`, error, 'warn', 'SettingsUI');
+                }
+                // Wait before next retry
+                if (i < maxRetries - 1) {
+                    yield delay(500); // 500ms between retries
+                }
+            }
+        });
     }
     // Helper function to extract hex color from gradient string
     function extractHexFromGradient(gradientStr) {

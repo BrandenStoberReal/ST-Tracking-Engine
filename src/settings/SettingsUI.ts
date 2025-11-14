@@ -282,7 +282,6 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
 
             // Cache DOM elements to avoid repeated jQuery lookups
             const $statusCore = $('#status-core');
-            const $statusAutoOutfit = $('#status-auto-outfit');
             const $statusBotPanel = $('#status-bot-panel');
             const $statusUserPanel = $('#status-user-panel');
             const $statusEvents = $('#status-events');
@@ -300,21 +299,7 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
             }
 
             // Update auto outfit system status
-            if (status.autoOutfit) {
-                if (status.autoOutfit.enabled) {
-                    if (!$statusAutoOutfit.hasClass('status-active')) {
-                        $statusAutoOutfit.removeClass('status-loading').addClass('status-active').text('Active');
-                    }
-                } else {
-                    if (!$statusAutoOutfit.hasClass('status-inactive')) {
-                        $statusAutoOutfit.removeClass('status-loading').addClass('status-inactive').text('Inactive');
-                    }
-                }
-            } else {
-                if (!$statusAutoOutfit.hasClass('status-inactive') || $statusAutoOutfit.text() !== 'Not Available') {
-                    $statusAutoOutfit.removeClass('status-loading').addClass('status-inactive').text('Not Available');
-                }
-            }
+            updateAutoOutfitStatus();
 
             // Update bot panel status
             if (status.botPanel) {
@@ -381,31 +366,8 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                     $('#status-core').removeClass('status-loading').addClass('status-inactive').text('Inactive');
                 }
 
-                // Check if auto outfit system is available and enabled
-                if (window.outfitTracker?.autoOutfitSystem) {
-                    const autoOutfitSystem = window.outfitTracker.autoOutfitSystem;
-                    const autoOutfitStatus =
-                        typeof autoOutfitSystem.getStatus === 'function' ? autoOutfitSystem.getStatus() : null;
-
-                    if (autoOutfitStatus && autoOutfitStatus.enabled) {
-                        $('#status-auto-outfit').removeClass('status-loading').addClass('status-active').text('Active');
-                    } else if (autoOutfitStatus) {
-                        $('#status-auto-outfit')
-                            .removeClass('status-loading')
-                            .addClass('status-inactive')
-                            .text('Inactive');
-                    } else {
-                        $('#status-auto-outfit')
-                            .removeClass('status-loading')
-                            .addClass('status-inactive')
-                            .text('Not Available');
-                    }
-                } else {
-                    $('#status-auto-outfit')
-                        .removeClass('status-loading')
-                        .addClass('status-inactive')
-                        .text('Not Available');
-                }
+                // Update auto outfit system status using the async function
+                updateAutoOutfitStatus();
 
                 // Check bot panel status
                 if (window.outfitTracker?.botOutfitPanel) {
@@ -578,6 +540,54 @@ export function createSettingsUI(AutoOutfitSystem: IDummyAutoOutfitSystem, autoO
                 }
             }, 100);
         };
+    }
+
+    // Helper function to update auto outfit status indicator with retries for async initialization
+    async function updateAutoOutfitStatus() {
+        if (!hasAutoSystem || !autoOutfitSystem) {
+            $('#status-auto-outfit').removeClass('status-loading').addClass('status-inactive').text('Not Available');
+            return;
+        }
+
+        // Retry mechanism to handle async initialization
+        const maxRetries = 10;
+        const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const autoOutfitStatus =
+                    typeof autoOutfitSystem.getStatus === 'function' ? autoOutfitSystem.getStatus() : null;
+
+                if (autoOutfitStatus) {
+                    const $statusAutoOutfit = $('#status-auto-outfit');
+                    if (autoOutfitStatus.enabled) {
+                        if (!$statusAutoOutfit.hasClass('status-active')) {
+                            $statusAutoOutfit.removeClass('status-loading').addClass('status-active').text('Active');
+                        }
+                    } else {
+                        if (!$statusAutoOutfit.hasClass('status-inactive')) {
+                            $statusAutoOutfit
+                                .removeClass('status-loading')
+                                .addClass('status-inactive')
+                                .text('Inactive');
+                        }
+                    }
+                    break; // Exit the retry loop if we got a valid status
+                }
+            } catch (error) {
+                debugLog(
+                    `Error getting auto outfit status (attempt ${i + 1}/${maxRetries}):`,
+                    error,
+                    'warn',
+                    'SettingsUI'
+                );
+            }
+
+            // Wait before next retry
+            if (i < maxRetries - 1) {
+                await delay(500); // 500ms between retries
+            }
+        }
     }
 
     // Helper function to extract hex color from gradient string
