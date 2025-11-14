@@ -131,6 +131,9 @@ class EventService {
                 (window as any).userOutfitPanel.renderContent();
             }
         }
+
+        // Pre-populate macro cache with default outfit values after reset
+        this._prepopulateMacroCache();
     }
 
     handleAppReady(): void {
