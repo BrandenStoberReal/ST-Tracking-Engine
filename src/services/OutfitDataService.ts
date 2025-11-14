@@ -28,7 +28,12 @@ class OutfitDataService {
                     });
 
                     this.dataManager.save({ variables: { global: globalVars } });
-                    debugLog(`Removed ${outfitVars.length} outfit-related global variables`, null, 'info', 'OutfitDataService');
+                    debugLog(
+                        `Removed ${outfitVars.length} outfit-related global variables`,
+                        null,
+                        'info',
+                        'OutfitDataService'
+                    );
                 }
             }
         } catch (error) {
@@ -158,7 +163,12 @@ class OutfitDataService {
             const STContext = window.SillyTavern?.getContext?.() || window.getContext?.();
 
             if (STContext) {
-                debugLog('Using direct SillyTavern save to ensure immediate persistence', null, 'info', 'OutfitDataService');
+                debugLog(
+                    'Using direct SillyTavern save to ensure immediate persistence',
+                    null,
+                    'info',
+                    'OutfitDataService'
+                );
 
                 // Create a complete outfit tracker object with empty data in the format expected by SillyTavern
                 const emptyOutfitTrackerData = {
