@@ -38,9 +38,10 @@ class CustomMacroService {
         (this as any).lastCacheCleanup = Date.now();
 
         debugLog(
-            `[CustomMacroService] Initialized with ${this.allSlots.length} slots: ${this.allSlots.join(', ')}`,
+            `Initialized with ${this.allSlots.length} slots: ${this.allSlots.join(', ')}`,
             null,
-            'debug'
+            'debug',
+            'CustomMacroService'
         );
     }
 
@@ -91,9 +92,10 @@ class CustomMacroService {
                 ctx.registerMacro(instanceMacro, () => value);
                 this.registeredMacros.add(instanceMacro);
                 debugLog(
-                    `[CustomMacroService] Registered user instance macro: ${instanceMacro} = ${value}`,
+                    `Registered user instance macro: ${instanceMacro} = ${value}`,
                     null,
-                    'debug'
+                    'debug',
+                    'CustomMacroService'
                 );
             }
         });
@@ -119,15 +121,17 @@ class CustomMacroService {
 
         if (!instanceId) {
             debugLog(
-                `[CustomMacroService] No instance ID found for ${macroType}_${slotName}, falling back to direct lookup`,
+                `No instance ID found for ${macroType}_${slotName}, falling back to direct lookup`,
                 null,
-                'debug'
+                'debug',
+                'CustomMacroService'
             );
             const fallbackValue = this.getCurrentSlotValue(macroType, slotName, charNameParam);
             debugLog(
-                `[CustomMacroService] Fallback value for ${macroType}_${slotName} = '${fallbackValue}'`,
+                `Fallback value for ${macroType}_${slotName} = '${fallbackValue}'`,
                 null,
-                'debug'
+                'debug',
+                'CustomMacroService'
             );
             return fallbackValue;
         }
@@ -140,9 +144,10 @@ class CustomMacroService {
                 // Use the outfit manager's character ID instead of the store's currentCharacterId
                 const characterId = window.outfitTracker?.botOutfitPanel?.outfitManager?.characterId || '';
                 debugLog(
-                    `[CustomMacroService] Looking up bot outfit for character ${characterId}, instance ${instanceId}`,
+                    `Looking up bot outfit for character ${characterId}, instance ${instanceId}`,
                     null,
-                    'debug'
+                    'debug',
+                    'CustomMacroService'
                 );
                 const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
                 const value = outfitData[slotName] || 'None';
@@ -157,24 +162,27 @@ class CustomMacroService {
             }
         } catch (error) {
             debugLog(
-                `[CustomMacroService] Error getting outfit data for ${macroType}_${slotName}_${instanceId}:`,
+                `Error getting outfit data for ${macroType}_${slotName}_${instanceId}:`,
                 error,
-                'error'
+                'error',
+                'CustomMacroService'
             );
         }
 
         debugLog(
-            `[CustomMacroService] No outfit data found for ${macroType}_${slotName}_${instanceId}, falling back to direct lookup`,
+            `No outfit data found for ${macroType}_${slotName}_${instanceId}, falling back to direct lookup`,
             null,
-            'debug'
+            'debug',
+            'CustomMacroService'
         );
 
         // Fallback to direct lookup if data not available
         const fallbackValue = this.getCurrentSlotValue(macroType, slotName, charNameParam);
         debugLog(
-            `[CustomMacroService] Fallback value for ${macroType}_${slotName} = '${fallbackValue}'`,
+            `Fallback value for ${macroType}_${slotName} = '${fallbackValue}'`,
             null,
-            'debug'
+            'debug',
+            'CustomMacroService'
         );
         return fallbackValue;
     }
@@ -195,9 +203,10 @@ class CustomMacroService {
 
         if (!instanceId) {
             debugLog(
-                `[CustomMacroService] No instance ID found for ${macroType}_${slotName}, returning 'None'`,
+                `No instance ID found for ${macroType}_${slotName}, returning 'None'`,
                 null,
-                'debug'
+                'debug',
+                'CustomMacroService'
             );
             return 'None';
         }
@@ -210,9 +219,10 @@ class CustomMacroService {
                 // Use the outfit manager's character ID instead of the store's currentCharacterId
                 const characterId = window.outfitTracker?.botOutfitPanel?.outfitManager?.characterId || '';
                 debugLog(
-                    `[CustomMacroService] Looking up bot outfit for character ${characterId}, instance ${instanceId}`,
+                    `Looking up bot outfit for character ${characterId}, instance ${instanceId}`,
                     null,
-                    'debug'
+                    'debug',
+                    'CustomMacroService'
                 );
                 const outfitData = outfitStore.getBotOutfit(characterId, instanceId);
                 const value = outfitData[slotName] || 'None';
@@ -227,24 +237,27 @@ class CustomMacroService {
             }
         } catch (error) {
             debugLog(
-                `[CustomMacroService] Error getting outfit data for ${macroType}_${slotName}_${instanceId}:`,
+                `Error getting outfit data for ${macroType}_${slotName}_${instanceId}:`,
                 error,
-                'error'
+                'error',
+                'CustomMacroService'
             );
         }
 
         debugLog(
-            `[CustomMacroService] No outfit data found for ${macroType}_${slotName}_${instanceId}, falling back to direct lookup`,
+            `No outfit data found for ${macroType}_${slotName}_${instanceId}, falling back to direct lookup`,
             null,
-            'debug'
+            'debug',
+            'CustomMacroService'
         );
 
         // Fallback to direct lookup if data not available
         const fallbackValue = this.getCurrentSlotValue(macroType, slotName);
         debugLog(
-            `[CustomMacroService] Fallback value for ${macroType}_${slotName} = '${fallbackValue}'`,
+            `Fallback value for ${macroType}_${slotName} = '${fallbackValue}'`,
             null,
-            'debug'
+            'debug',
+            'CustomMacroService'
         );
         return fallbackValue;
     }
@@ -745,23 +758,26 @@ class CustomMacroService {
                     macroType = 'char';
                     slot = singlePart;
                     debugLog(
-                        `[CustomMacroService] Single-part macro: ${singlePart} -> type: ${macroType}, slot: ${slot}`,
+                        `Single-part macro: ${singlePart} -> type: ${macroType}, slot: ${slot}`,
                         null,
-                        'debug'
+                        'debug',
+                        'CustomMacroService'
                     );
                 } else if (['user', 'char', 'bot'].includes(singlePart)) {
                     macroType = singlePart;
                     slot = null;
                     debugLog(
-                        `[CustomMacroService] Single-part macro: ${singlePart} -> type: ${macroType}, slot: null`,
+                        `Single-part macro: ${singlePart} -> type: ${macroType}, slot: null`,
                         null,
-                        'debug'
+                        'debug',
+                        'CustomMacroService'
                     );
                 } else {
                     debugLog(
-                        `[CustomMacroService] Skipping unrecognized single-part macro: ${singlePart}`,
+                        `Skipping unrecognized single-part macro: ${singlePart}`,
                         null,
-                        'debug'
+                        'debug',
+                        'CustomMacroService'
                     );
                     index = closeIdx + 2;
                     continue;
@@ -771,18 +787,20 @@ class CustomMacroService {
                 const potentialSlot = parts.slice(1).join('_');
 
                 debugLog(
-                    `[CustomMacroService] Multi-part macro: potential char: ${potentialCharacterName}, potential slot: ${potentialSlot}`,
+                    `Multi-part macro: potential char: ${potentialCharacterName}, potential slot: ${potentialSlot}`,
                     null,
-                    'debug'
+                    'debug',
+                    'CustomMacroService'
                 );
 
                 if (this.allSlots.includes(potentialSlot)) {
                     macroType = potentialCharacterName;
                     slot = potentialSlot;
                     debugLog(
-                        `[CustomMacroService] Direct match found: type: ${macroType}, slot: ${slot}`,
+                        `Direct match found: type: ${macroType}, slot: ${slot}`,
                         null,
-                        'debug'
+                        'debug',
+                        'CustomMacroService'
                     );
                 } else {
                     slot = null; // Ensure slot is initialized
@@ -790,9 +808,10 @@ class CustomMacroService {
                         const prefix = parts.slice(0, i).join('_');
                         const suffix = parts.slice(i).join('_');
                         debugLog(
-                            `[CustomMacroService] Trying split: prefix='${prefix}', suffix='${suffix}'`,
+                            `Trying split: prefix='${prefix}', suffix='${suffix}'`,
                             null,
-                            'debug'
+                            'debug',
+                            'CustomMacroService'
                         );
                         if (this.allSlots.includes(suffix)) {
                             macroType = prefix;
@@ -884,9 +903,10 @@ class CustomMacroService {
         for (let i = macros.length - 1; i >= 0; i--) {
             const macro = macros[i];
             debugLog(
-                `[CustomMacroService] Processing macro: ${macro.fullMatch} (type: ${macro.type}, slot: ${macro.slot})`,
+                `Processing macro: ${macro.fullMatch} (type: ${macro.type}, slot: ${macro.slot})`,
                 null,
-                'debug'
+                'debug',
+                'CustomMacroService'
             );
 
             if (macro.slot) {
@@ -1086,8 +1106,9 @@ export const invalidateMacroCachesForCharacter = (characterId: string | null, in
     }
 
     debugLog(
-        `[CustomMacroService] Invalidated macro caches for character ${characterId}, instance ${instanceId}`,
+        `Invalidated macro caches for character ${characterId}, instance ${instanceId}`,
         null,
-        'debug'
+        'debug',
+        'CustomMacroService'
     );
 };

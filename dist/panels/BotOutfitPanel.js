@@ -471,10 +471,10 @@ export class BotOutfitPanel {
             // Use the imported extractCommands function to extract outfit commands
             const commands = extractCommands(response);
             if (!commands || commands.length === 0) {
-                debugLog('No outfit commands found in response', 'BotOutfitPanel');
+                debugLog('No outfit commands found in response', null, 'info', 'BotOutfitPanel');
                 return;
             }
-            debugLog(`Found ${commands.length} commands to process:`, commands, 'BotOutfitPanel');
+            debugLog(`Found ${commands.length} commands to process:`, commands, 'info', 'BotOutfitPanel');
             // Process each command
             for (const command of commands) {
                 try {
@@ -548,7 +548,7 @@ export class BotOutfitPanel {
                     }
                 }
                 const cleanValue = value.split('"').join('').trim();
-                debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, 'BotOutfitPanel');
+                debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, null, 'info', 'BotOutfitPanel');
                 // Apply the outfit change to the bot manager
                 const message = yield this.outfitManager.setOutfitItem(slot, action === 'remove' ? 'None' : cleanValue);
                 // Show system message if enabled

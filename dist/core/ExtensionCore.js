@@ -213,7 +213,7 @@ window.outfitTrackerInterceptor = function (chat) {
                 debugLog('Panels not available for interceptor, deferring injection', {
                     botPanel: Boolean(botPanel),
                     userPanel: Boolean(userPanel),
-                }, 'warn');
+                }, 'warn', 'ExtensionCore');
                 return;
             }
             const botManager = botPanel.outfitManager;
@@ -222,7 +222,7 @@ window.outfitTrackerInterceptor = function (chat) {
                 debugLog('Managers not available for interceptor', {
                     botManager: Boolean(botManager),
                     userManager: Boolean(userManager),
-                }, 'warn');
+                }, 'warn', 'ExtensionCore');
                 return;
             }
             // If both bot and user have prompt injection disabled, skip entirely

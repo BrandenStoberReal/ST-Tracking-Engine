@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type checking
+        run: npm run typecheck
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Package extension
+        run: |
+          mkdir -p release
+          cd dist
+          zip -r ../release/st-outfits-extension.zip .
+          cd ..
+
+      - name: Get Changelog
+        id: changelog
+        run: |
+          # Extract the changelog entry for this version
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          
+          # Extract changelog for the current version (assuming format in CHANGELOG.md)
+          if [ -f CHANGELOG.md ]; then
+            START_LINE=$(grep -n "^## \[${VERSION#v}\]" CHANGELOG.md | head -1 | cut -d: -f1)
+            if [ -n "$START_LINE" ]; then
+              END_LINE=$(tail -n +$((START_LINE + 1)) CHANGELOG.md | grep -n "^##" | head -1 | cut -d: -f1)
+              if [ -n "$END_LINE" ]; then
+                CHANGELOG=$(tail -n +$((START_LINE + 1)) CHANGELOG.md | head -n $((END_LINE - 2)))
+              else
+                CHANGELOG=$(tail -n +$((START_LINE + 1)) CHANGELOG.md)
+              fi
+              echo "changelog<<EOF" >> $GITHUB_OUTPUT
+              echo "$CHANGELOG" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "changelog<<EOF" >> $GITHUB_OUTPUT
+              echo "No changelog entry found for version $VERSION" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "changelog<<EOF" >> $GITHUB_OUTPUT
+            echo "No CHANGELOG.md file found" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: SillyTavern Outfit Engine v${{ env.VERSION }}
+          tag_name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+          files: |
+            release/st-outfits-extension.zip
+            manifest.json
+            style.css
+            README.md

@@ -61,7 +61,7 @@ class EventService {
         extensionEventBus.on(EXTENSION_EVENTS.INSTANCE_CREATED, (data) => this.handleInstanceCreated(data));
     }
     handleAppReady() {
-        debugLog('App ready, marking auto outfit system as initialized', 'EventService');
+        debugLog('App ready, marking auto outfit system as initialized', null, 'info', 'EventService');
         if (this.autoOutfitSystem) {
             this.autoOutfitSystem.markAppInitialized();
         }
@@ -89,7 +89,7 @@ class EventService {
                     // Note: Macro registration is handled by handleAppReady on startup and handleInstanceCreated for new instances
                 }
                 else {
-                    debugLog('CHAT_CHANGED event fired but first message unchanged - skipping update', 'EventService');
+                    debugLog('CHAT_CHANGED event fired but first message unchanged - skipping update', null, 'info', 'EventService');
                 }
             }
             else {
@@ -115,7 +115,7 @@ class EventService {
                 return;
             const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
             if (aiMessages.length === 1 && !data.is_user) {
-                debugLog('First AI message received, updating outfit instance.', 'EventService');
+                debugLog('First AI message received, updating outfit instance.', null, 'info', 'EventService');
                 const firstBotMessage = aiMessages[0];
                 this.currentFirstMessageHash = this.generateMessageHash(firstBotMessage.mes);
                 const currentBotInstanceId = this.botManager.getOutfitInstanceId();
@@ -138,7 +138,7 @@ class EventService {
             if (!this.context) {
                 return;
             }
-            debugLog(`MESSAGE_SWIPED event fired with index: ${index}`, 'EventService');
+            debugLog(`MESSAGE_SWIPED event fired with index: ${index}`, null, 'info', 'EventService');
             const chat = this.context.chat;
             if (!chat || index < 0 || index >= chat.length) {
                 return;
@@ -147,7 +147,7 @@ class EventService {
             customMacroSystem.clearCache();
             const aiMessages = chat.filter((msg) => !msg.is_user && !msg.is_system);
             if (aiMessages.length > 0 && chat.indexOf(aiMessages[0]) === index) {
-                debugLog('First message was swiped, updating outfit instance.', 'EventService');
+                debugLog('First message was swiped, updating outfit instance.', null, 'info', 'EventService');
                 const firstBotMessage = aiMessages[0];
                 if (firstBotMessage) {
                     this.currentFirstMessageHash = this.generateMessageHash(firstBotMessage.mes);
@@ -177,7 +177,7 @@ class EventService {
         // Note: Macro registration is handled by handleAppReady on startup and handleInstanceCreated for new instances
     }
     handleOutfitDataLoaded() {
-        debugLog('Outfit data loaded, refreshing macros and UI', 'EventService');
+        debugLog('Outfit data loaded, refreshing macros and UI', null, 'info', 'EventService');
         // Clear macro cache to ensure fresh data
         customMacroSystem.clearCache();
         // Refresh the macro system to ensure it has the latest data
@@ -201,11 +201,11 @@ class EventService {
             else {
                 // Alternative: trigger a small change that might cause refresh
                 // This might require accessing the chat container directly
-                debugLog('Could not find redrawCurrentChat function, UI may need manual refresh', 'EventService');
+                debugLog('Could not find redrawCurrentChat function, UI may need manual refresh', null, 'info', 'EventService');
             }
         }
         catch (error) {
-            debugLog('Error trying to refresh UI:', error, 'EventService');
+            debugLog('Error trying to refresh UI:', error, 'error', 'EventService');
         }
     }
     handlePanelVisibilityChanged(data) {
@@ -304,7 +304,7 @@ class EventService {
                     window.userOutfitPanel.renderContent();
                 }
             }
-            debugLog('Restored outfits after chat reset.', 'EventService');
+            debugLog('Restored outfits after chat reset.', null, 'info', 'EventService');
             extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
             return result;
         });
@@ -370,7 +370,7 @@ class EventService {
                     window.userOutfitPanel.renderContent();
                 }
             }
-            debugLog('Restored outfits after chat clear.', 'EventService');
+            debugLog('Restored outfits after chat clear.', null, 'info', 'EventService');
             extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
         });
     }

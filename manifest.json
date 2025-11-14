@@ -1,8 +1,8 @@
 {
-  "display_name": "SillyTavern Outfit Engine",
+  "display_name": "SillyTavern Tracking Engine",
   "author": "Lucanna (Forked by Branden)",
   "version": "2.0.0-dev-unstable",
-  "homePage": "https://github.com/BrandenStoberReal/ST-Outfits-Extended",
+  "homePage": "https://github.com/BrandenStoberReal/ST-Tracking-Engine",
   "js": "./dist/index.js",
   "css": "style.css",
   "loading_order": 15,

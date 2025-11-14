@@ -24,7 +24,7 @@ async function processSingleCommand(command: string, botManager: OutfitManager):
         const [, action, slot, value] = match;
         const cleanValue = value || '';
 
-        debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, 'LLMService');
+        debugLog(`Processing: ${action} ${slot} "${cleanValue}"`, null, 'info', 'LLMService');
 
         let finalAction = action;
 
@@ -147,7 +147,7 @@ export async function importOutfitFromCharacterCard(): Promise<LLMImportResult> 
 
         // Process the commands to update the current bot outfit
         if (commands && commands.length > 0) {
-            debugLog(`Found ${commands.length} outfit commands to process:`, commands, 'LLMService');
+            debugLog(`Found ${commands.length} outfit commands to process:`, commands, 'info', 'LLMService');
 
             // Get the global bot outfit manager from window if available
             if (window.botOutfitPanel && window.botOutfitPanel.outfitManager) {
@@ -175,7 +175,7 @@ export async function importOutfitFromCharacterCard(): Promise<LLMImportResult> 
                 debugLog('Bot outfit manager not available to apply imported outfits', null, 'warn', 'LLMService');
             }
         } else {
-            debugLog('No outfit commands found in response', 'LLMService');
+            debugLog('No outfit commands found in response', null, 'info', 'LLMService');
         }
 
         return {
