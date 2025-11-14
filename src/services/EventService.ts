@@ -31,7 +31,6 @@ class EventService {
     processMacrosInFirstMessage: (context?: STContext) => Promise<void>;
     context: STContext | null;
     currentFirstMessageHash: string | null;
-    isNewChat: boolean;
 
     constructor(context: EventServiceContext) {
         this.botManager = context.botManager;
@@ -43,7 +42,6 @@ class EventService {
         this.processMacrosInFirstMessage = context.processMacrosInFirstMessage;
         this.context = context.context || null;
         this.currentFirstMessageHash = null;
-        this.isNewChat = false;
         this.initialize();
     }
 
@@ -78,7 +76,7 @@ class EventService {
 
         eventSource.on(event_types.APP_READY, () => this.handleAppReady());
         eventSource.on(event_types.CHAT_CREATED, () => {
-            this.isNewChat = true;
+            this.handleChatReset();
         });
         eventSource.on(event_types.CHAT_CHANGED, () => this.handleChatChange());
         eventSource.on(event_types.MESSAGE_RECEIVED, (data: any) => this.handleMessageReceived(data));
@@ -92,6 +90,34 @@ class EventService {
         );
         extensionEventBus.on(EXTENSION_EVENTS.OUTFIT_CHANGED, (data: any) => this.handleOutfitChanged(data));
         extensionEventBus.on(EXTENSION_EVENTS.INSTANCE_CREATED, (data: any) => this.handleInstanceCreated(data));
+    }
+
+    async handleChatReset(): Promise<void> {
+        debugLog('Chat has been reset, applying default outfits.', null, 'info', 'EventService');
+        const botOutfitInstanceId = this.botManager.getOutfitInstanceId();
+        const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
+
+        if (botOutfitInstanceId) {
+            const appliedDefault = await this.botManager.applyDefaultOutfitAfterReset();
+            if (!appliedDefault) {
+                this.botManager.loadOutfit();
+            }
+            if ((window as any).botOutfitPanel && typeof (window as any).botOutfitPanel.renderContent === 'function') {
+                (window as any).botOutfitPanel.renderContent();
+            }
+        }
+        if (userOutfitInstanceId) {
+            const appliedDefault = await this.userManager.applyDefaultOutfitAfterReset();
+            if (!appliedDefault) {
+                this.userManager.loadOutfit();
+            }
+            if (
+                (window as any).userOutfitPanel &&
+                typeof (window as any).userOutfitPanel.renderContent === 'function'
+            ) {
+                (window as any).userOutfitPanel.renderContent();
+            }
+        }
     }
 
     handleAppReady(): void {
@@ -112,40 +138,6 @@ class EventService {
         if (!this.context || !this.context.chat) {
             return;
         }
-
-        // Chat reset detection
-        if (this.context.chat.length <= 1 && !this.isNewChat) {
-            debugLog('Chat has been reset, applying default outfits.', null, 'info', 'EventService');
-            const botOutfitInstanceId = this.botManager.getOutfitInstanceId();
-            const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
-
-            if (botOutfitInstanceId) {
-                const appliedDefault = await this.botManager.applyDefaultOutfitAfterReset();
-                if (!appliedDefault) {
-                    this.botManager.loadOutfit();
-                }
-                if (
-                    (window as any).botOutfitPanel &&
-                    typeof (window as any).botOutfitPanel.renderContent === 'function'
-                ) {
-                    (window as any).botOutfitPanel.renderContent();
-                }
-            }
-            if (userOutfitInstanceId) {
-                const appliedDefault = await this.userManager.applyDefaultOutfitAfterReset();
-                if (!appliedDefault) {
-                    this.userManager.loadOutfit();
-                }
-                if (
-                    (window as any).userOutfitPanel &&
-                    typeof (window as any).userOutfitPanel.renderContent === 'function'
-                ) {
-                    (window as any).userOutfitPanel.renderContent();
-                }
-            }
-        }
-
-        this.isNewChat = false;
 
         if (this.context.chat.length > 0) {
             const firstBotMessage = this.context.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
