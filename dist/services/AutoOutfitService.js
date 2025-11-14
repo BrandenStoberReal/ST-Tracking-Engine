@@ -99,6 +99,8 @@ You have the following commands at your disposal:
             return '[Outfit System] Auto outfit updates already disabled.';
         }
         this._isEnabled = false;
+        outfitStore.setSetting('autoOutfitSystem', false);
+        outfitStore.saveState();
         this.removeEventListeners();
         return '[Outfit System] Auto outfit updates disabled.';
     }

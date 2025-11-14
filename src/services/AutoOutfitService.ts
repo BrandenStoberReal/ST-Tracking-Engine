@@ -118,6 +118,8 @@ You have the following commands at your disposal:
         }
 
         this._isEnabled = false;
+        outfitStore.setSetting('autoOutfitSystem', false);
+        outfitStore.saveState();
         this.removeEventListeners();
         return '[Outfit System] Auto outfit updates disabled.';
     }
