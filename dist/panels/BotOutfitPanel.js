@@ -260,7 +260,6 @@ export class BotOutfitPanel {
                         this.sendSystemMessage(message);
                     }
                     outfitStore.saveState();
-                    this.renderContent();
                 }));
                 (_c = presetElement.querySelector('.delete-preset')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
                     if (confirm(`Delete "${preset}" outfit?`)) {
@@ -687,10 +686,11 @@ export class BotOutfitPanel {
         if (window.outfitStore) {
             // Listen for changes in bot outfit data
             this.outfitSubscription = window.outfitStore.subscribe((state) => {
-                var _a, _b;
+                var _a, _b, _c, _d;
                 // Check if this panel's character/outfit instance has changed
                 if (this.outfitManager.characterId && this.outfitManager.outfitInstanceId) {
                     const currentOutfit = (_b = (_a = state.botInstances[this.outfitManager.characterId]) === null || _a === void 0 ? void 0 : _a[this.outfitManager.outfitInstanceId]) === null || _b === void 0 ? void 0 : _b.bot;
+                    const defaultPresetName = ((_d = (_c = state.settings.defaultBotPresets) === null || _c === void 0 ? void 0 : _c[this.outfitManager.characterId]) === null || _d === void 0 ? void 0 : _d[this.outfitManager.outfitInstanceId]) || null;
                     if (currentOutfit) {
                         // Only refresh if the outfit data has actually changed
                         let hasChanged = false;
@@ -699,6 +699,9 @@ export class BotOutfitPanel {
                                 hasChanged = true;
                                 break;
                             }
+                        }
+                        if (this.outfitManager.getDefaultPresetName() !== defaultPresetName) {
+                            hasChanged = true;
                         }
                         if (hasChanged && this.isVisible) {
                             this.renderContent();

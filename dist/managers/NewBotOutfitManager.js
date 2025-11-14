@@ -378,6 +378,8 @@ export class NewBotOutfitManager extends OutfitManager {
             }
             else {
                 debugLog(`Successfully embedded default outfit in character card for ${this.character}`, null, 'info', 'NewBotOutfitManager');
+                // Manually notify listeners because the character card is not part of the store
+                outfitStore.notifyListeners();
             }
             // Emit default outfit set event
             extensionEventBus.emit(EXTENSION_EVENTS.DEFAULT_OUTFIT_SET, {

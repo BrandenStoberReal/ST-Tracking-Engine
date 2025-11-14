@@ -320,7 +320,6 @@ export class BotOutfitPanel {
                         this.sendSystemMessage(message);
                     }
                     outfitStore.saveState();
-                    this.renderContent();
                 });
 
                 presetElement.querySelector('.delete-preset')?.addEventListener('click', () => {
@@ -827,6 +826,10 @@ export class BotOutfitPanel {
                 if (this.outfitManager.characterId && this.outfitManager.outfitInstanceId) {
                     const currentOutfit =
                         state.botInstances[this.outfitManager.characterId]?.[this.outfitManager.outfitInstanceId]?.bot;
+                    const defaultPresetName =
+                        state.settings.defaultBotPresets?.[this.outfitManager.characterId]?.[
+                            this.outfitManager.outfitInstanceId
+                        ] || null;
 
                     if (currentOutfit) {
                         // Only refresh if the outfit data has actually changed
@@ -837,6 +840,10 @@ export class BotOutfitPanel {
                                 hasChanged = true;
                                 break;
                             }
+                        }
+
+                        if (this.outfitManager.getDefaultPresetName() !== defaultPresetName) {
+                            hasChanged = true;
                         }
 
                         if (hasChanged && this.isVisible) {

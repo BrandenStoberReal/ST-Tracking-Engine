@@ -511,6 +511,8 @@ export class NewBotOutfitManager extends OutfitManager {
                 'info',
                 'NewBotOutfitManager'
             );
+            // Manually notify listeners because the character card is not part of the store
+            outfitStore.notifyListeners();
         }
 
         // Emit default outfit set event

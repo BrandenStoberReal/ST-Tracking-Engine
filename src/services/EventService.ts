@@ -31,6 +31,7 @@ class EventService {
     processMacrosInFirstMessage: (context?: STContext) => Promise<void>;
     context: STContext | null;
     currentFirstMessageHash: string | null;
+    isNewChat: boolean;
 
     constructor(context: EventServiceContext) {
         this.botManager = context.botManager;
@@ -42,6 +43,7 @@ class EventService {
         this.processMacrosInFirstMessage = context.processMacrosInFirstMessage;
         this.context = context.context || null;
         this.currentFirstMessageHash = null;
+        this.isNewChat = false;
         this.initialize();
     }
 
@@ -63,8 +65,6 @@ class EventService {
 
         this.setupSillyTavernEventListeners();
         this.setupExtensionEventListeners();
-        this.overrideClearChat();
-        this.overrideResetChat();
 
         this.updateForCurrentCharacter();
     }
@@ -77,6 +77,9 @@ class EventService {
         const { eventSource, event_types } = this.context as any;
 
         eventSource.on(event_types.APP_READY, () => this.handleAppReady());
+        eventSource.on(event_types.CHAT_CREATED, () => {
+            this.isNewChat = true;
+        });
         eventSource.on(event_types.CHAT_CHANGED, () => this.handleChatChange());
         eventSource.on(event_types.MESSAGE_RECEIVED, (data: any) => this.handleMessageReceived(data));
         eventSource.on(event_types.MESSAGE_SWIPED, (index: number) => this.handleMessageSwiped(index));
@@ -105,11 +108,46 @@ class EventService {
         }
     }
 
-    handleChatChange(): void {
-        if (!this.context || !this.context.chat?.length) {
+    async handleChatChange(): Promise<void> {
+        if (!this.context || !this.context.chat) {
             return;
         }
-        if (this.context.chat?.length > 0) {
+
+        // Chat reset detection
+        if (this.context.chat.length <= 1 && !this.isNewChat) {
+            debugLog('Chat has been reset, applying default outfits.', null, 'info', 'EventService');
+            const botOutfitInstanceId = this.botManager.getOutfitInstanceId();
+            const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
+
+            if (botOutfitInstanceId) {
+                const appliedDefault = await this.botManager.applyDefaultOutfitAfterReset();
+                if (!appliedDefault) {
+                    this.botManager.loadOutfit();
+                }
+                if (
+                    (window as any).botOutfitPanel &&
+                    typeof (window as any).botOutfitPanel.renderContent === 'function'
+                ) {
+                    (window as any).botOutfitPanel.renderContent();
+                }
+            }
+            if (userOutfitInstanceId) {
+                const appliedDefault = await this.userManager.applyDefaultOutfitAfterReset();
+                if (!appliedDefault) {
+                    this.userManager.loadOutfit();
+                }
+                if (
+                    (window as any).userOutfitPanel &&
+                    typeof (window as any).userOutfitPanel.renderContent === 'function'
+                ) {
+                    (window as any).userOutfitPanel.renderContent();
+                }
+            }
+        }
+
+        this.isNewChat = false;
+
+        if (this.context.chat.length > 0) {
             const firstBotMessage = this.context.chat.find((msg: ChatMessage) => !msg.is_user && !msg.is_system);
 
             if (firstBotMessage) {
@@ -338,77 +376,6 @@ class EventService {
         }
     }
 
-    overrideResetChat(): void {
-        if (typeof (window as any).restartLLM !== 'function') {
-            debugLog('window.restartLLM not found. Cannot override chat reset.', null, 'warn', 'EventService');
-            return;
-        }
-
-        const originalRestart = (window as any).restartLLM;
-
-        (window as any).restartLLM = async (...args: any[]) => {
-            debugLog('Chat reset triggered (restartLLM)', null, 'log', 'EventService');
-
-            outfitStore.flush();
-
-            const botOutfitInstanceId = this.botManager.getOutfitInstanceId();
-            const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
-
-            if (botOutfitInstanceId) {
-                await this.botManager.saveOutfit();
-            }
-            if (userOutfitInstanceId) {
-                await this.userManager.saveOutfit();
-            }
-
-            const result = await originalRestart.apply(this, args);
-
-            if (botOutfitInstanceId) {
-                this.botManager.setOutfitInstanceId(botOutfitInstanceId);
-            }
-            if (userOutfitInstanceId) {
-                this.userManager.setOutfitInstanceId(userOutfitInstanceId);
-            }
-
-            if (botOutfitInstanceId) {
-                outfitStore.setCurrentInstanceId(botOutfitInstanceId);
-            }
-
-            await this.updateForCurrentCharacter();
-
-            if (botOutfitInstanceId) {
-                const appliedDefault = await this.botManager.applyDefaultOutfitAfterReset();
-                if (!appliedDefault) {
-                    this.botManager.loadOutfit();
-                }
-                if (
-                    (window as any).botOutfitPanel &&
-                    typeof (window as any).botOutfitPanel.renderContent === 'function'
-                ) {
-                    (window as any).botOutfitPanel.renderContent();
-                }
-            }
-            if (userOutfitInstanceId) {
-                const appliedDefault = await this.userManager.applyDefaultOutfitAfterReset();
-                if (!appliedDefault) {
-                    this.userManager.loadOutfit();
-                }
-                if (
-                    (window as any).userOutfitPanel &&
-                    typeof (window as any).userOutfitPanel.renderContent === 'function'
-                ) {
-                    (window as any).userOutfitPanel.renderContent();
-                }
-            }
-
-            debugLog('Restored outfits after chat reset.', null, 'info', 'EventService');
-
-            extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
-
-            return result;
-        };
-    }
-
     // EventService interface implementation
     registerEvent(event: string, handler: EventCallback): void {
         extensionEventBus.on(event, handler);
@@ -420,77 +387,6 @@ class EventService {
 
     emitEvent(event: string, ...args: unknown[]): void {
         extensionEventBus.emit(event, ...args);
-    }
-
-    overrideClearChat(): void {
-        if (typeof (window as any).clearChat !== 'function') {
-            debugLog('window.clearChat not found. Cannot override chat clear.', null, 'warn', 'EventService');
-            return;
-        }
-
-        const originalClearChat = (window as any).clearChat;
-
-        (window as any).clearChat = async (...args: any[]) => {
-            const botOutfitInstanceId = this.botManager.getOutfitInstanceId();
-            const userOutfitInstanceId = this.userManager.getOutfitInstanceId();
-
-            if (botOutfitInstanceId) {
-                const botOutfitData = { ...this.botManager.getCurrentOutfit() };
-                if (this.botManager.characterId) {
-                    outfitStore.setBotOutfit(this.botManager.characterId, botOutfitInstanceId, botOutfitData);
-                }
-            }
-            if (userOutfitInstanceId) {
-                const userOutfitData = { ...this.userManager.getCurrentOutfit() };
-                outfitStore.setUserOutfit(userOutfitInstanceId, userOutfitData);
-            }
-
-            outfitStore.saveState();
-
-            await originalClearChat.apply(this, args);
-
-            if (botOutfitInstanceId) {
-                this.botManager.setOutfitInstanceId(botOutfitInstanceId);
-            }
-            if (userOutfitInstanceId) {
-                this.userManager.setOutfitInstanceId(userOutfitInstanceId);
-            }
-
-            if (botOutfitInstanceId) {
-                outfitStore.setCurrentInstanceId(botOutfitInstanceId);
-            }
-
-            await this.updateForCurrentCharacter();
-
-            if (botOutfitInstanceId) {
-                const appliedDefault = await this.botManager.applyDefaultOutfitAfterReset();
-                if (!appliedDefault) {
-                    this.botManager.loadOutfit();
-                }
-                if (
-                    (window as any).botOutfitPanel &&
-                    typeof (window as any).botOutfitPanel.renderContent === 'function'
-                ) {
-                    (window as any).botOutfitPanel.renderContent();
-                }
-            }
-            if (userOutfitInstanceId) {
-                const appliedDefault = await this.userManager.applyDefaultOutfitAfterReset();
-                if (!appliedDefault) {
-                    this.userManager.loadOutfit();
-                }
-                if (
-                    (window as any).userOutfitPanel &&
-                    typeof (window as any).userOutfitPanel.renderContent === 'function'
-                ) {
-                    (window as any).userOutfitPanel.renderContent();
-                }
-            }
-
-            debugLog('Restored outfits after chat clear.', null, 'info', 'EventService');
-
-            extensionEventBus.emit(EXTENSION_EVENTS.CHAT_CLEARED);
-        };
     }
 }
 

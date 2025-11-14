@@ -219,7 +219,6 @@ export class UserOutfitPanel {
                         this.sendSystemMessage(message);
                     }
                     outfitStore.saveState();
-                    this.renderContent();
                 }));
                 (_c = presetElement.querySelector('.delete-preset')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
                     if (confirm(`Delete "${preset}" outfit?`)) {
@@ -415,9 +414,11 @@ export class UserOutfitPanel {
         if (window.outfitStore) {
             // Listen for changes in user outfit data
             this.outfitSubscription = window.outfitStore.subscribe((state) => {
+                var _a;
                 // Check if this panel's outfit instance has changed
                 if (this.outfitManager.outfitInstanceId) {
                     const currentUserOutfit = state.userInstances[this.outfitManager.outfitInstanceId];
+                    const defaultPresetName = ((_a = state.settings.defaultUserPresets) === null || _a === void 0 ? void 0 : _a[this.outfitManager.outfitInstanceId]) || null;
                     if (currentUserOutfit) {
                         // Only refresh if the outfit data has actually changed
                         let hasChanged = false;
@@ -426,6 +427,9 @@ export class UserOutfitPanel {
                                 hasChanged = true;
                                 break;
                             }
+                        }
+                        if (this.outfitManager.getDefaultPresetName() !== defaultPresetName) {
+                            hasChanged = true;
                         }
                         if (hasChanged && this.isVisible) {
                             this.renderContent();
